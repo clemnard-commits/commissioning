@@ -7,62 +7,59 @@
 <style>
   :root {
     --ep-navy: #0A365C;
-    --ep-navy-hover: #0E487A;
     --ep-blue: #1E73BE;
     --ep-blue-light: #EFF6FC;
     --ep-green: #28A745;
+    --ep-orange: #F59E0B;
+    --ep-red: #DC2626;
     --ep-bg: #F5F7FA;
     --ep-border: #E2E8F0;
     --ep-text: #1E293B;
     --ep-muted: #64748B;
   }
   * { box-sizing: border-box; }
-  body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif; background: var(--ep-bg); color: var(--ep-text); margin: 0; display: flex; min-height: 100vh; }
+  body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif; background: var(--ep-bg); color: var(--ep-text); margin: 0; min-height: 100vh; }
 
-  /* SIDEBAR GAUCHE BLEU MARINE (STYLE DEALER GATEWAY) */
-  .sidebar { width: 245px; background: var(--ep-navy); color: #fff; display: flex; flex-direction: column; flex-shrink: 0; }
-  .sidebar-header { padding: 22px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: center; }
-  .ep-logo { width: 52px; height: 32px; margin: 0 auto 8px auto; }
-  .brand-title { font-weight: 700; font-size: 16px; letter-spacing: 1.5px; }
-  .brand-sub { font-size: 12px; color: #CBD5E1; margin-top: 2px; }
-  .brand-ver { font-size: 11px; color: #7DD3FC; margin-top: 4px; }
-  .sidebar-nav { padding: 14px 0; flex: 1; }
-  .nav-item { padding: 11px 20px; font-size: 13.5px; color: #E2E8F0; cursor: pointer; display: flex; align-items: center; gap: 10px; border-left: 3px solid transparent; transition: 0.15s; text-decoration: none; }
-  .nav-item:hover { background: var(--ep-navy-hover); color: #fff; }
-  .nav-item.active { background: #145388; color: #fff; border-left-color: #38BDF8; font-weight: 600; }
-  .sidebar-footer { padding: 15px; border-top: 1px solid rgba(255,255,255,0.1); }
-  .sidebar-badge { background: rgba(255,255,255,0.12); color: #fff; text-align: center; padding: 9px; border-radius: 6px; font-size: 12.5px; font-weight: 600; }
-
-  /* ZONE PRINCIPALE */
-  .main-wrapper { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-  .topbar { height: 60px; background: #fff; border-bottom: 1px solid var(--ep-border); padding: 0 24px; display: flex; align-items: center; justify-content: space-between; }
-  .topbar-left { display: flex; align-items: center; gap: 12px; font-size: 14px; color: var(--ep-muted); }
+  /* BARRE SUPERIEURE MINIMALISTE */
+  .topbar { height: 60px; background: #fff; border-bottom: 1px solid var(--ep-border); padding: 0 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+  .topbar-left { display: flex; align-items: center; gap: 14px; font-size: 14px; color: var(--ep-muted); }
+  .brand-pill { display: flex; align-items: center; gap: 9px; color: var(--ep-navy); font-weight: 700; font-size: 14px; letter-spacing: 0.6px; cursor: pointer; }
+  .ep-logo-mini { width: 32px; height: 20px; }
+  .sep { color: #CBD5E1; }
   .topbar-right { display: flex; align-items: center; gap: 12px; }
   .user-pill { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--ep-text); }
-  .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--ep-navy); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; }
+  .user-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--ep-navy); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; }
 
-  .content-area { padding: 24px; max-width: 1150px; width: 100%; margin: 0 auto; }
-  .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+  .content-area { padding: 28px 24px; max-width: 1100px; width: 100%; margin: 0 auto; }
+  .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 22px; flex-wrap: wrap; gap: 10px; }
   .page-title { font-size: 22px; font-weight: 600; color: var(--ep-text); margin: 0; }
   .page-subtitle { font-size: 13px; color: var(--ep-muted); margin: 4px 0 0 0; }
 
   /* LAYOUT WIZARD : PASTILLES GAUCHE + CARTE CENTRALE */
   .wizard-layout { display: flex; gap: 28px; align-items: flex-start; }
-  .stepper { width: 210px; flex-shrink: 0; padding-top: 6px; }
-  .step-item { display: flex; align-items: center; gap: 12px; padding: 9px 6px; cursor: pointer; font-size: 13.5px; color: var(--ep-muted); border-radius: 6px; transition: 0.15s; }
+  .stepper { width: 205px; flex-shrink: 0; padding-top: 6px; position: sticky; top: 82px; }
+  .step-item { display: flex; align-items: center; gap: 12px; padding: 9px 10px; cursor: pointer; font-size: 13.5px; color: var(--ep-muted); border-radius: 8px; transition: 0.15s; margin-bottom: 2px; border: 1px solid transparent; }
   .step-item:hover { background: rgba(30,115,190,0.06); color: var(--ep-text); }
-  .step-item.active { color: var(--ep-text); font-weight: 600; }
-  .step-circle { width: 24px; height: 24px; border-radius: 50%; background: #E2E8F0; color: #475569; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-  .step-item.active .step-circle { background: var(--ep-blue); color: #fff; }
-  .step-item.done .step-circle { background: var(--ep-green); color: #fff; }
+  .step-item.active { background: #fff; border-color: var(--ep-border); color: var(--ep-text); font-weight: 700; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+
+  /* COULEURS DES PASTILLES SELON LE REMPLISSAGE */
+  .step-circle { width: 25px; height: 25px; border-radius: 50%; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #fff; transition: 0.2s; }
+  .step-item.status-empty .step-circle { background: var(--ep-red); }
+  .step-item.status-partial .step-circle { background: var(--ep-orange); }
+  .step-item.status-complete .step-circle { background: var(--ep-green); }
+  .step-item.active .step-circle { box-shadow: 0 0 0 3px rgba(30, 115, 190, 0.3); }
+
+  .legend-box { margin-top: 14px; padding: 10px; border-top: 1px solid var(--ep-border); font-size: 11.5px; color: var(--ep-muted); display: flex; flex-direction: column; gap: 6px; }
+  .legend-row { display: flex; align-items: center; gap: 8px; }
+  .dot-mini { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
 
   /* CARTE PRINCIPALE BLANCHE */
-  .card { background: #fff; border: 1px solid var(--ep-border); border-radius: 10px; padding: 26px; flex: 1; box-shadow: 0 1px 4px rgba(0,0,0,0.03); min-width: 0; }
+  .card { background: #fff; border: 1px solid var(--ep-border); border-radius: 10px; padding: 28px; flex: 1; box-shadow: 0 1px 4px rgba(0,0,0,0.03); min-width: 0; }
   .card-title { font-size: 18px; font-weight: 600; color: var(--ep-text); margin: 0 0 6px 0; }
   .card-desc { font-size: 13px; color: var(--ep-muted); margin: 0 0 20px 0; }
-  .section-label { font-size: 12.5px; font-weight: 600; color: var(--ep-muted); margin: 16px 0 8px 0; text-transform: uppercase; letter-spacing: 0.4px; }
+  .section-label { font-size: 12px; font-weight: 600; color: var(--ep-muted); margin: 16px 0 8px 0; text-transform: uppercase; letter-spacing: 0.4px; }
 
-  /* CARTES DE SELECTION RADIO (TYPE I-SERIES / X-SERIES) */
+  /* CARTES DE SELECTION RADIO */
   .radio-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 16px; }
   .radio-card { border: 1.5px solid var(--ep-border); border-radius: 8px; padding: 14px; cursor: pointer; transition: 0.15s; background: #fff; }
   .radio-card:hover { border-color: #93C5FD; }
@@ -77,12 +74,12 @@
   /* FORMULAIRES & GRILLES */
   .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
   @media(max-width: 750px){
-    body { flex-direction: column; }
-    .sidebar { width: 100%; }
     .wizard-layout { flex-direction: column; }
-    .stepper { width: 100%; display: flex; overflow-x: auto; gap: 6px; padding-bottom: 8px; }
+    .stepper { position: static; width: 100%; display: flex; overflow-x: auto; gap: 6px; padding-bottom: 8px; }
     .step-item { white-space: nowrap; }
+    .legend-box { display: none; }
     .grid { grid-template-columns: 1fr; }
+    .topbar { padding: 0 14px; }
   }
   label { font-weight: 600; font-size: 12.5px; color: #334155; display: block; margin-top: 8px; }
   input, select, textarea { width: 100%; padding: 9px 11px; border: 1px solid #CBD5E1; border-radius: 6px; margin-top: 4px; font-size: 13.5px; color: var(--ep-text); background: #fff; font-family: inherit; }
@@ -93,7 +90,7 @@
   .check-row:hover { background: #F8FAFC; }
   .check-row select { width: 95px; padding: 5px 8px; margin: 0; }
 
-  /* BOUTONS STYLE GATEWAY */
+  /* BOUTONS */
   .btn { background: var(--ep-blue); color: #fff; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-size: 13.5px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: 0.15s; }
   .btn:hover { background: #165B96; }
   .btn-outline { background: #fff; color: #334155; border: 1px solid #CBD5E1; }
@@ -131,10 +128,10 @@
   .login-box { max-width: 400px; margin: 70px auto; text-align: center; padding: 32px; border: 1px solid var(--ep-border); border-radius: 10px; background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
   .hidden { display: none !important; }
 
-  /* IMPRESSION PDF : AFFICHE TOUTES LES ETAPES PROPREMENT */
+  /* IMPRESSION PDF */
   @media print {
-    .sidebar, .topbar, .stepper, .wizard-footer, .no-print { display: none !important; }
-    body { background: #fff; display: block; }
+    .topbar, .stepper, .wizard-footer, .no-print { display: none !important; }
+    body { background: #fff; }
     .content-area { padding: 0; max-width: 100%; }
     .card { border: none; box-shadow: none; padding: 0; }
     .step-section { display: block !important; page-break-inside: avoid; margin-bottom: 22px; border-bottom: 1px solid #ccc; padding-bottom: 15px; }
@@ -144,313 +141,305 @@
 </head>
 <body>
 
-  <!-- BARRE LATERALE BLEU MARINE EPROPULSION -->
-  <aside class="sidebar no-print">
-    <div class="sidebar-header">
-      <svg class="ep-logo" viewBox="0 0 100 60" fill="none" stroke="#FFFFFF" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M28 12 L10 30 L28 48 L48 30 L72 12 L90 30 L72 48 L52 30 Z"/>
-      </svg>
-      <div class="brand-title">EPROPULSION</div>
-      <div class="brand-sub">Commissioning Gateway</div>
-      <div class="brand-ver">Version 2.0 • Cloud Sync</div>
+  <!-- BARRE SUPERIEURE MINIMALISTE -->
+  <header class="topbar no-print">
+    <div class="topbar-left">
+      <div class="brand-pill" onclick="goAdmin()">
+        <svg class="ep-logo-mini" viewBox="0 0 100 60" fill="none" stroke="#0A365C" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M28 12 L10 30 L28 48 L48 30 L72 12 L90 30 L72 48 L52 30 Z"/>
+        </svg>
+        <span>EPROPULSION</span>
+      </div>
+      <span class="sep">/</span>
+      <span id="breadcrumbText">Commissioning</span>
     </div>
-    <nav class="sidebar-nav">
-      <div class="nav-item active" id="navDashboardBtn" onclick="goAdmin()">🏠 Gestion des Projets</div>
-      <div class="nav-item" id="navFormBtn">📋 Formulaire Commissioning</div>
-      <a id="navDriveBtn" href="#" target="_blank" class="nav-item hidden">📁 Dossier Google Drive</a>
-    </nav>
-    <div class="sidebar-footer">
-      <div class="sidebar-badge" id="sidebarRoleBadge">Espace Technique</div>
+    <div class="topbar-right">
+      <button class="btn btn-outline btn-sm hidden" id="topSaveBtn" onclick="saveForm(null)">💾 Sauvegarder</button>
+      <div class="user-pill">
+        <div class="user-avatar">EP</div>
+        <span id="userRoleLabel">Installateur</span>
+      </div>
     </div>
-  </aside>
+  </header>
 
-  <!-- CONTENU PRINCIPAL -->
-  <div class="main-wrapper">
-    <header class="topbar no-print">
-      <div class="topbar-left">
-        <span id="breadcrumbText">ePropulsion Commissioning Portal</span>
-      </div>
-      <div class="topbar-right">
-        <button class="btn btn-outline btn-sm hidden" id="topSaveBtn" onclick="saveForm(null)">💾 Sauvegarder</button>
-        <div class="user-pill">
-          <div class="user-avatar">EP</div>
-          <span id="userRoleLabel">Installateur</span>
+  <main class="content-area">
+
+    <!-- ECRAN DE CONNEXION ADMIN -->
+    <div id="loginScreen" class="login-box hidden no-print">
+      <h2 style="margin-top:0; color:var(--ep-navy);">Accès Administration</h2>
+      <p style="font-size:13px; color:var(--ep-muted);">Saisissez votre mot de passe pour gérer vos liens et dossiers de mise en service.</p>
+      <input type="password" id="adminPwdInput" placeholder="Mot de passe Admin" onkeypress="if(event.key==='Enter') checkAdminLogin()">
+      <button class="btn" style="width:100%; justify-content:center; margin-top:14px;" onclick="checkAdminLogin()">Se connecter</button>
+    </div>
+
+    <!-- VUE ADMIN (LISTE DES PROJETS) -->
+    <div id="adminDashboard" class="hidden no-print">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Tableau de suivi Commissioning</h1>
+          <p class="page-subtitle">Créez un projet pour générer automatiquement son lien unique et son arborescence Google Drive.</p>
         </div>
-      </div>
-    </header>
-
-    <main class="content-area">
-
-      <!-- ECRAN DE CONNEXION ADMIN -->
-      <div id="loginScreen" class="login-box hidden no-print">
-        <h2 style="margin-top:0; color:var(--ep-navy);">Accès Administration</h2>
-        <p style="font-size:13px; color:var(--ep-muted);">Saisissez votre mot de passe pour gérer vos liens et dossiers de mise en service.</p>
-        <input type="password" id="adminPwdInput" placeholder="Mot de passe Admin" onkeypress="if(event.key==='Enter') checkAdminLogin()">
-        <button class="btn" style="width:100%; justify-content:center; margin-top:14px;" onclick="checkAdminLogin()">Se connecter</button>
+        <button class="btn btn-outline btn-sm" onclick="logoutAdmin()">Déconnexion</button>
       </div>
 
-      <!-- VUE ADMIN (LISTE DES PROJETS) -->
-      <div id="adminDashboard" class="hidden no-print">
-        <div class="page-header">
-          <div>
-            <h1 class="page-title">Tableau de suivi Commissioning</h1>
-            <p class="page-subtitle">Créez un projet pour générer automatiquement son lien unique et son arborescence Google Drive.</p>
+      <div class="card" style="margin-bottom:20px;">
+        <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;">
+          <div style="flex:2; min-width:220px;">
+            <label style="margin-top:0;">Nom du bateau / Client</label>
+            <input type="text" id="newProjectName" placeholder="Ex: Beneteau Oceanis 38 - M. Martin">
           </div>
-          <button class="btn btn-outline btn-sm" onclick="logoutAdmin()">Déconnexion</button>
-        </div>
-
-        <div class="card" style="margin-bottom:20px;">
-          <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;">
-            <div style="flex:2; min-width:220px;">
-              <label style="margin-top:0;">Nom du bateau / Client</label>
-              <input type="text" id="newProjectName" placeholder="Ex: Beneteau Oceanis 38 - M. Martin">
-            </div>
-            <div style="flex:1; min-width:160px;">
-              <label style="margin-top:0;">Installateur assigné</label>
-              <input type="text" id="newInstallerName" placeholder="Ex: Jean Dupont">
-            </div>
-            <button class="btn" id="createProjBtn" onclick="createProject()">+ Créer Projet & Dossier Drive</button>
+          <div style="flex:1; min-width:160px;">
+            <label style="margin-top:0;">Installateur assigné</label>
+            <input type="text" id="newInstallerName" placeholder="Ex: Jean Dupont">
           </div>
-        </div>
-
-        <div class="card" style="padding:0; overflow-x:auto;">
-          <table style="margin:0;">
-            <thead>
-              <tr>
-                <th style="text-align:left; padding-left:16px;">Projet / Bateau</th>
-                <th>Installateur</th>
-                <th style="width:140px;">Remplissage</th>
-                <th>Statut</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="projectList"></tbody>
-          </table>
+          <button class="btn" id="createProjBtn" onclick="createProject()">+ Créer Projet & Dossier Drive</button>
         </div>
       </div>
 
-      <!-- VUE FORMULAIRE WIZARD (9 ETAPES) -->
-      <div id="projectForm" class="hidden">
-        <div class="page-header no-print">
-          <div>
-            <h1 class="page-title" id="displayProjName">Installation & Commissioning Form</h1>
-            <p class="page-subtitle">ID Dossier : <strong id="displayProjId"></strong> • Sauvegarde cloud et synchronisation Google Drive actives</p>
-          </div>
-          <div style="display:flex; gap:8px;">
-            <a id="projectDriveLinkBtn" href="#" target="_blank" class="btn btn-green btn-sm hidden">📁 Dossier Google Drive</a>
-            <button class="btn btn-outline btn-sm" id="backAdminBtn" onclick="goAdmin()">← Liste projets</button>
-          </div>
+      <div class="card" style="padding:0; overflow-x:auto;">
+        <table style="margin:0;">
+          <thead>
+            <tr>
+              <th style="text-align:left; padding-left:16px;">Projet / Bateau</th>
+              <th>Installateur</th>
+              <th style="width:140px;">Remplissage</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="projectList"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- VUE FORMULAIRE WIZARD (9 ETAPES) -->
+    <div id="projectForm" class="hidden">
+      <div class="page-header no-print">
+        <div>
+          <h1 class="page-title" id="displayProjName">Installation & Commissioning Form</h1>
+          <p class="page-subtitle">ID Dossier : <strong id="displayProjId"></strong></p>
         </div>
-
-        <div class="wizard-layout">
-          <!-- PASTILLES D'ETAPES A GAUCHE (STYLE GATEWAY) -->
-          <div class="stepper no-print" id="stepperContainer"></div>
-
-          <!-- CARTE CENTRALE DU FORMULAIRE -->
-          <div class="card">
-
-            <!-- ETAPE 1 : VESSEL & INSTALLATION INFO -->
-            <div class="step-section" data-step="1">
-              <h2 class="card-title">1. Vessel & Installation Info</h2>
-              <p class="card-desc">Renseignez les caractéristiques du navire et le système de propulsion installé.</p>
-
-              <div class="section-label">Drive System</div>
-              <div class="radio-cards" id="driveCards">
-                <div class="radio-card selected" onclick="selectDrive('Shaft', this)">
-                  <div class="radio-card-head"><span class="radio-dot"></span> Shaft Drive</div>
-                  <div class="radio-card-sub">Ligne d'arbre</div>
-                  <div class="radio-card-tag">I-Series Inboard</div>
-                </div>
-                <div class="radio-card" onclick="selectDrive('Saildrive', this)">
-                  <div class="radio-card-head"><span class="radio-dot"></span> Saildrive</div>
-                  <div class="radio-card-sub">Embase voilier</div>
-                  <div class="radio-card-tag">Pod / I-Series</div>
-                </div>
-                <div class="radio-card" onclick="selectDrive('Pod', this)">
-                  <div class="radio-card-head"><span class="radio-dot"></span> Pod / Outboard</div>
-                  <div class="radio-card-sub">Pod fixe ou Hors-bord</div>
-                  <div class="radio-card-tag">P-Series / X-Series</div>
-                </div>
-              </div>
-              <input type="hidden" id="driveSystem" value="Shaft">
-
-              <div class="grid">
-                <div><label>Vessel Model</label><input type="text" id="vesselModel"></div>
-                <div><label>Location (Port / Chantier)</label><input type="text" id="location"></div>
-                <div><label>Make / Builder</label><input type="text" id="makeBuilder"></div>
-                <div><label>Hull Type</label><input type="text" id="hullType"></div>
-                <div><label>LOA / LWL / Beam / Draught / Displacement</label><input type="text" id="dimensions"></div>
-                <div><label>Fitted Prop (Size & Type)</label><input type="text" id="fittedProp"></div>
-                <div><label>Original Propulsion System</label><input type="text" id="origProp"></div>
-                <div><label>Installer Name</label><input type="text" id="installerName"></div>
-                <div><label>Installation Date</label><input type="date" id="installDate"></div>
-              </div>
-            </div>
-
-            <!-- ETAPE 2 : SYSTEM INFO & SERIAL NUMBERS -->
-            <div class="step-section hidden" data-step="2">
-              <h2 class="card-title">2. System Info & Serial Numbers</h2>
-              <p class="card-desc">Listez les modèles et numéros de série de chaque composant (moteurs, batteries, afficheurs, chargeurs).</p>
-              <label>Motors, Batteries & Components (Model + Serial Number)</label>
-              <textarea id="serialNumbers" rows="6" placeholder="Ex:&#10;Motor P: X20 SN 12345&#10;Battery Master: G102-100 SN 67890&#10;Battery Slave 1: G102-100 SN 67891"></textarea>
-            </div>
-
-            <!-- ETAPE 3 : INSTALLATION CHECK (1 TO 21) -->
-            <div class="step-section hidden" data-step="3">
-              <h2 class="card-title">3. Installation Check (1 to 21)</h2>
-              <p class="card-desc">Vérifiez chaque point mécanique et électrique avant la mise sous tension.</p>
-              <div id="installChecksContainer"></div>
-              <label>Installation Comments</label>
-              <textarea id="installComments" rows="2"></textarea>
-            </div>
-
-            <!-- ETAPE 4 : APPENDICES 1 & 2 -->
-            <div class="step-section hidden" data-step="4">
-              <h2 class="card-title">4. Appendices 1 & 2 (Insulation, Earth & CAN)</h2>
-              <p class="card-desc">Mesures d'isolement (> 125 kΩ), résistance de terre (< 1 Ω) et terminaisons bus EPCAN.</p>
-              <div class="grid">
-                <div><label>Temp (°C) & Humidity (%)</label><input type="text" id="tempHumidity"></div>
-                <div><label>Insulation Test (> 125 kΩ)</label><input type="text" id="insulationTest" placeholder="YES / Valeur kΩ"></div>
-                <div><label>Earth Resistance (< 1 Ω)</label><input type="text" id="earthTest" placeholder="YES / Valeur Ω"></div>
-                <div><label>EPCAN Termination (120Ω / 360Ω)</label><select id="canTest"><option>YES</option><option>NO</option></select></div>
-              </div>
-            </div>
-
-            <!-- ETAPE 5 : REQUIRED COMMISSIONING PHOTOS -->
-            <div class="step-section hidden" data-step="5">
-              <h2 class="card-title">5. Required Commissioning Photos</h2>
-              <p class="card-desc">Sélectionnez vos photos : prévisualisation instantanée et archivage automatique en haute définition sur Google Drive.</p>
-              <div id="photoSectionsContainer"></div>
-            </div>
-
-            <!-- ETAPE 6 : TECHNICAL PLANS & BOAT MANUAL -->
-            <div class="step-section hidden" data-step="6">
-              <h2 class="card-title">6. Technical Plans, Schematics & Boat Manual</h2>
-              <p class="card-desc">Ajoutez les schémas électriques, plans mécaniques/3D et le manuel du bateau (classés automatiquement sur Drive).</p>
-              <div id="docSectionsContainer"></div>
-            </div>
-
-            <!-- ETAPE 7 : POWER-ON & OPERATION CHECK -->
-            <div class="step-section hidden" data-step="7">
-              <h2 class="card-title">7. Power-On & Operation Check (1 to 16)</h2>
-              <p class="card-desc">Contrôles fonctionnels après mise sous tension du système eSSA.</p>
-              <div id="powerChecksContainer"></div>
-              <label>Power-On Comments</label>
-              <textarea id="powerComments" rows="2"></textarea>
-            </div>
-
-            <!-- ETAPE 8 : SEA TRIAL -->
-            <div class="step-section hidden" data-step="8">
-              <h2 class="card-title">8. Sea Trial (Runs A & B - 0% to 100%)</h2>
-              <p class="card-desc">Sélectionnez la motorisation pour calculer automatiquement les moyennes aller/retour et le rendement.</p>
-
-              <div class="section-label">Motor Series & Power</div>
-              <div class="radio-cards" id="motorCards">
-                <div class="radio-card" onclick="selectMotor('12', this)">
-                  <div class="radio-card-head"><span class="radio-dot"></span> P12 / X12</div>
-                  <div class="radio-card-sub">12 kW Rated Power</div>
-                  <div class="radio-card-tag">eSSA System</div>
-                </div>
-                <div class="radio-card selected" onclick="selectMotor('20', this)">
-                  <div class="radio-card-head"><span class="radio-dot"></span> P20 / X20 / I20</div>
-                  <div class="radio-card-sub">20 kW Rated Power</div>
-                  <div class="radio-card-tag">eSSA System</div>
-                </div>
-                <div class="radio-card" onclick="selectMotor('40', this)">
-                  <div class="radio-card-head"><span class="radio-dot"></span> X40 / I40</div>
-                  <div class="radio-card-sub">40 kW Rated Power</div>
-                  <div class="radio-card-tag">eSSA System</div>
-                </div>
-              </div>
-              <input type="hidden" id="seaModel" value="20">
-
-              <div class="grid">
-                <div><label>Location / Wind (Kts) / Tide / Water Temp</label><input type="text" id="seaConditions"></div>
-                <div><label>Sea Trial Date & Personnel</label><input type="text" id="seaDatePers"></div>
-              </div>
-
-              <div style="overflow-x:auto;">
-                <table class="sea-table">
-                  <thead>
-                    <tr>
-                      <th rowspan="2">Gaz (%)</th>
-                      <th rowspan="2">Théorique</th>
-                      <th colspan="2">Run A (Aller)</th>
-                      <th colspan="2">Run B (Retour 180°)</th>
-                      <th colspan="3">Moyennes Calculées (A + B)</th>
-                    </tr>
-                    <tr>
-                      <th>Conso (kW)</th>
-                      <th>Vitesse (Kts)</th>
-                      <th>Conso (kW)</th>
-                      <th>Vitesse (Kts)</th>
-                      <th>Conso Moy.</th>
-                      <th>Vitesse Moy.</th>
-                      <th>kWh / NM</th>
-                    </tr>
-                  </thead>
-                  <tbody id="seaTrialTableBody"></tbody>
-                </table>
-              </div>
-              <label>Sea Trial Comments</label>
-              <textarea id="seaData" rows="2"></textarea>
-            </div>
-
-            <!-- ETAPE 9 : HANDOVER, SIGNATURES & ADMIN -->
-            <div class="step-section hidden" data-step="9">
-              <h2 class="card-title">9. Handover & Signatures</h2>
-              <p class="card-desc">Validation de la prise en main avec le propriétaire et signatures électroniques.</p>
-              <div id="handoverChecksContainer"></div>
-              <label>Customer Comments</label>
-              <textarea id="customerComments" rows="2"></textarea>
-
-              <div class="grid">
-                <div>
-                  <label>Installer Signature</label>
-                  <canvas id="sigInstaller"></canvas>
-                  <button type="button" class="btn btn-outline btn-sm no-print" onclick="clearCanvas('sigInstaller')">Effacer</button>
-                </div>
-                <div>
-                  <label>Customer Signature</label>
-                  <canvas id="sigCustomer"></canvas>
-                  <button type="button" class="btn btn-outline btn-sm no-print" onclick="clearCanvas('sigCustomer')">Effacer</button>
-                </div>
-              </div>
-
-              <div class="no-print" style="margin-top:16px;">
-                <button class="btn" onclick="saveForm('En cours / Rempli Installateur')">💾 Sauvegarder & Finaliser partie Installateur</button>
-              </div>
-
-              <!-- ENCADRE RESERVE ADMIN -->
-              <div class="admin-box" id="adminSection">
-                <h3 style="margin-top:0; color:var(--ep-navy); background:transparent; padding:0;">Validation Interne & Export PDF (Admin)</h3>
-                <label>Notes de vérification interne</label>
-                <textarea id="adminNotes" rows="3"></textarea>
-                <label>Date de validation</label>
-                <input type="date" id="adminDate">
-                <div class="no-print" style="display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;">
-                  <button class="btn btn-green" onclick="saveForm('Validé & Terminé')">✅ Valider le dossier</button>
-                  <button class="btn" onclick="window.print()">📄 Générer le rapport PDF</button>
-                  <a id="adminDriveBtn" href="#" target="_blank" class="btn btn-outline">📁 Ouvrir le dossier Drive</a>
-                </div>
-              </div>
-            </div>
-
-            <!-- PIED DE NAVIGATION WIZARD (BACK / CONTINUE) -->
-            <div class="wizard-footer no-print">
-              <span style="font-size:12.5px; color:var(--ep-muted);" id="stepIndicatorText">Step 1 of 9</span>
-              <div style="display:flex; gap:10px;">
-                <button type="button" class="btn btn-outline" id="prevStepBtn" onclick="changeStep(-1)">← BACK</button>
-                <button type="button" class="btn" id="nextStepBtn" onclick="changeStep(1)">CONTINUE →</button>
-              </div>
-            </div>
-
-          </div>
+        <div style="display:flex; gap:8px;">
+          <a id="projectDriveLinkBtn" href="#" target="_blank" class="btn btn-green btn-sm hidden">📁 Dossier Google Drive</a>
+          <button class="btn btn-outline btn-sm" id="backAdminBtn" onclick="goAdmin()">← Liste projets</button>
         </div>
       </div>
 
-    </main>
-  </div>
+      <div class="wizard-layout">
+        <!-- PASTILLES D'ETAPES A GAUCHE -->
+        <div class="stepper no-print">
+          <div id="stepperContainer"></div>
+          <div class="legend-box">
+            <div class="legend-row"><span class="dot-mini" style="background:var(--ep-green);"></span> Complet (100%)</div>
+            <div class="legend-row"><span class="dot-mini" style="background:var(--ep-orange);"></span> En cours</div>
+            <div class="legend-row"><span class="dot-mini" style="background:var(--ep-red);"></span> Non rempli</div>
+          </div>
+        </div>
+
+        <!-- CARTE CENTRALE DU FORMULAIRE -->
+        <div class="card">
+
+          <!-- ETAPE 1 : VESSEL & INSTALLATION INFO -->
+          <div class="step-section" data-step="1">
+            <h2 class="card-title">1. Vessel & Installation Info</h2>
+            <p class="card-desc">Renseignez les caractéristiques du navire et le système de propulsion installé.</p>
+
+            <div class="section-label">Drive System</div>
+            <div class="radio-cards" id="driveCards">
+              <div class="radio-card selected" onclick="selectDrive('Shaft', this)">
+                <div class="radio-card-head"><span class="radio-dot"></span> Shaft Drive</div>
+                <div class="radio-card-sub">Ligne d'arbre</div>
+                <div class="radio-card-tag">I-Series Inboard</div>
+              </div>
+              <div class="radio-card" onclick="selectDrive('Saildrive', this)">
+                <div class="radio-card-head"><span class="radio-dot"></span> Saildrive</div>
+                <div class="radio-card-sub">Embase voilier</div>
+                <div class="radio-card-tag">Pod / I-Series</div>
+              </div>
+              <div class="radio-card" onclick="selectDrive('Pod', this)">
+                <div class="radio-card-head"><span class="radio-dot"></span> Pod / Outboard</div>
+                <div class="radio-card-sub">Pod fixe ou Hors-bord</div>
+                <div class="radio-card-tag">P-Series / X-Series</div>
+              </div>
+            </div>
+            <input type="hidden" id="driveSystem" value="Shaft">
+
+            <div class="grid">
+              <div><label>Vessel Model</label><input type="text" id="vesselModel"></div>
+              <div><label>Location (Port / Chantier)</label><input type="text" id="location"></div>
+              <div><label>Make / Builder</label><input type="text" id="makeBuilder"></div>
+              <div><label>Hull Type</label><input type="text" id="hullType"></div>
+              <div><label>LOA / LWL / Beam / Draught / Displacement</label><input type="text" id="dimensions"></div>
+              <div><label>Fitted Prop (Size & Type)</label><input type="text" id="fittedProp"></div>
+              <div><label>Original Propulsion System</label><input type="text" id="origProp"></div>
+              <div><label>Installer Name</label><input type="text" id="installerName"></div>
+              <div><label>Installation Date</label><input type="date" id="installDate"></div>
+            </div>
+          </div>
+
+          <!-- ETAPE 2 : SYSTEM INFO & SERIAL NUMBERS -->
+          <div class="step-section hidden" data-step="2">
+            <h2 class="card-title">2. System Info & Serial Numbers</h2>
+            <p class="card-desc">Listez les modèles et numéros de série de chaque composant (moteurs, batteries, afficheurs, chargeurs).</p>
+            <label>Motors, Batteries & Components (Model + Serial Number)</label>
+            <textarea id="serialNumbers" rows="6" placeholder="Ex:&#10;Motor P: X20 SN 12345&#10;Battery Master: G102-100 SN 67890&#10;Battery Slave 1: G102-100 SN 67891"></textarea>
+          </div>
+
+          <!-- ETAPE 3 : INSTALLATION CHECK (1 TO 21) -->
+          <div class="step-section hidden" data-step="3">
+            <h2 class="card-title">3. Installation Check (1 to 21)</h2>
+            <p class="card-desc">Vérifiez chaque point mécanique et électrique avant la mise sous tension.</p>
+            <div id="installChecksContainer"></div>
+            <label>Installation Comments</label>
+            <textarea id="installComments" rows="2"></textarea>
+          </div>
+
+          <!-- ETAPE 4 : APPENDICES 1 & 2 -->
+          <div class="step-section hidden" data-step="4">
+            <h2 class="card-title">4. Appendices 1 & 2 (Insulation, Earth & CAN)</h2>
+            <p class="card-desc">Mesures d'isolement (> 125 kΩ), résistance de terre (< 1 Ω) et terminaisons bus EPCAN.</p>
+            <div class="grid">
+              <div><label>Temp (°C) & Humidity (%)</label><input type="text" id="tempHumidity"></div>
+              <div><label>Insulation Test (> 125 kΩ)</label><input type="text" id="insulationTest" placeholder="YES / Valeur kΩ"></div>
+              <div><label>Earth Resistance (< 1 Ω)</label><input type="text" id="earthTest" placeholder="YES / Valeur Ω"></div>
+              <div><label>EPCAN Termination (120Ω / 360Ω)</label><select id="canTest"><option value="">-- Choisir --</option><option value="YES">YES</option><option value="NO">NO</option></select></div>
+            </div>
+          </div>
+
+          <!-- ETAPE 5 : REQUIRED COMMISSIONING PHOTOS -->
+          <div class="step-section hidden" data-step="5">
+            <h2 class="card-title">5. Required Commissioning Photos</h2>
+            <p class="card-desc">Sélectionnez vos photos : prévisualisation instantanée et archivage automatique en haute définition sur Google Drive.</p>
+            <div id="photoSectionsContainer"></div>
+          </div>
+
+          <!-- ETAPE 6 : TECHNICAL PLANS & BOAT MANUAL -->
+          <div class="step-section hidden" data-step="6">
+            <h2 class="card-title">6. Technical Plans, Schematics & Boat Manual</h2>
+            <p class="card-desc">Ajoutez les schémas électriques, plans mécaniques/3D et le manuel du bateau (classés automatiquement sur Drive).</p>
+            <div id="docSectionsContainer"></div>
+          </div>
+
+          <!-- ETAPE 7 : POWER-ON & OPERATION CHECK -->
+          <div class="step-section hidden" data-step="7">
+            <h2 class="card-title">7. Power-On & Operation Check (1 to 16)</h2>
+            <p class="card-desc">Contrôles fonctionnels après mise sous tension du système eSSA.</p>
+            <div id="powerChecksContainer"></div>
+            <label>Power-On Comments</label>
+            <textarea id="powerComments" rows="2"></textarea>
+          </div>
+
+          <!-- ETAPE 8 : SEA TRIAL -->
+          <div class="step-section hidden" data-step="8">
+            <h2 class="card-title">8. Sea Trial (Runs A & B - 0% to 100%)</h2>
+            <p class="card-desc">Sélectionnez la motorisation pour calculer automatiquement les moyennes aller/retour et le rendement.</p>
+
+            <div class="section-label">Motor Series & Power</div>
+            <div class="radio-cards" id="motorCards">
+              <div class="radio-card" onclick="selectMotor('12', this)">
+                <div class="radio-card-head"><span class="radio-dot"></span> P12 / X12</div>
+                <div class="radio-card-sub">12 kW Rated Power</div>
+                <div class="radio-card-tag">eSSA System</div>
+              </div>
+              <div class="radio-card selected" onclick="selectMotor('20', this)">
+                <div class="radio-card-head"><span class="radio-dot"></span> P20 / X20 / I20</div>
+                <div class="radio-card-sub">20 kW Rated Power</div>
+                <div class="radio-card-tag">eSSA System</div>
+              </div>
+              <div class="radio-card" onclick="selectMotor('40', this)">
+                <div class="radio-card-head"><span class="radio-dot"></span> X40 / I40</div>
+                <div class="radio-card-sub">40 kW Rated Power</div>
+                <div class="radio-card-tag">eSSA System</div>
+              </div>
+            </div>
+            <input type="hidden" id="seaModel" value="20">
+
+            <div class="grid">
+              <div><label>Location / Wind (Kts) / Tide / Water Temp</label><input type="text" id="seaConditions"></div>
+              <div><label>Sea Trial Date & Personnel</label><input type="text" id="seaDatePers"></div>
+            </div>
+
+            <div style="overflow-x:auto;">
+              <table class="sea-table">
+                <thead>
+                  <tr>
+                    <th rowspan="2">Gaz (%)</th>
+                    <th rowspan="2">Théorique</th>
+                    <th colspan="2">Run A (Aller)</th>
+                    <th colspan="2">Run B (Retour 180°)</th>
+                    <th colspan="3">Moyennes Calculées (A + B)</th>
+                  </tr>
+                  <tr>
+                    <th>Conso (kW)</th>
+                    <th>Vitesse (Kts)</th>
+                    <th>Conso (kW)</th>
+                    <th>Vitesse (Kts)</th>
+                    <th>Conso Moy.</th>
+                    <th>Vitesse Moy.</th>
+                    <th>kWh / NM</th>
+                  </tr>
+                </thead>
+                <tbody id="seaTrialTableBody"></tbody>
+              </table>
+            </div>
+            <label>Sea Trial Comments</label>
+            <textarea id="seaData" rows="2"></textarea>
+          </div>
+
+          <!-- ETAPE 9 : HANDOVER, SIGNATURES & ADMIN -->
+          <div class="step-section hidden" data-step="9">
+            <h2 class="card-title">9. Handover & Signatures</h2>
+            <p class="card-desc">Validation de la prise en main avec le propriétaire et signatures électroniques.</p>
+            <div id="handoverChecksContainer"></div>
+            <label>Customer Comments</label>
+            <textarea id="customerComments" rows="2"></textarea>
+
+            <div class="grid">
+              <div>
+                <label>Installer Signature</label>
+                <canvas id="sigInstaller"></canvas>
+                <button type="button" class="btn btn-outline btn-sm no-print" onclick="clearCanvas('sigInstaller')">Effacer</button>
+              </div>
+              <div>
+                <label>Customer Signature</label>
+                <canvas id="sigCustomer"></canvas>
+                <button type="button" class="btn btn-outline btn-sm no-print" onclick="clearCanvas('sigCustomer')">Effacer</button>
+              </div>
+            </div>
+
+            <div class="no-print" style="margin-top:16px;">
+              <button class="btn" onclick="saveForm('En cours / Rempli Installateur')">💾 Sauvegarder & Finaliser partie Installateur</button>
+            </div>
+
+            <!-- ENCADRE RESERVE ADMIN -->
+            <div class="admin-box" id="adminSection">
+              <h3 style="margin-top:0; color:var(--ep-navy);">Validation Interne & Export PDF (Admin)</h3>
+              <label>Notes de vérification interne</label>
+              <textarea id="adminNotes" rows="3"></textarea>
+              <label>Date de validation</label>
+              <input type="date" id="adminDate">
+              <div class="no-print" style="display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;">
+                <button class="btn btn-green" onclick="saveForm('Validé & Terminé')">✅ Valider le dossier</button>
+                <button class="btn" onclick="window.print()">📄 Générer le rapport PDF</button>
+                <a id="adminDriveBtn" href="#" target="_blank" class="btn btn-outline">📁 Ouvrir le dossier Drive</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- PIED DE NAVIGATION WIZARD (BACK / CONTINUE) -->
+          <div class="wizard-footer no-print">
+            <span style="font-size:12.5px; color:var(--ep-muted);" id="stepIndicatorText">Step 1 of 9</span>
+            <div style="display:flex; gap:10px;">
+              <button type="button" class="btn btn-outline" id="prevStepBtn" onclick="changeStep(-1)">← BACK</button>
+              <button type="button" class="btn" id="nextStepBtn" onclick="changeStep(1)">CONTINUE →</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </main>
 
 <!-- FIREBASE SDK -->
 <script type="module">
@@ -480,29 +469,88 @@
   let currentProjectName = "";
   let currentDriveFolderUrl = "";
   let currentStep = 1;
+  let sigInstSigned = false;
+  let sigCustSigned = false;
 
-  // Etapes du Wizard (Style Dealer Gateway)
+  // Etapes du Wizard
   const stepNames = [
     "Vessel & Info", "System & S/N", "Install Check", "Appendices 1-2",
     "Photos Drive", "Plans & Manual", "Power-On Check", "Sea Trial", "Handover & Sign"
   ];
 
-  function renderStepper() {
+  // Calcul du statut de chaque étape : 'empty' (rouge), 'partial' (orange), 'complete' (vert)
+  function getStepStatus(stepNum) {
+    const val = id => { const el = document.getElementById(id); return el && el.value && el.value.trim() !== ""; };
+
+    if (stepNum === 1) {
+      const fields = ['vesselModel', 'location', 'makeBuilder', 'hullType', 'dimensions', 'fittedProp', 'origProp', 'installerName', 'installDate'];
+      const count = fields.filter(val).length;
+      if (count === 0) return 'empty';
+      return count === fields.length ? 'complete' : 'partial';
+    }
+    if (stepNum === 2) {
+      return val('serialNumbers') ? 'complete' : 'empty';
+    }
+    if (stepNum === 3) {
+      let count = 0;
+      for (let i = 0; i < 21; i++) if (val(`inst_${i}`)) count++;
+      if (count === 0) return 'empty';
+      return count === 21 ? 'complete' : 'partial';
+    }
+    if (stepNum === 4) {
+      const fields = ['tempHumidity', 'insulationTest', 'earthTest', 'canTest'];
+      const count = fields.filter(val).length;
+      if (count === 0) return 'empty';
+      return count === fields.length ? 'complete' : 'partial';
+    }
+    if (stepNum === 5) {
+      const cats = ['vessel', 'battery', 'motor', 'cabling'];
+      const filledCats = cats.filter(c => projectFiles.some(f => f.cat === c)).length;
+      if (filledCats === 0) return 'empty';
+      return filledCats === cats.length ? 'complete' : 'partial';
+    }
+    if (stepNum === 6) {
+      const docCount = projectFiles.filter(f => ['elec_schema', 'mech_3d', 'boat_manual'].includes(f.cat)).length;
+      return docCount > 0 ? 'complete' : 'empty';
+    }
+    if (stepNum === 7) {
+      let count = 0;
+      for (let i = 0; i < 16; i++) if (val(`pwr_${i}`)) count++;
+      if (count === 0) return 'empty';
+      return count === 16 ? 'complete' : 'partial';
+    }
+    if (stepNum === 8) {
+      const conds = val('seaConditions') && val('seaDatePers');
+      const fullThrottle = val('runA_kw_100') && val('runA_kts_100') && val('runB_kw_100') && val('runB_kts_100');
+      const anyFilled = val('seaConditions') || val('seaDatePers') || val('runA_kw_100') || val('runA_kw_50');
+      if (!anyFilled) return 'empty';
+      return (conds && fullThrottle) ? 'complete' : 'partial';
+    }
+    if (stepNum === 9) {
+      let checks = 0;
+      for (let i = 0; i < 5; i++) if (val(`hnd_${i}`)) checks++;
+      if (checks === 0 && !sigInstSigned && !sigCustSigned) return 'empty';
+      return (checks === 5 && sigInstSigned && sigCustSigned) ? 'complete' : 'partial';
+    }
+    return 'empty';
+  }
+
+  window.renderStepper = () => {
     const container = document.getElementById('stepperContainer');
+    if (!container) return;
     container.innerHTML = "";
     stepNames.forEach((name, idx) => {
       const stepNum = idx + 1;
-      const isDone = stepNum < currentStep;
-      const isActive = stepNum === currentStep;
-      const cls = isActive ? "active" : (isDone ? "done" : "");
-      const icon = isDone ? "✓" : stepNum;
+      const status = getStepStatus(stepNum);
+      const isActive = stepNum === currentStep ? "active" : "";
+      const icon = status === 'complete' ? "✓" : stepNum;
       container.innerHTML += `
-        <div class="step-item ${cls}" onclick="goToStep(${stepNum})">
+        <div class="step-item status-${status} ${isActive}" onclick="goToStep(${stepNum})">
           <span class="step-circle">${icon}</span>
           <span>${name}</span>
         </div>`;
     });
-  }
+  };
 
   window.goToStep = (stepNum) => {
     if (stepNum < 1 || stepNum > 9) return;
@@ -515,7 +563,7 @@
     document.getElementById('nextStepBtn').style.display = currentStep === 9 ? "none" : "inline-flex";
     renderStepper();
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    if (projectId) saveForm(null, true); // Sauvegarde automatique au changement d'étape
+    if (projectId) saveForm(null, true);
   };
 
   window.changeStep = (delta) => goToStep(currentStep + delta);
@@ -534,7 +582,7 @@
     recalcSeaTrial();
   };
 
-  // Listes des points de contrôle
+  // Listes des points de contrôle (avec option vide par défaut pour détecter le non-rempli)
   const installItems = [
     "1. Components match packing list", "2. Installed in clean dry area", "3. Structurally safe mounting",
     "4. No potential leaks", "5. Oil / Coolant levels match", "6. Power cables wired per drawing",
@@ -559,7 +607,7 @@
   function renderChecks(list, containerId, prefix) {
     const el = document.getElementById(containerId);
     list.forEach((text, i) => {
-      el.innerHTML += `<div class="check-row"><span>${text}</span><select id="${prefix}_${i}"><option value="YES">YES</option><option value="NO">NO</option><option value="N/A">N/A</option></select></div>`;
+      el.innerHTML += `<div class="check-row"><span>${text}</span><select id="${prefix}_${i}"><option value="">--</option><option value="YES">YES</option><option value="NO">NO</option><option value="N/A">N/A</option></select></div>`;
     });
   }
   renderChecks(installItems, "installChecksContainer", "inst");
@@ -600,6 +648,7 @@
       document.getElementById(`avg_kts_${pct}`).innerText = avgKts !== null ? avgKts.toFixed(1) : "-";
       document.getElementById(`eff_${pct}`).innerText = (avgKw !== null && avgKts !== null && avgKts > 0) ? (avgKw / avgKts).toFixed(2) : "-";
     });
+    renderStepper();
   };
   recalcSeaTrial();
 
@@ -619,7 +668,7 @@
   const photoContainer = document.getElementById('photoSectionsContainer');
   photoCategories.forEach(cat => {
     photoContainer.innerHTML += `
-      <h3>${cat.label}</h3>
+      <div class="section-label">${cat.label}</div>
       <div class="no-print">
         <input type="file" accept="image/*" multiple onchange="uploadToDrive(this.files, '${cat.id}')">
         <div id="status_${cat.id}" class="upload-status"></div>
@@ -630,7 +679,7 @@
   const docContainer = document.getElementById('docSectionsContainer');
   docCategories.forEach(cat => {
     docContainer.innerHTML += `
-      <h3>${cat.label}</h3>
+      <div class="section-label">${cat.label}</div>
       <div class="no-print">
         <input type="file" multiple onchange="uploadToDrive(this.files, '${cat.id}')">
         <div id="status_${cat.id}" class="upload-status"></div>
@@ -681,6 +730,7 @@
       projectFiles.push(tempItem);
       const itemIndex = projectFiles.length - 1;
       renderGalleries();
+      renderStepper();
 
       statusEl.innerText = `⏳ Envoi HD vers Google Drive (${i + 1}/${files.length}) : ${file.name}...`;
       try {
@@ -727,7 +777,7 @@
         </div>`;
     });
   }
-  window.removeFile = (idx) => { projectFiles.splice(idx, 1); renderGalleries(); };
+  window.removeFile = (idx) => { projectFiles.splice(idx, 1); renderGalleries(); renderStepper(); };
 
   // Signatures au doigt
   ['sigInstaller', 'sigCustomer'].forEach(id => {
@@ -739,15 +789,31 @@
       const t = e.touches ? e.touches[0] : e;
       return { x: (t.clientX - r.left) * (canvas.width / r.width), y: (t.clientY - r.top) * (canvas.height / r.height) };
     };
-    const start = e => { drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); };
+    const start = e => {
+      drawing = true;
+      if (id === 'sigInstaller') sigInstSigned = true;
+      if (id === 'sigCustomer') sigCustSigned = true;
+      renderStepper();
+      const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y);
+    };
     const move = e => { if(!drawing) return; e.preventDefault(); const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); };
     const end = () => { drawing = false; };
     canvas.addEventListener('mousedown', start); canvas.addEventListener('mousemove', move); window.addEventListener('mouseup', end);
     canvas.addEventListener('touchstart', start); canvas.addEventListener('touchmove', move); canvas.addEventListener('touchend', end);
   });
-  window.clearCanvas = id => { const c = document.getElementById(id); c.getContext('2d').clearRect(0, 0, c.width, c.height); };
+  window.clearCanvas = id => {
+    const c = document.getElementById(id);
+    c.getContext('2d').clearRect(0, 0, c.width, c.height);
+    if (id === 'sigInstaller') sigInstSigned = false;
+    if (id === 'sigCustomer') sigCustSigned = false;
+    renderStepper();
+  };
 
-  // Calcul pourcentage remplissage
+  // Mise à jour en temps réel des pastilles lors de la saisie dans n'importe quel champ
+  document.getElementById('projectForm').addEventListener('input', () => renderStepper());
+  document.getElementById('projectForm').addEventListener('change', () => renderStepper());
+
+  // Calcul pourcentage global (tableau Admin)
   function computeCompletion(data) {
     const keyFields = [
       'vesselModel', 'location', 'makeBuilder', 'hullType', 'dimensions', 'fittedProp',
@@ -812,9 +878,7 @@
   async function loadDashboard() {
     document.getElementById('loginScreen').classList.add('hidden');
     document.getElementById('adminDashboard').classList.remove('hidden');
-    document.getElementById('navDashboardBtn').classList.add('active');
-    document.getElementById('navFormBtn').classList.remove('active');
-    document.getElementById('breadcrumbText').innerText = "Dealer Gateway / Gestion des Projets";
+    document.getElementById('breadcrumbText').innerText = "Gestion des Projets";
 
     const tbody = document.getElementById('projectList');
     tbody.innerHTML = "<tr><td colspan='5'>Chargement...</td></tr>";
@@ -853,13 +917,10 @@
     document.getElementById('adminDashboard').classList.add('hidden');
     document.getElementById('projectForm').classList.remove('hidden');
     document.getElementById('topSaveBtn').classList.remove('hidden');
-    document.getElementById('navFormBtn').classList.add('active');
-    document.getElementById('navDashboardBtn').classList.remove('active');
 
     if(!isAuthAdmin) {
       document.getElementById('adminSection').classList.add('hidden');
       document.getElementById('backAdminBtn').classList.add('hidden');
-      document.getElementById('navDashboardBtn').classList.add('hidden');
     }
 
     const snap = await getDoc(doc(db, "projects", id));
@@ -875,8 +936,6 @@
         document.getElementById('projectDriveLinkBtn').href = currentDriveFolderUrl;
         document.getElementById('projectDriveLinkBtn').classList.remove('hidden');
         document.getElementById('adminDriveBtn').href = currentDriveFolderUrl;
-        document.getElementById('navDriveBtn').href = currentDriveFolderUrl;
-        document.getElementById('navDriveBtn').classList.remove('hidden');
       }
 
       Object.keys(data).forEach(k => {
@@ -884,7 +943,6 @@
         if(el && el.tagName !== 'CANVAS' && el.type !== 'file') el.value = data[k];
       });
 
-      // Synchronisation des cartes visuelles sélectionnées
       if (data.driveSystem) {
         document.querySelectorAll('#driveCards .radio-card').forEach(c => {
           c.classList.toggle('selected', c.innerText.includes(data.driveSystem));
@@ -898,13 +956,18 @@
 
       recalcSeaTrial();
       if(data.photos) { projectFiles = data.photos; renderGalleries(); }
-      ['sigInstaller', 'sigCustomer'].forEach(sigId => {
-        if(data[sigId]) {
-          const img = new Image();
-          img.onload = () => document.getElementById(sigId).getContext('2d').drawImage(img, 0, 0);
-          img.src = data[sigId];
-        }
-      });
+      if(data.sigInstaller && data.sigInstaller.length > 2500) {
+        sigInstSigned = true;
+        const img = new Image();
+        img.onload = () => document.getElementById('sigInstaller').getContext('2d').drawImage(img, 0, 0);
+        img.src = data.sigInstaller;
+      }
+      if(data.sigCustomer && data.sigCustomer.length > 2500) {
+        sigCustSigned = true;
+        const img = new Image();
+        img.onload = () => document.getElementById('sigCustomer').getContext('2d').drawImage(img, 0, 0);
+        img.src = data.sigCustomer;
+      }
       goToStep(1);
     } else alert("Projet introuvable. Vérifiez le lien.");
   }
@@ -935,7 +998,6 @@
   function initApp() {
     const isAuthAdmin = sessionStorage.getItem('isAdminAuth') === 'true';
     document.getElementById('userRoleLabel').innerText = isAuthAdmin ? "Administrateur" : "Installateur";
-    document.getElementById('sidebarRoleBadge').innerText = isAuthAdmin ? "Admin Gateway" : "Installateur";
     if (projectId) loadProject(projectId, isAuthAdmin);
     else if (isAuthAdmin) loadDashboard();
     else document.getElementById('loginScreen').classList.remove('hidden');
