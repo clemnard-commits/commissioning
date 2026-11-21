@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
 <title>ePropulsion France • Commissioning Portal</title>
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" defer></script>
 <style>
   :root {
     --ep-navy: #0A365C;
@@ -436,7 +436,7 @@
       <div class="page-header no-print">
         <div>
           <h1 class="page-title" id="displayProjName">Installation & Commissioning Form</h1>
-          <p class="page-subtitle">ID Dossier : <strong id="displayProjId"></strong></p>
+          <p class="page-subtitle">ID Dossier : <strong id="displayProjId"></strong> • Stockage illimité activé</p>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
           <a id="projectDriveLinkBtn" href="#" target="_blank" class="btn btn-green btn-sm hidden">
@@ -591,14 +591,14 @@
           <!-- ETAPE 5 : 15 RUBRIQUES PHOTOS OBLIGATOIRES + CASE N/A -->
           <div class="step-section hidden" data-step="5">
             <h2 class="card-title">5. Required Commissioning Photos (15 points)</h2>
-            <p class="card-desc">Ajoutez les photos demandées par rubrique (archivées dans <strong>01_Photos</strong> sur Drive). Si un élément ne concerne pas ce bateau, cochez <strong>N/A</strong>.</p>
+            <p class="card-desc">Ajoutez les photos demandées par rubrique (archivées dans <strong>01_Photos</strong> sur Drive en haute définition). Si un élément ne concerne pas ce bateau, cochez <strong>N/A</strong>.</p>
             <div id="photoSectionsContainer"></div>
           </div>
 
           <!-- ETAPE 6 : TECHNICAL PLANS & BOAT MANUAL -->
           <div class="step-section hidden" data-step="6">
             <h2 class="card-title">6. Technical Plans, Schematics & Boat Manual</h2>
-            <p class="card-desc">Ajoutez les schémas électriques, plans mécaniques/3D et le manuel du bateau (classés dans <strong>02_Documents</strong> sur Drive).</p>
+            <p class="card-desc">Ajoutez les schémas électriques, plans mécaniques/3D et le manuel du bateau (classés dans <strong>02_Documents</strong> sur Drive • max 45 Mo par fichier).</p>
             <div id="docSectionsContainer"></div>
           </div>
 
@@ -792,8 +792,11 @@
   };
 
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js').catch(() => {});
+    navigator.serviceWorker.getRegistrations().then(regs => {
+      regs.forEach(r => r.unregister());
+    }).catch(() => {});
   }
+
   function updateOnlineStatus() {
     document.getElementById('offlineIndicator').classList.toggle('hidden', navigator.onLine);
   }
@@ -821,7 +824,6 @@
   const projectId = urlParams.get('id');
   const inviteToken = urlParams.get('invite');
 
-  // Gestion de l'invitation Co-Administrateur via lien dédié
   if (inviteToken === "ep_admin_invite") {
     sessionStorage.setItem('isAdminAuth', 'true');
     const cleanUrl = window.location.href.split('?')[0] + (projectId ? `?id=${projectId}` : '');
@@ -918,7 +920,7 @@
   };
 
   // =========================================================================
-  // ETAPE 2 : GESTION DU TABLEAU DYNAMIQUE DE NUMEROS DE SERIE + SCANNER
+  // ETAPE 2 : TABLEAU DYNAMIQUE DE NUMEROS DE SERIE + SCANNER
   // =========================================================================
   const componentTypes = [
     "Moteur Principal", "Moteur Tribord", "Moteur Bâbord",
@@ -1092,7 +1094,6 @@
   ];
   const allCategories = [...photoCategories, ...docCategories];
 
-  // Etapes du Wizard (Pastille 4 renommée : "Test d'isolement et de résistance")
   const stepNames = [
     "Vessel & Info",
     "System & S/N",
@@ -1396,7 +1397,8 @@
       <div id="gal_${cat.id}" class="photo-gallery"></div>`;
   });
 
-  function createThumbnail(file, maxWidth = 680, quality = 0.72) {
+  // Compression haute qualité (900px, qualité 0.78 — chaque fichier est dans son propre document Firebase)
+  function createThumbnail(file, maxWidth = 900, quality = 0.78) {
     return new Promise((resolve) => {
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -1423,6 +1425,13 @@
     });
   }
 
+  // Sauvegarde d'un fichier individuel dans la sous-collection illimitée projects/{projectId}/files/{fileId}
+  async function saveSingleFileToSubcollection(fileItem) {
+    if (!projectId) return;
+    const { uploading, ...cleanItem } = fileItem;
+    await setDoc(doc(db, "projects", projectId, "files", cleanItem.fileId), cleanItem);
+  }
+
   window.uploadToDrive = async (files, catId) => {
     markUnsaved();
     const statusEl = document.getElementById(`status_${catId}`);
@@ -1431,12 +1440,26 @@
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
+
+      // Vérification limite technique Google Apps Script (45 Mo max par fichier)
+      if (file.size > 45 * 1024 * 1024) {
+        alert(`Le fichier "${file.name}" dépasse 45 Mo. Veuillez le compresser avant de l'envoyer.`);
+        continue;
+      }
+
       const isImg = file.type.startsWith("image/");
       let thumbData = isImg ? await createThumbnail(file) : null;
+      const uniqueFileId = "FILE-" + Date.now() + "-" + Math.random().toString(36).slice(2, 6);
 
       const tempItem = {
-        cat: catId, type: isImg ? "image" : "doc", name: file.name,
-        thumb: thumbData, fileUrl: "#", uploading: true
+        fileId: uniqueFileId,
+        cat: catId,
+        type: isImg ? "image" : "doc",
+        name: file.name,
+        thumb: thumbData,
+        fileUrl: "#",
+        uploading: true,
+        createdAt: Date.now()
       };
       projectFiles.push(tempItem);
       const itemIndex = projectFiles.length - 1;
@@ -1444,7 +1467,7 @@
       renderStepper();
 
       if (!navigator.onLine) {
-        statusEl.innerText = "Hors-ligne : miniature conservée. Pensez à renvoyer le fichier HD une fois connecté.";
+        statusEl.innerText = "Hors-ligne : aperçu conservé. Pensez à renvoyer le fichier HD une fois connecté.";
         continue;
       }
 
@@ -1470,6 +1493,7 @@
           projectFiles[itemIndex].uploading = false;
           if (result.folderUrl) currentDriveFolderUrl = result.folderUrl;
           renderGalleries();
+          await saveSingleFileToSubcollection(projectFiles[itemIndex]);
           await saveForm(null, true);
         } else alert("Erreur Google Drive : " + result.message);
       } catch (err) { alert("Erreur lors de l'envoi : " + err.message); }
@@ -1500,7 +1524,19 @@
     });
     updatePhotoBlockVisuals();
   }
-  window.removeFile = (idx) => { projectFiles.splice(idx, 1); renderGalleries(); renderStepper(); markUnsaved(); };
+
+  window.removeFile = async (idx) => {
+    const removed = projectFiles[idx];
+    projectFiles.splice(idx, 1);
+    renderGalleries();
+    renderStepper();
+    markUnsaved();
+    if (removed && removed.fileId && projectId) {
+      try {
+        await deleteDoc(doc(db, "projects", projectId, "files", removed.fileId));
+      } catch (e) {}
+    }
+  };
 
   // Signatures au doigt
   ['sigInstaller', 'sigCustomer'].forEach(id => {
@@ -1547,7 +1583,8 @@
     let filled = 0;
     keyFields.forEach(f => { if (data[f] && String(data[f]).trim() !== "") filled++; });
     if (data.serialItems && data.serialItems.some(s => (s.sn || "").trim() !== "")) filled += 1;
-    if (data.photos && data.photos.length > 0) filled += 2;
+    const totalFiles = data.filesCount || (data.photos ? data.photos.length : 0);
+    if (totalFiles > 0) filled += 2;
     if (data.sigInstaller && data.sigInstaller.length > 2500) filled += 1;
     if (data.sigCustomer && data.sigCustomer.length > 2500) filled += 1;
     return Math.min(100, Math.round((filled / (keyFields.length + 5)) * 100));
@@ -1783,7 +1820,6 @@
     `;
   }
 
-  // Impression du rapport accessible au client dès que le dossier est validé
   window.printClientReport = () => {
     if (!currentProjectStatus.includes("Validé") && !isStrictAdmin()) {
       return alert("Le rapport final sera disponible dès que le dossier aura été validé.");
@@ -1794,7 +1830,6 @@
     window.print();
   };
 
-  // Téléchargement du fichier ZIP complet (Rapport + Photos + Documents)
   window.downloadProjectZip = async () => {
     if (!currentProjectStatus.includes("Validé") && !isStrictAdmin()) {
       return alert("Le téléchargement de l'archive ZIP est disponible une fois le dossier validé.");
@@ -2046,6 +2081,7 @@
     delete basePayload.sigCustomer;
     delete basePayload.adminNotes;
     delete basePayload.adminDate;
+    delete basePayload.filesCount;
 
     await setDoc(doc(db, "projects", id), {
       ...basePayload,
@@ -2054,7 +2090,7 @@
       installerEmail: email,
       status: "En attente Installateur",
       driveFolderUrl: driveUrl,
-      photos: [],
+      filesCount: 0,
       photoNaState: {},
       serialItems: [
         { type: "Moteur Principal", model: "", sn: "" },
@@ -2236,7 +2272,28 @@
       photoNaState = data.photoNaState || {};
       checkInsulationValues();
       recalcSeaTrial();
-      if(data.photos) projectFiles = data.photos;
+
+      // Chargement illimité depuis la sous-collection projects/{id}/files + migration automatique anciens fichiers
+      projectFiles = [];
+      try {
+        const filesSnap = await getDocs(collection(db, "projects", id, "files"));
+        filesSnap.forEach(fDoc => {
+          projectFiles.push(fDoc.data());
+        });
+        projectFiles.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+      } catch (e) { console.error(e); }
+
+      if (projectFiles.length === 0 && Array.isArray(data.photos) && data.photos.length > 0) {
+        for (let i = 0; i < data.photos.length; i++) {
+          const oldItem = {
+            ...data.photos[i],
+            fileId: data.photos[i].fileId || ("FILE-MIG-" + Date.now() + "-" + i),
+            createdAt: Date.now() + i
+          };
+          projectFiles.push(oldItem);
+          await saveSingleFileToSubcollection(oldItem);
+        }
+      }
       renderGalleries();
 
       if(data.sigInstaller && data.sigInstaller.length > 2500) {
@@ -2257,9 +2314,10 @@
   }
 
   window.saveForm = async (newStatus, silent = false) => {
-    const cleanPhotos = projectFiles.map(({ uploading, ...rest }) => rest);
+    // Le document principal ne stocke plus les images lourdes (qui sont dans la sous-collection illimitée)
     const payload = {
-      photos: cleanPhotos,
+      photos: [],
+      filesCount: projectFiles.length,
       photoNaState: photoNaState,
       serialItems: serialItems,
       driveFolderUrl: currentDriveFolderUrl
