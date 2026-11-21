@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
 <title>COMMISSION-X - Marine Commissioning Portal</title>
+<!-- Librairie universelle de scan QR / Code-barres (compatible Android & iOS Safari) -->
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <style>
   :root {
     --cx-navy: #0A365C;
@@ -72,6 +74,19 @@
   .card-title { font-size: 18px; font-weight: 600; color: var(--cx-text); margin: 0 0 6px 0; }
   .card-desc { font-size: 13px; color: var(--cx-muted); margin: 0 0 18px 0; }
   .section-label { font-size: 12px; font-weight: 600; color: var(--cx-muted); margin: 16px 0 8px 0; text-transform: uppercase; letter-spacing: 0.4px; }
+
+  /* LIGNES STRUCTURÉES NUMEROS DE SERIE + SCANNER */
+  .sn-row { display: grid; grid-template-columns: 1.3fr 1fr 1.4fr auto; gap: 8px; align-items: center; background: #FAFCFF; border: 1px solid var(--cx-border); padding: 10px; border-radius: 8px; margin-bottom: 10px; }
+  .sn-row select, .sn-row input { margin-top: 0; }
+  .sn-input-wrap { display: flex; gap: 6px; align-items: center; }
+  .sn-input-wrap input { text-transform: uppercase; font-family: monospace; font-weight: 600; letter-spacing: 0.5px; }
+  .sn-dup { border-color: var(--cx-red) !important; background: #FEF2F2 !important; color: #B91C1C !important; }
+  .dup-warning { color: var(--cx-red); font-size: 12px; font-weight: 600; margin-bottom: 10px; }
+
+  /* MODALE CAMERA SCANNER QR / CODE-BARRES */
+  .scanner-modal { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.85); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 16px; }
+  .scanner-box { background: #fff; border-radius: 12px; padding: 18px; width: 100%; max-width: 440px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+  #qrReaderContainer { width: 100%; border-radius: 8px; overflow: hidden; margin: 12px 0; background: #000; }
 
   /* BLOCS PHOTO INDIVIDUELS AVEC CASE N/A */
   .photo-req-block { border: 1px solid var(--cx-border); border-radius: 8px; padding: 14px; margin-bottom: 12px; background: #FAFCFF; transition: 0.2s; }
@@ -164,7 +179,7 @@
   .login-box { max-width: 400px; margin: 50px auto; text-align: center; padding: 28px 22px; border: 1px solid var(--cx-border); border-radius: 10px; background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
   .hidden { display: none !important; }
 
-  /* CONTENEURS D'IMPRESSION DEDIES (MASQUES A L'ECRAN) */
+  /* CONTENEURS D'IMPRESSION DEDIES */
   #printReportView, #printCertificateView { display: none; }
 
   /* OPTIMISATION RESPONSIVE TELEPHONE (MOBILE < 768px) */
@@ -189,6 +204,9 @@
     .grid, .stats-grid, .radio-cards { grid-template-columns: 1fr; gap: 10px; }
     input, select, textarea { font-size: 16px; padding: 10px 12px; }
 
+    /* Ligne numéro de série ergonomique sur téléphone */
+    .sn-row { grid-template-columns: 1fr; gap: 8px; padding: 12px; }
+
     .check-row { flex-direction: column; align-items: stretch; gap: 8px; padding: 12px 6px; }
     .check-row select { width: 100%; font-size: 15px; padding: 8px 10px; }
 
@@ -201,15 +219,12 @@
     .wizard-footer-btns .btn { width: 100%; padding: 12px; }
   }
 
-  /* =========================================================
-     STYLES D'IMPRESSION HAUTE QUALITE (RAPPORT PDF & CERTIFICAT)
-     ========================================================= */
+  /* STYLES D'IMPRESSION HAUTE QUALITE */
   @media print {
     @page { size: A4 portrait; margin: 14mm; }
     body { background: #fff !important; color: #0F172A !important; font-size: 11px; }
-    .topbar, .content-area, .no-print { display: none !important; }
+    .topbar, .content-area, .scanner-modal, .no-print { display: none !important; }
 
-    /* MODE 1 : RAPPORT TECHNIQUE COMPLET */
     body.printing-report #printReportView { display: block !important; }
     body.printing-certificate #printCertificateView { display: block !important; }
 
@@ -232,7 +247,6 @@
     .pill-no { background: #FEE2E2; color: #991B1B; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
     .pill-na { background: #F1F5F9; color: #475569; font-weight: 600; padding: 2px 6px; border-radius: 4px; }
 
-    /* BLOCS PHOTOS RAPPORT PDF */
     .rpt-photo-item { border: 1px solid #CBD5E1; border-radius: 6px; padding: 10px; margin-bottom: 12px; break-inside: avoid; page-break-inside: avoid; background: #fff; }
     .rpt-photo-head { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #E2E8F0; padding-bottom: 5px; margin-bottom: 8px; }
     .rpt-photo-title { font-weight: 700; font-size: 12px; color: var(--cx-navy); }
@@ -241,7 +255,6 @@
     .rpt-photo-box img { width: 100%; height: 210px; object-fit: contain; background: #F8FAFC; display: block; }
     .rpt-photo-cap { font-size: 9.5px; color: var(--cx-muted); margin-top: 3px; }
 
-    /* MODE 2 : CERTIFICAT OFFICIEL DE FIN DE COMMISSIONING (1 PAGE) */
     .cert-frame { border: 4px double var(--cx-navy); padding: 26px 30px; border-radius: 8px; min-height: 255mm; display: flex; flex-direction: column; justify-content: space-between; position: relative; }
     .cert-top { text-align: center; border-bottom: 2px solid var(--cx-navy); padding-bottom: 16px; }
     .cert-logo-txt { font-size: 24px; font-weight: 800; color: var(--cx-navy); letter-spacing: 2px; }
@@ -307,14 +320,12 @@
         <button class="btn btn-outline btn-sm" onclick="logoutAdmin()">Déconnexion</button>
       </div>
 
-      <!-- COMPTEURS SYNTHETIQUES -->
       <div class="stats-grid">
         <div class="stat-card"><div class="stat-label">Total Projets</div><div class="stat-val" id="statTotal">0</div></div>
         <div class="stat-card"><div class="stat-label">En cours / Attente</div><div class="stat-val" style="color:var(--cx-orange);" id="statPending">0</div></div>
         <div class="stat-card"><div class="stat-label">Validés & Terminés</div><div class="stat-val" style="color:var(--cx-green);" id="statDone">0</div></div>
       </div>
 
-      <!-- CREATION NOUVEAU PROJET -->
       <div class="card" style="margin-bottom:20px;">
         <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;">
           <div style="flex:2; min-width:200px;">
@@ -333,7 +344,6 @@
         </div>
       </div>
 
-      <!-- FILTRE & RECHERCHE -->
       <div style="display:flex; gap:10px; margin-bottom:12px; flex-wrap:wrap;">
         <input type="text" id="searchProjectInput" style="flex:2; min-width:200px; margin:0;" placeholder="Rechercher un bateau, un ID ou un installateur..." oninput="filterProjects()">
         <select id="filterStatusSelect" style="flex:1; min-width:160px; margin:0;" onchange="filterProjects()">
@@ -429,12 +439,17 @@
             </div>
           </div>
 
-          <!-- ETAPE 2 : SYSTEM INFO & SERIAL NUMBERS -->
+          <!-- ETAPE 2 : SYSTEM INFO & SERIAL NUMBERS (TABLEAU DYNAMIQUE + SCANNER QR/CODE-BARRES) -->
           <div class="step-section hidden" data-step="2">
             <h2 class="card-title">2. System Info & Serial Numbers</h2>
-            <p class="card-desc">Listez les modèles et numéros de série de chaque composant (moteurs, batteries, afficheurs, chargeurs).</p>
-            <label>Motors, Batteries & Components (Model + Serial Number)</label>
-            <textarea id="serialNumbers" rows="6" placeholder="Ex:&#10;Motor P: 20kW SN 12345&#10;Battery Master: 100Ah SN 67890&#10;Battery Slave 1: 100Ah SN 67891"></textarea>
+            <p class="card-desc">Ajoutez chaque équipement et scannez ou saisissez son numéro de série (détection automatique des doublons).</p>
+
+            <div id="snDupWarning" class="dup-warning hidden">Attention : deux équipements portent le même numéro de série. Vérifiez les cases encadrées en rouge.</div>
+            <div id="serialListContainer"></div>
+
+            <button type="button" class="btn btn-outline btn-sm no-print" style="margin-top:6px;" onclick="addSerialRow()">
+              + Ajouter un composant
+            </button>
           </div>
 
           <!-- ETAPE 3 : INSTALLATION CHECK (1 TO 21) -->
@@ -579,7 +594,6 @@
               </table>
             </div>
 
-            <!-- GRAPHIQUE AUTOMATIQUE PUISSANCE & VITESSE -->
             <div class="chart-box">
               <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
                 <strong style="font-size:13px; color:var(--cx-navy);">Courbes de performance (Puissance & Vitesse moyennes)</strong>
@@ -623,7 +637,7 @@
               </button>
             </div>
 
-            <!-- ENCADRE STRICTEMENT RESERVE A L'ADMINISTRATEUR AUTHENTIFIE (INVISIBLE POUR L'INSTALLATEUR) -->
+            <!-- ENCADRE STRICTEMENT RESERVE A L'ADMINISTRATEUR AUTHENTIFIE -->
             <div class="admin-box hidden" id="adminSection">
               <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
                 <h3 style="margin:0; color:var(--cx-navy);">Validation Interne, Rapport PDF & Certificat Final (Accès Admin)</h3>
@@ -655,7 +669,7 @@
             </div>
           </div>
 
-          <!-- PIED DE NAVIGATION WIZARD (BACK / CONTINUE) -->
+          <!-- PIED DE NAVIGATION WIZARD -->
           <div class="wizard-footer no-print">
             <span style="font-size:12.5px; color:var(--cx-muted);" id="stepIndicatorText">Step 1 of 9</span>
             <div class="wizard-footer-btns">
@@ -670,14 +684,18 @@
 
   </main>
 
-  <!-- =========================================================================
-       CONTENEUR D'IMPRESSION 1 : RAPPORT TECHNIQUE PDF COMPLET (GENERE PAR JS)
-       ========================================================================= -->
-  <div id="printReportView"></div>
+  <!-- MODALE CAMERA SCANNER QR / CODE-BARRES -->
+  <div id="scannerModal" class="scanner-modal hidden no-print">
+    <div class="scanner-box">
+      <h3 style="margin:0; color:var(--cx-navy);">Scanner le numéro de série</h3>
+      <p style="font-size:12.5px; color:var(--cx-muted); margin:4px 0 0 0;">Visez le QR code ou le code-barres de l'étiquette constructeur.</p>
+      <div id="qrReaderContainer"></div>
+      <button type="button" class="btn btn-outline" style="width:100%;" onclick="closeScanner()">Fermer la caméra</button>
+    </div>
+  </div>
 
-  <!-- =========================================================================
-       CONTENEUR D'IMPRESSION 2 : CERTIFICAT OFFICIEL DE FIN DE COMMISSIONING
-       ========================================================================= -->
+  <!-- CONTENEURS D'IMPRESSION PDF -->
+  <div id="printReportView"></div>
   <div id="printCertificateView"></div>
 
 <!-- FIREBASE SDK -->
@@ -716,6 +734,7 @@
   const db = getFirestore(app);
   let projectFiles = [];
   let photoNaState = {};
+  let serialItems = [];
   let allProjectsCache = [];
   let currentProjectName = "";
   let currentProjectStatus = "En cours";
@@ -724,8 +743,8 @@
   let sigInstSigned = false;
   let sigCustSigned = false;
   let hasUnsavedChanges = false;
+  let html5QrScanner = null;
 
-  // Vérification stricte de la session Admin (l'installateur n'a jamais accès au certificat ni à la validation)
   function isStrictAdmin() {
     return sessionStorage.getItem('isAdminAuth') === 'true';
   }
@@ -751,6 +770,123 @@
       return e.returnValue;
     }
   });
+
+  // =========================================================================
+  // ETAPE 2 : GESTION DU TABLEAU DYNAMIQUE DE NUMEROS DE SERIE + SCANNER
+  // =========================================================================
+  const componentTypes = [
+    "Moteur Principal", "Moteur Tribord", "Moteur Bâbord",
+    "Batterie Master", "Batterie Slave 1", "Batterie Slave 2", "Batterie Slave 3", "Batterie Slave 4",
+    "Bus Box / Contrôleur", "Afficheur (Display)", "Manette (Throttle)",
+    "Chargeur AC", "Convertisseur DC-DC", "Régulateur MPPT", "Antenne GPS / 4G", "Autre équipement"
+  ];
+
+  function renderSerialRows() {
+    const container = document.getElementById('serialListContainer');
+    if (!container) return;
+    if (serialItems.length === 0) {
+      serialItems = [
+        { type: "Moteur Principal", model: "", sn: "" },
+        { type: "Batterie Master", model: "", sn: "" }
+      ];
+    }
+
+    // Détection des doublons de S/N
+    const snCounts = {};
+    serialItems.forEach(item => {
+      const cleanSn = (item.sn || "").trim().toUpperCase();
+      if (cleanSn) snCounts[cleanSn] = (snCounts[cleanSn] || 0) + 1;
+    });
+    let hasDuplicate = false;
+
+    container.innerHTML = "";
+    serialItems.forEach((item, idx) => {
+      const cleanSn = (item.sn || "").trim().toUpperCase();
+      const isDup = cleanSn && snCounts[cleanSn] > 1;
+      if (isDup) hasDuplicate = true;
+
+      const optionsHtml = componentTypes.map(t =>
+        `<option value="${t}" ${item.type === t ? 'selected' : ''}>${t}</option>`
+      ).join('');
+
+      container.innerHTML += `
+        <div class="sn-row">
+          <select onchange="updateSerialField(${idx}, 'type', this.value)">${optionsHtml}</select>
+          <input type="text" placeholder="Modèle (ex: X20)" value="${escAttr(item.model)}" oninput="updateSerialField(${idx}, 'model', this.value)">
+          <div class="sn-input-wrap">
+            <input type="text" class="${isDup ? 'sn-dup' : ''}" placeholder="N° de série (S/N)" value="${escAttr(item.sn)}" oninput="updateSerialField(${idx}, 'sn', this.value.toUpperCase())">
+            <button type="button" class="btn btn-outline btn-sm no-print" onclick="openScanner(${idx})" title="Scanner le code-barres / QR code">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="7" y1="12" x2="17" y2="12"/></svg>
+              Scan
+            </button>
+          </div>
+          <button type="button" class="btn btn-red no-print" onclick="removeSerialRow(${idx})" title="Supprimer cette ligne">Retirer</button>
+        </div>`;
+    });
+
+    document.getElementById('snDupWarning').classList.toggle('hidden', !hasDuplicate);
+    renderStepper();
+  }
+
+  function escAttr(str) {
+    return String(str || "").replace(/"/g, "&quot;");
+  }
+
+  window.updateSerialField = (idx, field, val) => {
+    serialItems[idx][field] = val;
+    if (field === 'sn') renderSerialRows();
+    else renderStepper();
+    markUnsaved();
+  };
+
+  window.addSerialRow = () => {
+    serialItems.push({ type: "Batterie Slave 1", model: "", sn: "" });
+    renderSerialRows();
+    markUnsaved();
+  };
+
+  window.removeSerialRow = (idx) => {
+    serialItems.splice(idx, 1);
+    renderSerialRows();
+    markUnsaved();
+  };
+
+  // Scanner QR Code / Code-barres via appareil photo
+  window.openScanner = async (rowIndex) => {
+    const modal = document.getElementById('scannerModal');
+    modal.classList.remove('hidden');
+
+    if (typeof Html5Qrcode === "undefined") {
+      alert("Le module caméra n'est pas disponible hors-ligne. Vous pouvez saisir le numéro manuellement.");
+      closeScanner();
+      return;
+    }
+
+    try {
+      html5QrScanner = new Html5Qrcode("qrReaderContainer");
+      await html5QrScanner.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 250, height: 140 } },
+        (decodedText) => {
+          serialItems[rowIndex].sn = decodedText.trim().toUpperCase();
+          closeScanner();
+          renderSerialRows();
+          markUnsaved();
+        }
+      );
+    } catch (err) {
+      alert("Impossible d'accéder à la caméra : vérifiez les autorisations de votre navigateur.");
+      closeScanner();
+    }
+  };
+
+  window.closeScanner = async () => {
+    if (html5QrScanner) {
+      try { await html5QrScanner.stop(); html5QrScanner.clear(); } catch (e) {}
+      html5QrScanner = null;
+    }
+    document.getElementById('scannerModal').classList.add('hidden');
+  };
 
   // Vérification automatique des seuils d'isolement 96V (< 250 kOhm => alerte rouge)
   window.checkInsulationValues = () => {
@@ -826,7 +962,12 @@
       if (count === 0) return 'empty';
       return count === fields.length ? 'complete' : 'partial';
     }
-    if (stepNum === 2) return val('serialNumbers') ? 'complete' : 'empty';
+    if (stepNum === 2) {
+      const filledRows = serialItems.filter(it => (it.sn || "").trim() !== "");
+      if (filledRows.length === 0) return 'empty';
+      const allFilled = serialItems.every(it => (it.model || "").trim() !== "" && (it.sn || "").trim() !== "");
+      return allFilled ? 'complete' : 'partial';
+    }
     if (stepNum === 3) {
       let count = 0;
       for (let i = 0; i < 21; i++) if (val(`inst_${i}`)) count++;
@@ -1087,7 +1228,7 @@
     });
   }
 
-  // Rendu des 3 blocs Documents (02_Documents)
+  // Rendu des 3 blocs Documents
   const docContainer = document.getElementById('docSectionsContainer');
   docCategories.forEach(cat => {
     docContainer.innerHTML += `
@@ -1243,18 +1384,18 @@
   function computeCompletion(data) {
     const keyFields = [
       'vesselModel', 'location', 'makeBuilder', 'hullType', 'dimensions', 'fittedProp',
-      'origProp', 'installerName', 'installDate', 'serialNumbers', 'ambientTemp', 'ambientHumidity',
+      'origProp', 'installerName', 'installDate', 'ambientTemp', 'ambientHumidity',
       'insulPosVal', 'insulNegVal', 'earthTest', 'seaConditions', 'seaDatePers', 'runA_kw_100', 'runB_kw_100'
     ];
     let filled = 0;
     keyFields.forEach(f => { if (data[f] && String(data[f]).trim() !== "") filled++; });
+    if (data.serialItems && data.serialItems.some(s => (s.sn || "").trim() !== "")) filled += 1;
     if (data.photos && data.photos.length > 0) filled += 2;
     if (data.sigInstaller && data.sigInstaller.length > 2500) filled += 1;
     if (data.sigCustomer && data.sigCustomer.length > 2500) filled += 1;
-    return Math.min(100, Math.round((filled / (keyFields.length + 4)) * 100));
+    return Math.min(100, Math.round((filled / (keyFields.length + 5)) * 100));
   }
 
-  // Envoi par mail du lien installateur
   window.sendProjectEmail = (projName, instName, instEmail, link) => {
     const subject = encodeURIComponent(`COMMISSION-X - Dossier de mise en service : ${projName}`);
     const greeting = instName ? `Bonjour ${instName},` : `Bonjour,`;
@@ -1287,7 +1428,24 @@
     return `<span style="color:#94A3B8;">Non renseigné</span>`;
   }
 
-  // 1. GENERATION DU RAPPORT TECHNIQUE PDF COMPLET (AVEC PHOTOS CLAIRES PAR POINT)
+  function buildSerialTableHtml() {
+    const validRows = serialItems.filter(it => (it.model || "").trim() !== "" || (it.sn || "").trim() !== "");
+    if (validRows.length === 0) return `<div style="padding:8px; color:#64748B;">Aucun numéro de série renseigné</div>`;
+    return `
+      <table class="rpt-table">
+        <thead><tr><th>Composant</th><th>Modèle / Référence</th><th>Numéro de Série (S/N)</th></tr></thead>
+        <tbody>
+          ${validRows.map(it => `
+            <tr>
+              <td><strong>${esc(it.type)}</strong></td>
+              <td>${esc(it.model)}</td>
+              <td style="font-family:monospace; font-weight:700;">${esc(it.sn)}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>`;
+  }
+
+  // 1. GENERATION DU RAPPORT TECHNIQUE PDF COMPLET
   window.printFullReport = () => {
     if (!isStrictAdmin()) return alert("Accès refusé : réservé à l'administrateur.");
     recalcSeaTrial();
@@ -1297,17 +1455,14 @@
     const negVal = g('insulNegVal'), negUnit = g('insulNegUnit') === 'MOhm' ? 'MΩ' : 'kΩ';
     const posK = posVal ? (g('insulPosUnit') === 'MOhm' ? parseFloat(posVal) * 1000 : parseFloat(posVal)) : null;
     const negK = negVal ? (g('insulNegUnit') === 'MOhm' ? parseFloat(negVal) * 1000 : parseFloat(negVal)) : null;
-
     const isValidated = currentProjectStatus.includes("Validé");
 
-    // Construction des lignes de checklists
     const buildCheckRows = (list, prefix) => list.map((txt, i) => `
       <tr>
         <td>${esc(txt)}</td>
         <td style="width:90px; text-align:center;">${formatAnswerPill(g(`${prefix}_${i}`))}</td>
       </tr>`).join('');
 
-    // Construction des 15 rubriques photo classées par point
     const photoSectionsHtml = photoCategories.map(cat => {
       const isNa = !!photoNaState[cat.id];
       const files = projectFiles.filter(f => f.cat === cat.id && f.type === 'image');
@@ -1336,7 +1491,6 @@
         </div>`;
     }).join('');
 
-    // Construction tableau Sea Trial
     const seaRowsHtml = throttleSteps.map(pct => `
       <tr>
         <td><strong>${pct}%</strong></td>
@@ -1382,7 +1536,7 @@
 
       <div class="rpt-sec">
         <div class="rpt-sec-title">2. Équipements & Numéros de Série</div>
-        <div style="border:1px solid #CBD5E1; padding:8px 10px; border-radius:6px; white-space:pre-wrap; background:#FAFCFF;">${esc(g('serialNumbers'))}</div>
+        ${buildSerialTableHtml()}
       </div>
 
       <div class="rpt-sec">
@@ -1397,7 +1551,7 @@
       <div class="rpt-sec">
         <div class="rpt-sec-title">4. Mesures Électriques (Isolement 96V, Terre & CAN)</div>
         <div class="rpt-grid">
-          <div class="rpt-field"><strong>Température ambiante :</strong> ${posVal || g('ambientTemp') ? esc(g('ambientTemp')) + ' °C' : '-'}</div>
+          <div class="rpt-field"><strong>Température ambiante :</strong> ${g('ambientTemp') ? esc(g('ambientTemp')) + ' °C' : '-'}</div>
           <div class="rpt-field"><strong>Humidité ambiante :</strong> ${g('ambientHumidity') ? esc(g('ambientHumidity')) + ' %' : '-'}</div>
           <div class="rpt-field"><strong>Isolement 96V (+) / Terre :</strong> ${posVal ? esc(posVal + ' ' + posUnit) + (posK < 250 ? ' <span class="pill-no">DÉFAUT &lt; 250kΩ</span>' : ' <span class="pill-yes">OK</span>') : '-'}</div>
           <div class="rpt-field"><strong>Isolement 96V (-) / Terre :</strong> ${negVal ? esc(negVal + ' ' + negUnit) + (negK < 250 ? ' <span class="pill-no">DÉFAUT &lt; 250kΩ</span>' : ' <span class="pill-yes">OK</span>') : '-'}</div>
@@ -1480,7 +1634,6 @@
     const negVal = g('insulNegVal'), negUnit = g('insulNegUnit') === 'MOhm' ? 'MΩ' : 'kΩ';
     const validDate = g('adminDate') || new Date().toISOString().split('T')[0];
 
-    // Récupération des performances max relevées à 100%
     const maxSpeed = document.getElementById('avg_kts_100') ? document.getElementById('avg_kts_100').innerText : "-";
     const maxPower = document.getElementById('avg_kw_100') ? document.getElementById('avg_kw_100').innerText : "-";
     const sigInstUrl = document.getElementById('sigInstaller').toDataURL();
@@ -1516,7 +1669,7 @@
 
           <div class="cert-box">
             <div class="cert-box-title">2. Équipements & Numéros de Série Certifiés</div>
-            <div style="font-size:11.5px; white-space:pre-wrap; line-height:1.45;">${esc(g('serialNumbers'))}</div>
+            ${buildSerialTableHtml()}
           </div>
 
           <div class="cert-box">
@@ -1609,7 +1762,11 @@
       status: "En attente Installateur",
       driveFolderUrl: driveUrl,
       photos: [],
-      photoNaState: {}
+      photoNaState: {},
+      serialItems: [
+        { type: "Moteur Principal", model: "", sn: "" },
+        { type: "Batterie Master", model: "", sn: "" }
+      ]
     });
 
     document.getElementById('newProjectName').value = "";
@@ -1721,7 +1878,6 @@
     document.getElementById('projectForm').classList.remove('hidden');
     document.getElementById('topSaveBtn').classList.remove('hidden');
 
-    // Affichage exclusif des outils Admin (Rapport PDF & Certificat) uniquement si authentifié
     if (isAuthAdmin) {
       document.getElementById('adminSection').classList.remove('hidden');
       document.getElementById('backAdminBtn').classList.remove('hidden');
@@ -1762,6 +1918,21 @@
         });
       }
 
+      // Chargement des numéros de série structurés (avec compatibilité anciens dossiers texte)
+      if (Array.isArray(data.serialItems) && data.serialItems.length > 0) {
+        serialItems = data.serialItems;
+      } else if (data.serialNumbers && data.serialNumbers.trim() !== "") {
+        serialItems = data.serialNumbers.split('\n').filter(l => l.trim() !== "").map(line => ({
+          type: "Autre équipement", model: "", sn: line.trim()
+        }));
+      } else {
+        serialItems = [
+          { type: "Moteur Principal", model: "", sn: "" },
+          { type: "Batterie Master", model: "", sn: "" }
+        ];
+      }
+      renderSerialRows();
+
       photoNaState = data.photoNaState || {};
       checkInsulationValues();
       recalcSeaTrial();
@@ -1790,6 +1961,7 @@
     const payload = {
       photos: cleanPhotos,
       photoNaState: photoNaState,
+      serialItems: serialItems,
       driveFolderUrl: currentDriveFolderUrl
     };
     if (newStatus) {
@@ -1798,7 +1970,6 @@
     }
     document.querySelectorAll('input, select, textarea').forEach(el => {
       if(el.id && el.type !== 'file' && el.type !== 'checkbox' && el.id !== 'adminPwdInput') {
-        // Un installateur non authentifié ne peut jamais modifier les champs Admin
         if (!isStrictAdmin() && (el.id === 'adminNotes' || el.id === 'adminDate')) return;
         payload[el.id] = el.value;
       }
