@@ -79,7 +79,7 @@
   .photo-req-block.req-na { border-left: 4px solid #94A3B8; background: #F8FAFC; opacity: 0.85; }
   .photo-req-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
   .photo-req-title { font-weight: 700; font-size: 13.5px; color: var(--cx-navy); }
-  .photo-req-hint { font-size: 12px; color: var(--cx-muted); margin-top: 2px; }
+  .photo-req-hint { font-size: 12px; color: var(--cx-muted); margin-top: 3px; line-height: 1.35; }
   .na-toggle { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: #475569; background: #E2E8F0; padding: 5px 10px; border-radius: 6px; cursor: pointer; user-select: none; flex-shrink: 0; margin: 0; }
   .na-toggle input { width: auto; margin: 0; cursor: pointer; }
   .photo-req-block.req-na .na-toggle { background: var(--cx-navy); color: #fff; }
@@ -468,10 +468,10 @@
             </div>
           </div>
 
-          <!-- ETAPE 5 : 17 RUBRIQUES PHOTOS OBLIGATOIRES + CASE N/A -->
+          <!-- ETAPE 5 : 15 RUBRIQUES PHOTOS OBLIGATOIRES + CASE N/A -->
           <div class="step-section hidden" data-step="5">
-            <h2 class="card-title">5. Required Commissioning Photos (17 points)</h2>
-            <p class="card-desc">Ajoutez une photo par rubrique (archivée dans <strong>01_Photos</strong> sur Drive). Si un élément n'équipe pas le bateau, cochez <strong>N/A</strong>.</p>
+            <h2 class="card-title">5. Required Commissioning Photos (15 points)</h2>
+            <p class="card-desc">Ajoutez les photos demandées par rubrique (archivées dans <strong>01_Photos</strong> sur Drive). Si un élément ne concerne pas ce bateau, cochez <strong>N/A</strong>.</p>
             <div id="photoSectionsContainer"></div>
           </div>
 
@@ -729,25 +729,23 @@
     renderStepper();
   };
 
-  // 17 RUBRIQUES PHOTOS PRECISES & OBLIGATOIRES (AVEC CASE N/A)
+  // 15 RUBRIQUES PHOTOS ORDONNEES & STRICTES (AVEC CASE N/A)
   const photoCategories = [
-    { id: "boat_side", drivePrefix: "01_Bateau_Profil", label: "1. Vues extérieures du bateau (Profil bâbord / tribord)", hint: "Vue latérale d'ensemble du navire" },
-    { id: "boat_stern", drivePrefix: "02_Bateau_Arriere", label: "2. Vue arrière du bateau & Tableau arrière", hint: "Vue de l'arrière du bateau et du tableau arrière" },
-    { id: "helm_station", drivePrefix: "03_Poste_Pilotage", label: "3. Poste de pilotage (Console, manette & écran)", hint: "Vue d'ensemble du poste de barre et des commandes" },
-    { id: "device_list", drivePrefix: "04_Device_List_Ecran", label: "4. Device List sur l'écran système", hint: "Photo nette de la liste des équipements et numéros de série affichés" },
-    { id: "motor_main", drivePrefix: "05_Moteur_Principal", label: "5. Moteur principal & Supports / Silentblocs", hint: "Vue générale du moteur installé et de ses fixations" },
-    { id: "motor_plate", drivePrefix: "06_Plaque_Moteur", label: "6. Plaque signalétique moteur (Numéro de série)", hint: "Gros plan lisible sur l'étiquette constructeur du moteur" },
-    { id: "mech_coupling", drivePrefix: "07_Accouplement_Mecanique", label: "7. Accouplement mécanique / Tourteau / Alignement arbre", hint: "Liaison mécanique moteur-arbre, accouplement souple ou presse-étoupe" },
-    { id: "prop_drive", drivePrefix: "08_Helice_Saildrive_Pod", label: "8. Hélice / Saildrive / Pod / Embase", hint: "Vue de la propulsion immergée, hélice et anodes" },
-    { id: "hv_crimping", drivePrefix: "09_Sertissage_Cables_96V", label: "9. Sertissage des câbles puissance 96V", hint: "Gros plan sur les cosses serties et gaines thermo haute tension" },
-    { id: "box_96v_ext", drivePrefix: "10_BusBox_96V_Exterieur", label: "10. Bus Box / Boîte de distribution 96V DC (Extérieur)", hint: "Emplacement, fixation et presse-étoupes de la boîte 96V" },
-    { id: "box_96v_int", drivePrefix: "11_BusBox_96V_Interieur", label: "11. Intérieur de la Bus Box / Boîte 96V DC", hint: "Capot ouvert montrant les connexions internes, barres et fusibles HV" },
-    { id: "bat_96v", drivePrefix: "12_Batteries_96V", label: "12. Parc batteries principal (96V) & Arrimage", hint: "Vue d'ensemble des batteries haute tension et de leur fixation" },
-    { id: "bat_12v", drivePrefix: "13_Batterie_12V_Fusible", label: "13. Batterie auxiliaire 12V & Fusible", hint: "Batterie 12V dédiée au contrôle et sa protection fusible" },
-    { id: "chargers_dcdc", drivePrefix: "14_Chargeurs_DCDC", label: "14. Chargeur(s) & Convertisseur(s) DC-DC", hint: "Vue d'ensemble des chargeurs et convertisseurs installés" },
-    { id: "box_220v_ext", drivePrefix: "15_Boite_220V_Exterieur", label: "15. Boîte de distribution 220V AC (Extérieur)", hint: "Coffret 220V AC, disjoncteurs différentiels et prise de quai" },
-    { id: "box_220v_int", drivePrefix: "16_Boite_220V_Interieur", label: "16. Intérieur de la boîte de distribution 220V AC", hint: "Capot ouvert montrant le câblage interne Phase / Neutre / Terre" },
-    { id: "earth_can", drivePrefix: "17_Terre_et_Reseau_CAN", label: "17. Busbar de terre, liaison batteries & Nœuds CAN", hint: "Barre de terre, mise à la terre des batteries, tés et terminaisons CAN" }
+    { id: "boat_views", drivePrefix: "01_Vues_Exterieures_Bateau", label: "1. Vues extérieures du bateau", hint: "Vue de face, vue arrière, vue de côté et vue à 45°" },
+    { id: "helm_station", drivePrefix: "02_Poste_de_Pilotage", label: "2. Poste de pilotage", hint: "Vue d'ensemble du poste de barre et des commandes" },
+    { id: "device_list", drivePrefix: "03_Device_List_Ecran", label: "3. Device List sur l'écran système", hint: "Photo nette de la liste des équipements et numéros de série affichés" },
+    { id: "motor_outboard", drivePrefix: "04_Moteur_Hors_Bord", label: "4. Moteur hors-bord", hint: "Vue moteur, fixation et étanchéité de la gaine" },
+    { id: "motor_inboard", drivePrefix: "05_Moteur_Inboard", label: "5. Moteur inboard", hint: "Châssis, fixation, accouplement d'arbre, hélice, système de refroidissement (filtres et vanne d'isolement)" },
+    { id: "motor_pod", drivePrefix: "06_Moteur_Pod_Saildrive", label: "6. Moteur Pod / Saildrive", hint: "Châssis Pod / Saildrive, module de direction (Steering) et hélice" },
+    { id: "hv_crimping", drivePrefix: "07_Sertissage_Cables_96V", label: "7. Sertissage des câbles puissance 96V", hint: "Gros plan sur les cosses serties et gaines thermo haute tension" },
+    { id: "box_96v", drivePrefix: "08_BusBox_96V_Int_Ext", label: "8. Bus Box / Boîte 96V DC (Intérieur & Extérieur)", hint: "Vue capot fermé et capot ouvert montrant les connexions internes, barres et fusibles HV" },
+    { id: "bat_isolator", drivePrefix: "09_Isolateur_Batterie", label: "9. Isolateur batterie (Vue externe & interne)", hint: "Vue externe du coupe-batterie et vue interne des raccordements" },
+    { id: "bat_96v", drivePrefix: "10_Parc_Batteries_96V", label: "10. Parc batteries principal (96V) & Arrimage", hint: "Vue d'ensemble des batteries haute tension et de leur fixation" },
+    { id: "bat_12v", drivePrefix: "11_Batterie_12V_Fusible", label: "11. Batterie auxiliaire 12V & Fusible", hint: "Batterie 12V dédiée au contrôle et sa protection fusible" },
+    { id: "chargers_dcdc", drivePrefix: "12_Chargeurs_DCDC_MPPT", label: "12. Chargeur(s), Convertisseur(s) DC-DC & MPPT", hint: "Vue d'ensemble des chargeurs, convertisseurs DC-DC et régulateurs MPPT installés" },
+    { id: "box_220v", drivePrefix: "13_Boite_220V_AC_Ext_Int", label: "13. Boîte de distribution 220V AC (Extérieur & Intérieur)", hint: "Coffret 220V AC externe, disjoncteurs différentiels, prise de quai et photo interne" },
+    { id: "can_network", drivePrefix: "14_Reseau_Noeuds_CAN_GPS_4G", label: "14. Réseau & Nœuds CAN", hint: "Nœuds, tés et terminaisons CAN, antennes GPS et 4G" },
+    { id: "earthing_sys", drivePrefix: "15_Systeme_Mise_a_la_Terre", label: "15. Système de mise à la terre", hint: "Mise à la terre batterie, mise à la terre moteur, mise à la terre devices et plaque de mise à la terre" }
   ];
 
   const docCategories = [
@@ -760,7 +758,7 @@
   // Etapes du Wizard
   const stepNames = [
     "Vessel & Info", "System & S/N", "Install Check", "Appendices 1-2",
-    "Photos (17)", "Plans & Manual", "Power-On Check", "Sea Trial", "Handover & Sign"
+    "Photos (15)", "Plans & Manual", "Power-On Check", "Sea Trial", "Handover & Sign"
   ];
 
   function getStepStatus(stepNum) {
@@ -786,7 +784,6 @@
       return count === fields.length ? 'complete' : 'partial';
     }
     if (stepNum === 5) {
-      // Chaque rubrique photo est validée si elle contient >= 1 photo OU si elle est cochée N/A
       const completedCount = photoCategories.filter(c => photoNaState[c.id] || projectFiles.some(f => f.cat === c.id)).length;
       if (completedCount === 0) return 'empty';
       return completedCount === photoCategories.length ? 'complete' : 'partial';
@@ -983,7 +980,7 @@
   };
   recalcSeaTrial();
 
-  // Rendu des 17 blocs Photos avec case N/A
+  // Rendu des 15 blocs Photos avec case N/A
   const photoContainer = document.getElementById('photoSectionsContainer');
   photoCategories.forEach(cat => {
     photoContainer.innerHTML += `
@@ -1132,7 +1129,7 @@
   function renderGalleries() {
     allCategories.forEach(cat => { document.getElementById(`gal_${cat.id}`).innerHTML = ""; });
     projectFiles.forEach((p, idx) => {
-      const target = document.getElementById(`gal_${p.cat}`) || document.getElementById('gal_boat_side');
+      const target = document.getElementById(`gal_${p.cat}`) || document.getElementById('gal_boat_views');
       const imgSrc = p.thumb || p.directImgUrl || "";
       const linkAttr = p.fileUrl && p.fileUrl !== "#" ? `href="${p.fileUrl}" target="_blank"` : ``;
       const statusBadge = p.uploading ? `<div style="font-size:10px; color:#D97706;">En attente Drive</div>` : `<div style="font-size:10px; color:#28A745;">Sur Drive (HD)</div>`;
