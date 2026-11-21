@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ePropulsion - Commissioning Form</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #f4f6f9; color: #222; margin: 0; padding: 15px; }
+  .container { max-width: 850px; margin: auto; background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+  h1, h2 { color: #004b87; border-bottom: 2px solid #004b87; padding-bottom: 5px; margin-top: 25px; }
+  h1 { margin-top: 0; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px; }
+  @media(max-width: 600px){ .grid { grid-template-columns: 1fr; } }
+  label { font-weight: bold; font-size: 13px; display: block; margin-top: 10px; }
+  input, select, textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; margin-top: 4px; font-size: 14px; }
+  .check-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #eee; font-size: 14px; }
+  .check-row select { width: 90px; }
+  canvas { border: 1px dashed #666; border-radius: 4px; width: 100%; height: 130px; touch-action: none; background: #fafafa; }
+  .btn { background: #004b87; color: #fff; border: none; padding: 12px 20px; border-radius: 5px; cursor: pointer; font-size: 15px; margin-top: 15px; }
+  .btn:hover { background: #003666; }
+  .btn-green { background: #1e7e34; }
+  .btn-gray { background: #6c757d; padding: 6px 12px; font-size: 12px; margin-top: 5px; }
+  .btn-red { background: #c82333; padding: 6px 12px; font-size: 12px; margin-top: 5px; }
+  .admin-box { background: #eef5fc; border: 2px solid #004b87; padding: 15px; border-radius: 6px; margin-top: 25px; }
+  .login-box { max-width: 400px; margin: 60px auto; text-align: center; padding: 30px; border: 1px solid #ddd; border-radius: 8px; background: #fafafa; }
+  .hidden { display: none !important; }
+  table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+  th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 13px; }
+  .photo-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin-top: 10px; }
+  .photo-card { border: 1px solid #ddd; padding: 5px; border-radius: 4px; text-align: center; background: #fafafa; }
+  .photo-card img { width: 100%; height: 140px; object-fit: cover; border-radius: 3px; }
+  @media print {
+    .no-print { display: none !important; }
+    .container { box-shadow: none; padding: 0; max-width: 100%; }
+    .photo-card img { height: 180px; }
+    h2 { page-break-after: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ECRAN DE CONNEXION ADMIN -->
+  <div id="loginScreen" class="login-box hidden no-print">
+    <h2>Accès Administration</h2>
+    <p style="font-size:13px; color:#555;">Veuillez saisir votre mot de passe pour gérer les formulaires.</p>
+    <input type="password" id="adminPwdInput" placeholder="Mot de passe Admin" onkeypress="if(event.key==='Enter') checkAdminLogin()">
+    <button class="btn" style="width:100%;" onclick="checkAdminLogin()">Se connecter</button>
+  </div>
+
+  <!-- VUE ADMIN (LISTE DES PROJETS & CREATION DE LIENS) -->
+  <div id="adminDashboard" class="hidden no-print">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <h1>Gestion des Commissioning</h1>
+      <button class="btn btn-gray" onclick="logoutAdmin()">Déconnexion</button>
+    </div>
+    <div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;">
+      <input type="text" id="newProjectName" style="flex:2; min-width:200px;" placeholder="Nom du bateau / Client (ex: Oceanis 38 - M. Martin)">
+      <input type="text" id="newInstallerName" style="flex:1; min-width:150px;" placeholder="Nom de l'installateur">
+      <button class="btn" style="margin:0;" onclick="createProject()">+ Créer Lien</button>
+    </div>
+    <table>
+      <thead><tr><th>Projet / Bateau</th><th>Installateur</th><th>Statut</th><th>Actions</th></tr></thead>
+      <tbody id="projectList"></tbody>
+    </table>
+  </div>
+
+  <!-- VUE FORMULAIRE PROJET (INSTALLATEUR + ADMIN) -->
+  <div id="projectForm" class="hidden">
+    <button class="btn btn-gray no-print" id="backAdminBtn" onclick="goAdmin()">← Retour liste projets</button>
+    <h1>ePropulsion Installation & Commissioning Form</h1>
+    <p><strong>Projet :</strong> <span id="displayProjName"></span> | <strong>ID :</strong> <span id="displayProjId"></span></p>
+
+    <h2>1. Vessel & Installation Info</h2>
+    <div class="grid">
+      <div><label>Vessel Model</label><input type="text" id="vesselModel"></div>
+      <div><label>Location</label><input type="text" id="location"></div>
+      <div><label>Make / Builder</label><input type="text" id="makeBuilder"></div>
+      <div><label>Hull Type</label><input type="text" id="hullType"></div>
+      <div><label>LOA / LWL / Beam / Draught / Displacement</label><input type="text" id="dimensions"></div>
+      <div><label>Drive System</label><select id="driveSystem"><option>Shaft</option><option>Saildrive</option><option>Pod</option></select></div>
+      <div><label>Fitted Prop (Size & Type)</label><input type="text" id="fittedProp"></div>
+      <div><label>Original Propulsion System</label><input type="text" id="origProp"></div>
+      <div><label>Installer Name</label><input type="text" id="installerName"></div>
+      <div><label>Installation Date</label><input type="date" id="installDate"></div>
+    </div>
+
+    <h2>2. System Info & Serial Numbers</h2>
+    <label>Motors, Batteries & Components (Model + Serial Number)</label>
+    <textarea id="serialNumbers" rows="4" placeholder="Ex: Motor P: X20 SN 12345 / Battery 1: G102-100 SN 67890..."></textarea>
+
+    <h2>3. Installation Check (1 to 21)</h2>
+    <div id="installChecksContainer"></div>
+    <label>Installation Comments</label><textarea id="installComments" rows="2"></textarea>
+
+    <h2>4. Appendices 1 & 2 (Insulation, Earth & CAN)</h2>
+    <div class="grid">
+      <div><label>Temp (°C) & Humidity (%)</label><input type="text" id="tempHumidity"></div>
+      <div><label>Insulation Test (> 125 kΩ)</label><input type="text" id="insulationTest" placeholder="YES / Valeur kΩ"></div>
+      <div><label>Earth Resistance (< 1 Ω)</label><input type="text" id="earthTest" placeholder="YES / Valeur Ω"></div>
+      <div><label>EPCAN Termination (120Ω / 360Ω)</label><select id="canTest"><option>YES</option><option>NO</option></select></div>
+    </div>
+
+    <h2>5. Power-On & Operation Check (1 to 16)</h2>
+    <div id="powerChecksContainer"></div>
+    <label>Power-On Comments</label><textarea id="powerComments" rows="2"></textarea>
+
+    <h2>6. Sea Trial (Runs A & B - 0% to 100%)</h2>
+    <div class="grid">
+      <div><label>Location / Wind (Kts) / Tide / Water Temp</label><input type="text" id="seaConditions"></div>
+      <div><label>Sea Trial Date & Personnel</label><input type="text" id="seaDatePers"></div>
+      <div><label>Motor Model</label><select id="seaModel"><option>P12 / X12</option><option>P20 / X20 / I20</option><option>X40 / I40</option></select></div>
+    </div>
+    <label>Run A & Run B (180° return) - Power (kW) & Speed (Kts) from 0% to 100%</label>
+    <textarea id="seaData" rows="4" placeholder="Ex: Run A: 20% = 4kW / 3.5 Kts | 50% = 10kW / 5.8 Kts | 100% = 20kW / 7.5 Kts..."></textarea>
+
+    <h2>7. Required Commissioning Photos</h2>
+    <p style="font-size:12px; color:#555;" class="no-print">
+      Photos requises : Vues bateau (avant/côté/arrière), Hélice/Saildrive, Batteries & connexions, Écran (liste N° série), Moteur principal, Manette, Chargeur/DCDC, Câblage 96V/12V/Terre/eSSA.
+    </p>
+    <div class="no-print">
+      <input type="file" id="photoInput" accept="image/*" multiple onchange="handlePhotos(this.files)">
+    </div>
+    <div id="photoGallery" class="photo-gallery"></div>
+
+    <h2>8. Handover & Signatures</h2>
+    <div id="handoverChecksContainer"></div>
+    <label>Customer Comments</label><textarea id="customerComments" rows="2"></textarea>
+    <div class="grid">
+      <div>
+        <label>Installer Signature</label>
+        <canvas id="sigInstaller"></canvas>
+        <button type="button" class="btn btn-gray no-print" onclick="clearCanvas('sigInstaller')">Effacer</button>
+      </div>
+      <div>
+        <label>Customer Signature</label>
+        <canvas id="sigCustomer"></canvas>
+        <button type="button" class="btn btn-gray no-print" onclick="clearCanvas('sigCustomer')">Effacer</button>
+      </div>
+    </div>
+
+    <div class="no-print">
+      <button class="btn" onclick="saveForm('En cours / Rempli Installateur')">💾 Sauvegarder mon avancement</button>
+    </div>
+
+    <!-- PARTIE RESERVEE ADMIN -->
+    <div class="admin-box" id="adminSection">
+      <h2>Validation Interne (Partie réservée Admin)</h2>
+      <label>Notes de vérification interne</label>
+      <textarea id="adminNotes" rows="3"></textarea>
+      <label>Date de validation</label>
+      <input type="date" id="adminDate">
+      <div class="no-print">
+        <button class="btn btn-green" onclick="saveForm('Validé & Terminé')">✅ Valider le dossier</button>
+        <button class="btn" onclick="window.print()">📄 Générer / Enregistrer en PDF</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FIREBASE SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, doc, setDoc, getDoc, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  // 1. DEFINISSEZ VOTRE MOT DE PASSE ADMIN ICI
+  const ADMIN_PASSWORD = "ChangezMoi2026";
+
+  // 2. COLLEZ VOTRE CONFIGURATION FIREBASE ICI
+  const firebaseConfig = {
+    apiKey: "VOTRE_API_KEY",
+    authDomain: "VOTRE_PROJET.firebaseapp.com",
+    projectId: "VOTRE_PROJET_ID",
+    storageBucket: "VOTRE_PROJET.appspot.com",
+    messagingSenderId: "VOTRE_SENDER_ID",
+    appId: "VOTRE_APP_ID"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  let projectPhotos = [];
+
+  // Listes des points de contrôle du PDF ePropulsion
+  const installItems = [
+    "1. Components match packing list", "2. Installed in clean dry area", "3. Structurally safe mounting",
+    "4. No potential leaks", "5. Oil / Coolant levels match", "6. Power cables wired per drawing",
+    "7. Communication cables connected", "8. Connections torqued", "9. Propeller & Anode fitted",
+    "10. Adequate ventilation", "11. Insulation/ground tests pass", "12. EPCAN terminator check",
+    "13. No drop cables extended", "14. Battery CAN 2x terminators", "15. Battery CAN parallel cables",
+    "16. 12V battery normal voltage", "17. Shaft aligned (I series)", "18. Cable bend < 45 deg",
+    "19. Motor proper height (X series)", "20. Twin motors distance (X series)", "21. Steering/Trim space (X series)"
+  ];
+  const powerItems = [
+    "1. Isolator & breakers ON", "2. No display errors", "3. Components visible in Display",
+    "4. Latest software version", "5. GPS & 4G functioning", "6. Cooling system operational",
+    "7. F/N/R shift operational", "8. Kill switch works", "9. Shore power charging",
+    "10. Solar/Gen charging", "11. DCDC power operational", "12. Fan / Water pump operational",
+    "13. Steer/Trim max limit", "14. Steer/Trim full range (X)", "15. Turbo operation", "16. ePropulsion Link operational"
+  ];
+  const handoverItems = [
+    "1. Components explained", "2. Operation & maintenance explained", "3. Troubleshooting explained",
+    "4. Manuals delivered", "5. Warranty policy explained"
+  ];
+
+  function renderChecks(list, containerId, prefix) {
+    const el = document.getElementById(containerId);
+    list.forEach((text, i) => {
+      el.innerHTML += `<div class="check-row"><span>${text}</span><select id="${prefix}_${i}"><option value="YES">YES</option><option value="NO">NO</option><option value="N/A">N/A</option></select></div>`;
+    });
+  }
+  renderChecks(installItems, "installChecksContainer", "inst");
+  renderChecks(powerItems, "powerChecksContainer", "pwr");
+  renderChecks(handoverItems, "handoverChecksContainer", "hnd");
+
+  // Compression et gestion des photos
+  window.handlePhotos = async (files) => {
+    for (let file of files) {
+      const compressed = await compressImage(file, 800, 0.65);
+      projectPhotos.push({ name: file.name, data: compressed });
+    }
+    renderGallery();
+  };
+
+  function compressImage(file, maxWidth, quality) {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let w = img.width, h = img.height;
+          if (w > maxWidth) { h = Math.round((h * maxWidth) / w); w = maxWidth; }
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function renderGallery() {
+    const gal = document.getElementById('photoGallery');
+    gal.innerHTML = "";
+    projectPhotos.forEach((p, idx) => {
+      gal.innerHTML += `
+        <div class="photo-card">
+          <img src="${p.data}" alt="Photo ${idx+1}">
+          <div style="font-size:11px; margin-top:4px; overflow:hidden; text-overflow:ellipsis;">${p.name}</div>
+          <button type="button" class="btn btn-red no-print" onclick="removePhoto(${idx})">Supprimer</button>
+        </div>`;
+    });
+  }
+  window.removePhoto = (idx) => { projectPhotos.splice(idx, 1); renderGallery(); };
+
+  // Gestion des signatures au doigt
+  ['sigInstaller', 'sigCustomer'].forEach(id => {
+    const canvas = document.getElementById(id);
+    const ctx = canvas.getContext('2d');
+    let drawing = false;
+    const getPos = e => {
+      const r = canvas.getBoundingClientRect();
+      const t = e.touches ? e.touches[0] : e;
+      return { x: (t.clientX - r.left) * (canvas.width / r.width), y: (t.clientY - r.top) * (canvas.height / r.height) };
+    };
+    const start = e => { drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); };
+    const move = e => { if(!drawing) return; e.preventDefault(); const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); };
+    const end = () => { drawing = false; };
+    canvas.addEventListener('mousedown', start); canvas.addEventListener('mousemove', move); window.addEventListener('mouseup', end);
+    canvas.addEventListener('touchstart', start); canvas.addEventListener('touchmove', move); canvas.addEventListener('touchend', end);
+  });
+  window.clearCanvas = id => { const c = document.getElementById(id); c.getContext('2d').clearRect(0, 0, c.width, c.height); };
+
+  // Authentification Admin
+  window.checkAdminLogin = () => {
+    const pwd = document.getElementById('adminPwdInput').value;
+    if (pwd === ADMIN_PASSWORD) {
+      sessionStorage.setItem('isAdminAuth', 'true');
+      initApp();
+    } else {
+      alert("Mot de passe incorrect.");
+    }
+  };
+  window.logoutAdmin = () => { sessionStorage.removeItem('isAdminAuth'); location.reload(); };
+
+  // Navigation et chargement des données
+  const params = new URLSearchParams(window.location.search);
+  const projectId = params.get('id');
+
+  window.createProject = async () => {
+    const name = document.getElementById('newProjectName').value;
+    const inst = document.getElementById('newInstallerName').value;
+    if(!name) return alert("Entrez un nom de projet");
+    const id = "PROJ-" + Date.now().toString().slice(-5);
+    await setDoc(doc(db, "projects", id), { projectName: name, installerName: inst, status: "En attente Installateur", photos: [] });
+    document.getElementById('newProjectName').value = "";
+    document.getElementById('newInstallerName').value = "";
+    loadDashboard();
+  };
+
+  window.deleteProject = async (id) => {
+    if(confirm("Supprimer définitivement ce projet ?")) {
+      await deleteDoc(doc(db, "projects", id));
+      loadDashboard();
+    }
+  };
+
+  async function loadDashboard() {
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('adminDashboard').classList.remove('hidden');
+    const tbody = document.getElementById('projectList');
+    tbody.innerHTML = "<tr><td colspan='4'>Chargement...</td></tr>";
+    const snap = await getDocs(collection(db, "projects"));
+    tbody.innerHTML = "";
+    const baseUrl = window.location.href.split('?')[0];
+    snap.forEach(d => {
+      const data = d.data();
+      const linkInst = `${baseUrl}?id=${d.id}`;
+      const linkAdmin = `${baseUrl}?id=${d.id}&admin=1`;
+      tbody.innerHTML += `<tr>
+        <td><strong>${data.projectName}</strong><br><small>${d.id}</small></td>
+        <td>${data.installerName || '-'}</td>
+        <td>${data.status || 'Nouveau'}</td>
+        <td>
+          <button class="btn btn-gray" onclick="navigator.clipboard.writeText('${linkInst}'); alert('Lien installateur copié !')">📋 Copier lien</button>
+          <a href="${linkAdmin}" class="btn btn-gray" style="text-decoration:none;">✏️ Ouvrir</a>
+          <button class="btn btn-red" onclick="deleteProject('${d.id}')">🗑️</button>
+        </td>
+      </tr>`;
+    });
+  }
+
+  async function loadProject(id, isAuthAdmin) {
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('adminDashboard').classList.add('hidden');
+    document.getElementById('projectForm').classList.remove('hidden');
+    if(!isAuthAdmin) {
+      document.getElementById('adminSection').classList.add('hidden');
+      document.getElementById('backAdminBtn').classList.add('hidden');
+    }
+    const snap = await getDoc(doc(db, "projects", id));
+    if(snap.exists()) {
+      const data = snap.data();
+      document.getElementById('displayProjName').innerText = data.projectName || "";
+      document.getElementById('displayProjId').innerText = id;
+      Object.keys(data).forEach(k => {
+        const el = document.getElementById(k);
+        if(el && el.tagName !== 'CANVAS' && el.type !== 'file') el.value = data[k];
+      });
+      if(data.photos) { projectPhotos = data.photos; renderGallery(); }
+      ['sigInstaller', 'sigCustomer'].forEach(sigId => {
+        if(data[sigId]) {
+          const img = new Image();
+          img.onload = () => document.getElementById(sigId).getContext('2d').drawImage(img, 0, 0);
+          img.src = data[sigId];
+        }
+      });
+    } else {
+      alert("Projet introuvable. Vérifiez le lien.");
+    }
+  }
+
+  window.saveForm = async (newStatus) => {
+    const payload = { status: newStatus, photos: projectPhotos };
+    document.querySelectorAll('input, select, textarea').forEach(el => {
+      if(el.id && el.type !== 'file' && el.id !== 'adminPwdInput') payload[el.id] = el.value;
+    });
+    payload.sigInstaller = document.getElementById('sigInstaller').toDataURL();
+    payload.sigCustomer = document.getElementById('sigCustomer').toDataURL();
+    try {
+      await setDoc(doc(db, "projects", projectId), payload, { merge: true });
+      alert("Enregistré avec succès !");
+    } catch (e) {
+      alert("Erreur lors de la sauvegarde (vérifiez le poids des photos ou la connexion) : " + e.message);
+    }
+  };
+
+  window.goAdmin = () => { window.location.href = window.location.href.split('?')[0]; };
+
+  function initApp() {
+    const isAuthAdmin = sessionStorage.getItem('isAdminAuth') === 'true';
+    if (projectId) {
+      loadProject(projectId, isAuthAdmin);
+    } else if (isAuthAdmin) {
+      loadDashboard();
+    } else {
+      document.getElementById('loginScreen').classList.remove('hidden');
+    }
+  }
+
+  initApp();
+</script>
+</body>
+</html>
