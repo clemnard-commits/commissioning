@@ -4,8 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ePropulsion - Commissioning Form</title>
-<!-- Librairie JSZip pour le téléchargement groupé des photos et documents -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
   body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f4f8; color: #222; margin: 0; padding: 15px; }
   .container { max-width: 960px; margin: auto; background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
@@ -19,10 +17,10 @@
   .check-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #eee; font-size: 14px; }
   .check-row select { width: 90px; }
   canvas { border: 1px dashed #666; border-radius: 4px; width: 100%; height: 130px; touch-action: none; background: #fafafa; }
-  .btn { background: #004b87; color: #fff; border: none; padding: 10px 18px; border-radius: 5px; cursor: pointer; font-size: 14px; margin-top: 12px; font-weight: 600; }
+  .btn { background: #004b87; color: #fff; border: none; padding: 10px 18px; border-radius: 5px; cursor: pointer; font-size: 14px; margin-top: 12px; font-weight: 600; text-decoration: none; display: inline-block; }
   .btn:hover { background: #003666; }
   .btn-green { background: #1e7e34; }
-  .btn-orange { background: #d97706; }
+  .btn-drive { background: #0f9d58; padding: 6px 12px; font-size: 12px; margin-top: 4px; }
   .btn-gray { background: #6c757d; padding: 6px 12px; font-size: 12px; margin-top: 4px; }
   .btn-red { background: #c82333; padding: 5px 10px; font-size: 11px; margin-top: 4px; }
   .admin-box { background: #eef5fc; border: 2px solid #004b87; padding: 18px; border-radius: 6px; margin-top: 25px; }
@@ -39,7 +37,8 @@
   .photo-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; margin-top: 8px; }
   .photo-card { border: 1px solid #ddd; padding: 6px; border-radius: 4px; text-align: center; background: #fafafa; }
   .photo-card img { width: 100%; height: 130px; object-fit: cover; border-radius: 3px; }
-  .doc-badge { background: #e0f2fe; color: #0369a1; padding: 25px 10px; border-radius: 4px; font-weight: bold; font-size: 13px; border: 1px solid #bae6fd; }
+  .doc-badge { background: #e0f2fe; color: #0369a1; padding: 20px 8px; border-radius: 4px; font-weight: bold; font-size: 12px; border: 1px solid #bae6fd; }
+  .upload-status { font-size: 12px; color: #d97706; font-weight: bold; margin-top: 5px; }
   @media print {
     .no-print { display: none !important; }
     .container { box-shadow: none; padding: 0; max-width: 100%; }
@@ -60,7 +59,7 @@
     <button class="btn" style="width:100%;" onclick="checkAdminLogin()">Se connecter</button>
   </div>
 
-  <!-- VUE ADMIN (TABLEAU DE SUIVI & PROGRESSION) -->
+  <!-- VUE ADMIN (TABLEAU DE SUIVI & DOSSIERS GOOGLE DRIVE) -->
   <div id="adminDashboard" class="hidden no-print">
     <div style="display:flex; justify-content:space-between; align-items:center;">
       <h1>Gestion des Commissioning ePropulsion</h1>
@@ -69,14 +68,14 @@
     <div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;">
       <input type="text" id="newProjectName" style="flex:2; min-width:200px;" placeholder="Nom du bateau / Client (ex: Oceanis 38 - M. Martin)">
       <input type="text" id="newInstallerName" style="flex:1; min-width:150px;" placeholder="Nom de l'installateur">
-      <button class="btn" style="margin:0;" onclick="createProject()">+ Créer Lien</button>
+      <button class="btn" id="createProjBtn" style="margin:0;" onclick="createProject()">+ Créer Projet & Dossier Drive</button>
     </div>
     <table>
       <thead>
         <tr>
           <th style="text-align:left;">Projet / Bateau</th>
           <th>Installateur</th>
-          <th style="width:140px;">Remplissage</th>
+          <th style="width:130px;">Remplissage</th>
           <th>Statut</th>
           <th>Actions</th>
         </tr>
@@ -87,7 +86,11 @@
 
   <!-- VUE FORMULAIRE PROJET -->
   <div id="projectForm" class="hidden">
-    <button class="btn btn-gray no-print" id="backAdminBtn" onclick="goAdmin()">← Retour liste projets</button>
+    <div class="no-print" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
+      <button class="btn btn-gray" id="backAdminBtn" onclick="goAdmin()">← Retour liste projets</button>
+      <a id="projectDriveLinkBtn" href="#" target="_blank" class="btn btn-drive hidden">📁 Ouvrir le dossier Google Drive du bateau</a>
+    </div>
+    
     <h1>ePropulsion Installation & Commissioning Form</h1>
     <p><strong>Projet :</strong> <span id="displayProjName"></span> | <strong>ID :</strong> <span id="displayProjId"></span></p>
 
@@ -164,16 +167,14 @@
     </div>
     <label>Sea Trial Comments</label><textarea id="seaData" rows="2"></textarea>
 
-    <h2>7. Required Commissioning Photos (Par rubrique)</h2>
+    <h2>7. Required Commissioning Photos (Envoi direct Google Drive)</h2>
     <div id="photoSectionsContainer"></div>
 
-    <h2>8. Technical Plans, Schematics & Boat Manual</h2>
+    <h2>8. Technical Plans, Schematics & Boat Manual (Envoi direct Google Drive)</h2>
     <p style="font-size:12px; color:#555;" class="no-print">
-      Ajoutez vos schémas électriques, plans mécaniques/3D et le manuel du bateau (Images ou petits PDF &lt; 300 Ko). Pour les manuels PDF ou fichiers 3D volumineux, indiquez le lien Drive / WeTransfer ci-dessous.
+      Tous les fichiers ajoutés ici (photos HD, schémas électriques, plans mécaniques/3D, manuels PDF jusqu'à 25 Mo par fichier) sont rangés automatiquement dans les sous-dossiers Google Drive du projet.
     </p>
     <div id="docSectionsContainer"></div>
-    <label>Lien externe pour fichiers volumineux (Manuel PDF complet, fichiers CAO/3D, dossier Drive...)</label>
-    <input type="url" id="externalDocsLink" placeholder="https://drive.google.com/...">
 
     <h2>9. Handover & Signatures</h2>
     <div id="handoverChecksContainer"></div>
@@ -205,7 +206,7 @@
       <div class="no-print" style="display:flex; gap:10px; flex-wrap:wrap;">
         <button class="btn btn-green" onclick="saveForm('Validé & Terminé')">✅ Valider le dossier</button>
         <button class="btn" onclick="window.print()">📄 Générer / Enregistrer en PDF</button>
-        <button class="btn btn-orange" onclick="downloadAllZip()">📦 Télécharger Photos & Plans (.ZIP)</button>
+        <a id="adminDriveBtn" href="#" target="_blank" class="btn btn-drive" style="padding:10px 18px; font-size:14px; margin-top:12px;">📁 Accéder aux fichiers sur Google Drive</a>
       </div>
     </div>
   </div>
@@ -219,7 +220,10 @@
   // 1. VOTRE MOT DE PASSE ADMIN
   const ADMIN_PASSWORD = "ChangezMoi2026";
 
-  // 2. VOTRE CONFIGURATION FIREBASE
+  // 2. COLLEZ L'URL DE VOTRE GOOGLE APPS SCRIPT ICI
+  const GOOGLE_SCRIPT_URL = "VOTRE_URL_APPS_SCRIPT_ICI";
+
+  // 3. VOTRE CONFIGURATION FIREBASE
   const firebaseConfig = {
     apiKey: "AIzaSyBiNU1SuighjrYDKarEta5GmtPv8xQEryk",
     authDomain: "epropulsion-form.firebaseapp.com",
@@ -233,6 +237,8 @@
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
   let projectFiles = [];
+  let currentProjectName = "";
+  let currentDriveFolderUrl = "";
 
   // Listes des points de contrôle
   const installItems = [
@@ -266,7 +272,7 @@
   renderChecks(powerItems, "powerChecksContainer", "pwr");
   renderChecks(handoverItems, "handoverChecksContainer", "hnd");
 
-  // Construction du tableau Sea Trial (0% à 100%)
+  // Tableau Sea Trial (0% à 100%)
   const throttleSteps = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
   const seaBody = document.getElementById('seaTrialTableBody');
   throttleSteps.forEach(pct => {
@@ -293,14 +299,8 @@
       const ktsA = parseFloat(document.getElementById(`runA_kts_${pct}`).value);
       const ktsB = parseFloat(document.getElementById(`runB_kts_${pct}`).value);
 
-      let avgKw = null, avgKts = null;
-      if (!isNaN(kwA) && !isNaN(kwB)) avgKw = (kwA + kwB) / 2;
-      else if (!isNaN(kwA)) avgKw = kwA;
-      else if (!isNaN(kwB)) avgKw = kwB;
-
-      if (!isNaN(ktsA) && !isNaN(ktsB)) avgKts = (ktsA + ktsB) / 2;
-      else if (!isNaN(ktsA)) avgKts = ktsA;
-      else if (!isNaN(ktsB)) avgKts = ktsB;
+      let avgKw = !isNaN(kwA) && !isNaN(kwB) ? (kwA + kwB) / 2 : (!isNaN(kwA) ? kwA : (!isNaN(kwB) ? kwB : null));
+      let avgKts = !isNaN(ktsA) && !isNaN(ktsB) ? (ktsA + ktsB) / 2 : (!isNaN(ktsA) ? ktsA : (!isNaN(ktsB) ? ktsB : null));
 
       document.getElementById(`avg_kw_${pct}`).innerText = avgKw !== null ? avgKw.toFixed(1) : "-";
       document.getElementById(`avg_kts_${pct}`).innerText = avgKts !== null ? avgKts.toFixed(1) : "-";
@@ -309,7 +309,7 @@
   };
   recalcSeaTrial();
 
-  // Rubriques Photos (Section 7) & Plans/Schémas/Manuels (Section 8)
+  // Rubriques Photos & Documents Google Drive
   const photoCategories = [
     { id: "vessel", label: "1. Vues extérieures du bateau & Hélice / Saildrive / Pod" },
     { id: "battery", label: "2. Compartiment batteries & Connexions" },
@@ -317,16 +317,19 @@
     { id: "cabling", label: "4. Chargeur, DCDC, Câblage 96V / 12V / Terre / Réseau eSSA" }
   ];
   const docCategories = [
-    { id: "elec_schema", label: "1. Schémas électriques d'installation (Images ou PDF)" },
-    { id: "mech_3d", label: "2. Plans mécaniques & Vues 3D (Images ou PDF)" },
-    { id: "boat_manual", label: "3. Manuel du bateau / Documentation chantier (PDF ou Images)" }
+    { id: "elec_schema", label: "1. Schémas électriques d'installation" },
+    { id: "mech_3d", label: "2. Plans mécaniques & Fichiers 3D" },
+    { id: "boat_manual", label: "3. Manuel du bateau / Documentation chantier" }
   ];
 
   const photoContainer = document.getElementById('photoSectionsContainer');
   photoCategories.forEach(cat => {
     photoContainer.innerHTML += `
       <h3>${cat.label}</h3>
-      <div class="no-print"><input type="file" accept="image/*" multiple onchange="handleFiles(this.files, '${cat.id}')"></div>
+      <div class="no-print">
+        <input type="file" accept="image/*" multiple onchange="uploadToDrive(this.files, '${cat.id}')">
+        <div id="status_${cat.id}" class="upload-status"></div>
+      </div>
       <div id="gal_${cat.id}" class="photo-gallery"></div>`;
   });
 
@@ -334,31 +337,60 @@
   docCategories.forEach(cat => {
     docContainer.innerHTML += `
       <h3>${cat.label}</h3>
-      <div class="no-print"><input type="file" accept="image/*,.pdf" multiple onchange="handleFiles(this.files, '${cat.id}')"></div>
+      <div class="no-print">
+        <input type="file" multiple onchange="uploadToDrive(this.files, '${cat.id}')">
+        <div id="status_${cat.id}" class="upload-status"></div>
+      </div>
       <div id="gal_${cat.id}" class="photo-gallery"></div>`;
   });
 
   const allCategories = [...photoCategories, ...docCategories];
 
-  window.handleFiles = async (files, catId) => {
-    for (let file of files) {
-      if (file.type.startsWith('image/')) {
-        // Pour les schémas/plans, on garde une résolution plus fine (1200px)
-        const maxW = (catId === 'elec_schema' || catId === 'mech_3d') ? 1200 : 850;
-        const compressed = await compressImage(file, maxW, 0.72);
-        projectFiles.push({ cat: catId, type: 'image', name: file.name, data: compressed });
-      } else if (file.type === 'application/pdf') {
-        if (file.size > 350 * 1024) {
-          alert(`Le fichier PDF "${file.name}" dépasse 350 Ko. Veuillez le déposer sur Google Drive / WeTransfer et coller le lien dans le champ "Lien externe pour fichiers volumineux" juste en dessous.`);
-          continue;
+  // Envoi des fichiers directement vers Google Drive
+  window.uploadToDrive = async (files, catId) => {
+    if (GOOGLE_SCRIPT_URL.includes("VOTRE_URL")) {
+      return alert("Veuillez d'abord configurer l'URL Google Apps Script dans le code HTML.");
+    }
+    const statusEl = document.getElementById(`status_${catId}`);
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      statusEl.innerText = `⏳ Envoi vers Google Drive (${i + 1}/${files.length}) : ${file.name}...`;
+      try {
+        const base64Data = await readFileAsDataURL(file);
+        const res = await fetch(GOOGLE_SCRIPT_URL, {
+          method: "POST",
+          body: JSON.stringify({
+            action: "uploadFile",
+            projectId: projectId,
+            projectName: currentProjectName,
+            category: catId,
+            fileName: file.name,
+            mimeType: file.type || "application/octet-stream",
+            fileData: base64Data
+          })
+        });
+        const result = await res.json();
+        if (result.status === "ok") {
+          const isImg = file.type.startsWith("image/");
+          projectFiles.push({
+            cat: catId,
+            type: isImg ? "image" : "doc",
+            name: file.name,
+            fileUrl: result.fileUrl,
+            directImgUrl: result.directImgUrl
+          });
+          if (result.folderUrl) currentDriveFolderUrl = result.folderUrl;
+          renderGalleries();
+          await saveForm(null, true); // Sauvegarde silencieuse du lien dans Firestore
+        } else {
+          alert("Erreur Google Drive : " + result.message);
         }
-        const base64Pdf = await readFileAsDataURL(file);
-        projectFiles.push({ cat: catId, type: 'pdf', name: file.name, data: base64Pdf });
-      } else {
-        alert(`Format non pris en charge directement pour "${file.name}". Utilisez le champ de lien externe ci-dessous pour les fichiers CAO/3D natifs.`);
+      } catch (err) {
+        alert("Erreur lors de l'envoi : " + err.message);
       }
     }
-    renderGalleries();
+    statusEl.innerText = "✅ Fichier(s) enregistré(s) sur Google Drive !";
+    setTimeout(() => { statusEl.innerText = ""; }, 4000);
   };
 
   function readFileAsDataURL(file) {
@@ -369,63 +401,25 @@
     });
   }
 
-  function compressImage(file, maxWidth, quality) {
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          let w = img.width, h = img.height;
-          if (w > maxWidth) { h = Math.round((h * maxWidth) / w); w = maxWidth; }
-          canvas.width = w; canvas.height = h;
-          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-          resolve(canvas.toDataURL('image/jpeg', quality));
-        };
-        img.src = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    });
-  }
-
   function renderGalleries() {
     allCategories.forEach(cat => { document.getElementById(`gal_${cat.id}`).innerHTML = ""; });
     projectFiles.forEach((p, idx) => {
       const target = document.getElementById(`gal_${p.cat}`) || document.getElementById('gal_vessel');
-      const isPdf = p.type === 'pdf' || (p.data && p.data.startsWith('data:application/pdf'));
-      const previewHtml = isPdf
-        ? `<div class="doc-badge">📄 DOCUMENT PDF<br><a href="${p.data}" download="${p.name}" style="font-size:11px; color:#004b87;">Ouvrir / Télécharger</a></div>`
-        : `<img src="${p.data}" alt="Fichier">`;
+      const previewHtml = p.type === 'image'
+        ? `<a href="${p.fileUrl}" target="_blank"><img src="${p.directImgUrl}" alt="${p.name}"></a>`
+        : `<div class="doc-badge">📄 FICHIER DRIVE<br><a href="${p.fileUrl}" target="_blank" style="font-size:11px; color:#004b87;">Ouvrir sur Drive</a></div>`;
 
       target.innerHTML += `
         <div class="photo-card">
           ${previewHtml}
           <div style="font-size:11px; margin-top:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${p.name}">${p.name}</div>
-          <button type="button" class="btn btn-red no-print" onclick="removeFile(${idx})">Supprimer</button>
+          <button type="button" class="btn btn-red no-print" onclick="removeFile(${idx})">Retirer</button>
         </div>`;
     });
   }
   window.removeFile = (idx) => { projectFiles.splice(idx, 1); renderGalleries(); };
 
-  // Téléchargement groupé des photos et plans en .ZIP
-  window.downloadAllZip = async () => {
-    if (!projectFiles.length) return alert("Aucune photo ou document enregistré sur ce dossier.");
-    const zip = new JSZip();
-    const projName = (document.getElementById('displayProjName').innerText || "Commissioning").replace(/[^a-z0-9]/gi, '_');
-    projectFiles.forEach((p, i) => {
-      const base64Data = p.data.split(',')[1];
-      const isPdf = p.type === 'pdf' || (p.data && p.data.startsWith('data:application/pdf'));
-      const ext = isPdf ? 'pdf' : 'jpg';
-      zip.file(`${projName}_${p.cat}_${i + 1}.${ext}`, base64Data, { base64: true });
-    });
-    const content = await zip.generateAsync({ type: "blob" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(content);
-    a.download = `Dossier_Complet_${projName}.zip`;
-    a.click();
-  };
-
-  // Gestion des signatures au doigt
+  // Signatures au doigt
   ['sigInstaller', 'sigCustomer'].forEach(id => {
     const canvas = document.getElementById(id);
     const ctx = canvas.getContext('2d');
@@ -443,7 +437,7 @@
   });
   window.clearCanvas = id => { const c = document.getElementById(id); c.getContext('2d').clearRect(0, 0, c.width, c.height); };
 
-  // Calcul du pourcentage de remplissage du dossier
+  // Calcul du pourcentage de remplissage
   function computeCompletion(data) {
     const keyFields = [
       'vesselModel', 'location', 'makeBuilder', 'hullType', 'dimensions', 'fittedProp',
@@ -475,15 +469,39 @@
     const name = document.getElementById('newProjectName').value;
     const inst = document.getElementById('newInstallerName').value;
     if(!name) return alert("Entrez un nom de projet");
+    const btn = document.getElementById('createProjBtn');
+    btn.disabled = true; btn.innerText = "⏳ Création dossier Drive...";
+
     const id = "PROJ-" + Date.now().toString().slice(-5);
-    await setDoc(doc(db, "projects", id), { projectName: name, installerName: inst, status: "En attente Installateur", photos: [] });
+    let driveUrl = "";
+
+    if (!GOOGLE_SCRIPT_URL.includes("VOTRE_URL")) {
+      try {
+        const res = await fetch(GOOGLE_SCRIPT_URL, {
+          method: "POST",
+          body: JSON.stringify({ action: "createProjectFolder", projectId: id, projectName: name })
+        });
+        const result = await res.json();
+        if (result.status === "ok") driveUrl = result.folderUrl;
+      } catch (e) { console.error("Erreur création dossier Drive:", e); }
+    }
+
+    await setDoc(doc(db, "projects", id), {
+      projectName: name,
+      installerName: inst,
+      status: "En attente Installateur",
+      driveFolderUrl: driveUrl,
+      photos: []
+    });
+
     document.getElementById('newProjectName').value = "";
     document.getElementById('newInstallerName').value = "";
+    btn.disabled = false; btn.innerText = "+ Créer Projet & Dossier Drive";
     loadDashboard();
   };
 
   window.deleteProject = async (id) => {
-    if(confirm("Supprimer définitivement ce projet ?")) {
+    if(confirm("Supprimer ce projet de la liste ? (Le dossier Google Drive sera conservé par sécurité)")) {
       await deleteDoc(doc(db, "projects", id));
       loadDashboard();
     }
@@ -502,6 +520,10 @@
       const pct = computeCompletion(data);
       const linkInst = `${baseUrl}?id=${d.id}`;
       const linkAdmin = `${baseUrl}?id=${d.id}&admin=1`;
+      const driveBtn = data.driveFolderUrl
+        ? `<a href="${data.driveFolderUrl}" target="_blank" class="btn btn-drive">📁 Drive</a>`
+        : ``;
+
       tbody.innerHTML += `<tr>
         <td style="text-align:left;"><strong>${data.projectName}</strong><br><small>${d.id}</small></td>
         <td>${data.installerName || '-'}</td>
@@ -514,7 +536,8 @@
         <td>${data.status || 'Nouveau'}</td>
         <td>
           <button class="btn btn-gray" onclick="navigator.clipboard.writeText('${linkInst}'); alert('Lien installateur copié !')">📋 Lien</button>
-          <a href="${linkAdmin}" class="btn btn-gray" style="text-decoration:none;">✏️ Ouvrir</a>
+          <a href="${linkAdmin}" class="btn btn-gray">✏️ Ouvrir</a>
+          ${driveBtn}
           <button class="btn btn-red" onclick="deleteProject('${d.id}')">🗑️</button>
         </td>
       </tr>`;
@@ -532,8 +555,18 @@
     const snap = await getDoc(doc(db, "projects", id));
     if(snap.exists()) {
       const data = snap.data();
-      document.getElementById('displayProjName').innerText = data.projectName || "";
+      currentProjectName = data.projectName || id;
+      currentDriveFolderUrl = data.driveFolderUrl || "";
+      document.getElementById('displayProjName').innerText = currentProjectName;
       document.getElementById('displayProjId').innerText = id;
+
+      if (currentDriveFolderUrl && isAuthAdmin) {
+        const topBtn = document.getElementById('projectDriveLinkBtn');
+        topBtn.href = currentDriveFolderUrl;
+        topBtn.classList.remove('hidden');
+        document.getElementById('adminDriveBtn').href = currentDriveFolderUrl;
+      }
+
       Object.keys(data).forEach(k => {
         const el = document.getElementById(k);
         if(el && el.tagName !== 'CANVAS' && el.type !== 'file') el.value = data[k];
@@ -550,8 +583,9 @@
     } else alert("Projet introuvable. Vérifiez le lien.");
   }
 
-  window.saveForm = async (newStatus) => {
-    const payload = { status: newStatus, photos: projectFiles };
+  window.saveForm = async (newStatus, silent = false) => {
+    const payload = { photos: projectFiles, driveFolderUrl: currentDriveFolderUrl };
+    if (newStatus) payload.status = newStatus;
     document.querySelectorAll('input, select, textarea').forEach(el => {
       if(el.id && el.type !== 'file' && el.id !== 'adminPwdInput') payload[el.id] = el.value;
     });
@@ -559,9 +593,9 @@
     payload.sigCustomer = document.getElementById('sigCustomer').toDataURL();
     try {
       await setDoc(doc(db, "projects", projectId), payload, { merge: true });
-      alert("Enregistré avec succès !");
+      if (!silent) alert("Enregistré avec succès !");
     } catch (e) {
-      alert("Erreur lors de la sauvegarde (vérifiez la taille totale des fichiers) : " + e.message);
+      if (!silent) alert("Erreur lors de la sauvegarde : " + e.message);
     }
   };
 
