@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ePropulsion - Commissioning Form</title>
-<!-- Librairie JSZip pour le téléchargement groupé des photos -->
+<!-- Librairie JSZip pour le téléchargement groupé des photos et documents -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
   body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f4f8; color: #222; margin: 0; padding: 15px; }
@@ -36,9 +36,10 @@
   .progress-wrap { background: #e2e8f0; border-radius: 10px; height: 18px; width: 100%; overflow: hidden; position: relative; }
   .progress-bar { background: #1e7e34; height: 100%; transition: width 0.3s; }
   .progress-text { position: absolute; width: 100%; text-align: center; top: 0; left: 0; font-size: 11px; font-weight: bold; line-height: 18px; color: #111; }
-  .photo-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; margin-top: 8px; }
-  .photo-card { border: 1px solid #ddd; padding: 5px; border-radius: 4px; text-align: center; background: #fafafa; }
-  .photo-card img { width: 100%; height: 120px; object-fit: cover; border-radius: 3px; }
+  .photo-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; margin-top: 8px; }
+  .photo-card { border: 1px solid #ddd; padding: 6px; border-radius: 4px; text-align: center; background: #fafafa; }
+  .photo-card img { width: 100%; height: 130px; object-fit: cover; border-radius: 3px; }
+  .doc-badge { background: #e0f2fe; color: #0369a1; padding: 25px 10px; border-radius: 4px; font-weight: bold; font-size: 13px; border: 1px solid #bae6fd; }
   @media print {
     .no-print { display: none !important; }
     .container { box-shadow: none; padding: 0; max-width: 100%; }
@@ -166,7 +167,15 @@
     <h2>7. Required Commissioning Photos (Par rubrique)</h2>
     <div id="photoSectionsContainer"></div>
 
-    <h2>8. Handover & Signatures</h2>
+    <h2>8. Technical Plans, Schematics & Boat Manual</h2>
+    <p style="font-size:12px; color:#555;" class="no-print">
+      Ajoutez vos schémas électriques, plans mécaniques/3D et le manuel du bateau (Images ou petits PDF &lt; 300 Ko). Pour les manuels PDF ou fichiers 3D volumineux, indiquez le lien Drive / WeTransfer ci-dessous.
+    </p>
+    <div id="docSectionsContainer"></div>
+    <label>Lien externe pour fichiers volumineux (Manuel PDF complet, fichiers CAO/3D, dossier Drive...)</label>
+    <input type="url" id="externalDocsLink" placeholder="https://drive.google.com/...">
+
+    <h2>9. Handover & Signatures</h2>
     <div id="handoverChecksContainer"></div>
     <label>Customer Comments</label><textarea id="customerComments" rows="2"></textarea>
     <div class="grid">
@@ -196,7 +205,7 @@
       <div class="no-print" style="display:flex; gap:10px; flex-wrap:wrap;">
         <button class="btn btn-green" onclick="saveForm('Validé & Terminé')">✅ Valider le dossier</button>
         <button class="btn" onclick="window.print()">📄 Générer / Enregistrer en PDF</button>
-        <button class="btn btn-orange" onclick="downloadPhotosZip()">📦 Télécharger les photos (.ZIP)</button>
+        <button class="btn btn-orange" onclick="downloadAllZip()">📦 Télécharger Photos & Plans (.ZIP)</button>
       </div>
     </div>
   </div>
@@ -223,7 +232,7 @@
 
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
-  let projectPhotos = [];
+  let projectFiles = [];
 
   // Listes des points de contrôle
   const installItems = [
@@ -300,28 +309,65 @@
   };
   recalcSeaTrial();
 
-  // Rubriques de photos obligatoires
+  // Rubriques Photos (Section 7) & Plans/Schémas/Manuels (Section 8)
   const photoCategories = [
     { id: "vessel", label: "1. Vues extérieures du bateau & Hélice / Saildrive / Pod" },
     { id: "battery", label: "2. Compartiment batteries & Connexions" },
     { id: "motor", label: "3. Moteur principal, Écran (liste N° série) & Manette" },
     { id: "cabling", label: "4. Chargeur, DCDC, Câblage 96V / 12V / Terre / Réseau eSSA" }
   ];
+  const docCategories = [
+    { id: "elec_schema", label: "1. Schémas électriques d'installation (Images ou PDF)" },
+    { id: "mech_3d", label: "2. Plans mécaniques & Vues 3D (Images ou PDF)" },
+    { id: "boat_manual", label: "3. Manuel du bateau / Documentation chantier (PDF ou Images)" }
+  ];
+
   const photoContainer = document.getElementById('photoSectionsContainer');
   photoCategories.forEach(cat => {
     photoContainer.innerHTML += `
       <h3>${cat.label}</h3>
-      <div class="no-print"><input type="file" accept="image/*" multiple onchange="handlePhotos(this.files, '${cat.id}')"></div>
+      <div class="no-print"><input type="file" accept="image/*" multiple onchange="handleFiles(this.files, '${cat.id}')"></div>
       <div id="gal_${cat.id}" class="photo-gallery"></div>`;
   });
 
-  window.handlePhotos = async (files, catId) => {
+  const docContainer = document.getElementById('docSectionsContainer');
+  docCategories.forEach(cat => {
+    docContainer.innerHTML += `
+      <h3>${cat.label}</h3>
+      <div class="no-print"><input type="file" accept="image/*,.pdf" multiple onchange="handleFiles(this.files, '${cat.id}')"></div>
+      <div id="gal_${cat.id}" class="photo-gallery"></div>`;
+  });
+
+  const allCategories = [...photoCategories, ...docCategories];
+
+  window.handleFiles = async (files, catId) => {
     for (let file of files) {
-      const compressed = await compressImage(file, 900, 0.7);
-      projectPhotos.push({ cat: catId, name: file.name, data: compressed });
+      if (file.type.startsWith('image/')) {
+        // Pour les schémas/plans, on garde une résolution plus fine (1200px)
+        const maxW = (catId === 'elec_schema' || catId === 'mech_3d') ? 1200 : 850;
+        const compressed = await compressImage(file, maxW, 0.72);
+        projectFiles.push({ cat: catId, type: 'image', name: file.name, data: compressed });
+      } else if (file.type === 'application/pdf') {
+        if (file.size > 350 * 1024) {
+          alert(`Le fichier PDF "${file.name}" dépasse 350 Ko. Veuillez le déposer sur Google Drive / WeTransfer et coller le lien dans le champ "Lien externe pour fichiers volumineux" juste en dessous.`);
+          continue;
+        }
+        const base64Pdf = await readFileAsDataURL(file);
+        projectFiles.push({ cat: catId, type: 'pdf', name: file.name, data: base64Pdf });
+      } else {
+        alert(`Format non pris en charge directement pour "${file.name}". Utilisez le champ de lien externe ci-dessous pour les fichiers CAO/3D natifs.`);
+      }
     }
     renderGalleries();
   };
+
+  function readFileAsDataURL(file) {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target.result);
+      reader.readAsDataURL(file);
+    });
+  }
 
   function compressImage(file, maxWidth, quality) {
     return new Promise((resolve) => {
@@ -343,32 +389,39 @@
   }
 
   function renderGalleries() {
-    photoCategories.forEach(cat => { document.getElementById(`gal_${cat.id}`).innerHTML = ""; });
-    projectPhotos.forEach((p, idx) => {
+    allCategories.forEach(cat => { document.getElementById(`gal_${cat.id}`).innerHTML = ""; });
+    projectFiles.forEach((p, idx) => {
       const target = document.getElementById(`gal_${p.cat}`) || document.getElementById('gal_vessel');
+      const isPdf = p.type === 'pdf' || (p.data && p.data.startsWith('data:application/pdf'));
+      const previewHtml = isPdf
+        ? `<div class="doc-badge">📄 DOCUMENT PDF<br><a href="${p.data}" download="${p.name}" style="font-size:11px; color:#004b87;">Ouvrir / Télécharger</a></div>`
+        : `<img src="${p.data}" alt="Fichier">`;
+
       target.innerHTML += `
         <div class="photo-card">
-          <img src="${p.data}" alt="Photo">
-          <div style="font-size:11px; margin-top:4px; overflow:hidden; text-overflow:ellipsis;">${p.name}</div>
-          <button type="button" class="btn btn-red no-print" onclick="removePhoto(${idx})">Supprimer</button>
+          ${previewHtml}
+          <div style="font-size:11px; margin-top:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${p.name}">${p.name}</div>
+          <button type="button" class="btn btn-red no-print" onclick="removeFile(${idx})">Supprimer</button>
         </div>`;
     });
   }
-  window.removePhoto = (idx) => { projectPhotos.splice(idx, 1); renderGalleries(); };
+  window.removeFile = (idx) => { projectFiles.splice(idx, 1); renderGalleries(); };
 
-  // Téléchargement groupé des photos en .ZIP
-  window.downloadPhotosZip = async () => {
-    if (!projectPhotos.length) return alert("Aucune photo enregistrée sur ce dossier.");
+  // Téléchargement groupé des photos et plans en .ZIP
+  window.downloadAllZip = async () => {
+    if (!projectFiles.length) return alert("Aucune photo ou document enregistré sur ce dossier.");
     const zip = new JSZip();
     const projName = (document.getElementById('displayProjName').innerText || "Commissioning").replace(/[^a-z0-9]/gi, '_');
-    projectPhotos.forEach((p, i) => {
+    projectFiles.forEach((p, i) => {
       const base64Data = p.data.split(',')[1];
-      zip.file(`${projName}_${p.cat}_${i + 1}.jpg`, base64Data, { base64: true });
+      const isPdf = p.type === 'pdf' || (p.data && p.data.startsWith('data:application/pdf'));
+      const ext = isPdf ? 'pdf' : 'jpg';
+      zip.file(`${projName}_${p.cat}_${i + 1}.${ext}`, base64Data, { base64: true });
     });
     const content = await zip.generateAsync({ type: "blob" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(content);
-    a.download = `Photos_${projName}.zip`;
+    a.download = `Dossier_Complet_${projName}.zip`;
     a.click();
   };
 
@@ -486,7 +539,7 @@
         if(el && el.tagName !== 'CANVAS' && el.type !== 'file') el.value = data[k];
       });
       recalcSeaTrial();
-      if(data.photos) { projectPhotos = data.photos; renderGalleries(); }
+      if(data.photos) { projectFiles = data.photos; renderGalleries(); }
       ['sigInstaller', 'sigCustomer'].forEach(sigId => {
         if(data[sigId]) {
           const img = new Image();
@@ -498,7 +551,7 @@
   }
 
   window.saveForm = async (newStatus) => {
-    const payload = { status: newStatus, photos: projectPhotos };
+    const payload = { status: newStatus, photos: projectFiles };
     document.querySelectorAll('input, select, textarea').forEach(el => {
       if(el.id && el.type !== 'file' && el.id !== 'adminPwdInput') payload[el.id] = el.value;
     });
@@ -508,7 +561,7 @@
       await setDoc(doc(db, "projects", projectId), payload, { merge: true });
       alert("Enregistré avec succès !");
     } catch (e) {
-      alert("Erreur lors de la sauvegarde : " + e.message);
+      alert("Erreur lors de la sauvegarde (vérifiez la taille totale des fichiers) : " + e.message);
     }
   };
 
