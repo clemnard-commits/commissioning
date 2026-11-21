@@ -92,6 +92,16 @@
   input, select, textarea { width: 100%; padding: 9px 11px; border: 1px solid #CBD5E1; border-radius: 6px; margin-top: 4px; font-size: 13.5px; color: var(--cx-text); background: #fff; font-family: inherit; }
   input:focus, select:focus, textarea:focus { outline: none; border-color: var(--cx-blue); box-shadow: 0 0 0 3px rgba(30,115,190,0.12); }
 
+  /* GROUPE VALEUR + UNITE (ISOLEMENT 96V) & ALERTE ROUGE < 250 kOhm */
+  .input-unit-group { display: flex; gap: 8px; align-items: center; margin-top: 4px; }
+  .input-unit-group input { flex: 1; margin-top: 0; }
+  .input-unit-group select { width: 92px; margin-top: 0; font-weight: 600; flex-shrink: 0; }
+  .insul-fail { border-color: var(--cx-red) !important; background: #FEF2F2 !important; color: #B91C1C !important; font-weight: 700; box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.2) !important; }
+  .insul-ok { border-color: var(--cx-green) !important; background: #F0FDF4 !important; color: #15803D !important; font-weight: 600; }
+  .insul-msg { font-size: 11.5px; font-weight: 600; margin-top: 4px; min-height: 16px; }
+  .insul-msg.fail { color: var(--cx-red); }
+  .insul-msg.ok { color: var(--cx-green); }
+
   /* CHECKLISTS */
   .check-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px; border-bottom: 1px solid #F1F5F9; font-size: 13.5px; }
   .check-row:hover { background: #F8FAFC; }
@@ -143,9 +153,7 @@
   .hidden { display: none !important; }
   .print-only { display: none; }
 
-  /* =========================================================
-     OPTIMISATION RESPONSIVE TELEPHONE (MOBILE < 768px)
-     ========================================================= */
+  /* OPTIMISATION RESPONSIVE TELEPHONE (MOBILE < 768px) */
   @media(max-width: 768px) {
     .topbar { padding: 0 12px; height: 54px; }
     .topbar-left .sep, .topbar-left #breadcrumbText, #userRoleLabel { display: none; }
@@ -154,7 +162,6 @@
     .page-header { margin-bottom: 14px; }
     .page-title { font-size: 18px; }
 
-    /* Stepper horizontal tactile fluide en haut */
     .wizard-layout { flex-direction: column; gap: 12px; }
     .stepper { position: static; width: 100%; background: #fff; border: 1px solid var(--cx-border); border-radius: 8px; padding: 8px; }
     #stepperContainer { display: flex; overflow-x: auto; gap: 6px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
@@ -163,21 +170,17 @@
     .step-item.active { background: var(--cx-blue-light); border-color: var(--cx-blue); }
     .legend-box { flex-direction: row; justify-content: space-around; margin-top: 8px; padding-top: 8px; font-size: 11px; }
 
-    /* Carte et champs adaptés au tactile (16px évite le zoom auto iOS) */
     .card { padding: 16px 14px; border-radius: 8px; }
     .card-title { font-size: 16.5px; }
     .grid, .stats-grid, .radio-cards { grid-template-columns: 1fr; gap: 10px; }
     input, select, textarea { font-size: 16px; padding: 10px 12px; }
 
-    /* Checklists ergonomiques au pouce */
     .check-row { flex-direction: column; align-items: stretch; gap: 8px; padding: 12px 6px; }
     .check-row select { width: 100%; font-size: 15px; padding: 8px 10px; }
 
-    /* Galerie photos 2 colonnes sur mobile */
     .photo-gallery { grid-template-columns: repeat(2, 1fr); gap: 8px; }
     .photo-card img { height: 100px; }
 
-    /* Pied de navigation mobile pleine largeur */
     .wizard-footer { flex-direction: column; align-items: stretch; gap: 10px; }
     #stepIndicatorText { text-align: center; }
     .wizard-footer-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
@@ -399,15 +402,59 @@
             <textarea id="installComments" rows="2"></textarea>
           </div>
 
-          <!-- ETAPE 4 : APPENDICES 1 & 2 -->
+          <!-- ETAPE 4 : APPENDICES 1 & 2 (TEMP, HUMIDITE, ISOLEMENT 96V +/- TERRE) -->
           <div class="step-section hidden" data-step="4">
             <h2 class="card-title">4. Appendices 1 & 2 (Insulation, Earth & CAN)</h2>
-            <p class="card-desc">Mesures d'isolement (> 125 kΩ), résistance de terre (< 1 Ω) et terminaisons bus CAN.</p>
+            <p class="card-desc">Mesures d'isolement 96V (&ge; 250 k&Omega;), résistance de terre (&lt; 1 &Omega;) et terminaisons bus CAN.</p>
+            
+            <div class="section-label">Conditions ambiantes</div>
             <div class="grid">
-              <div><label>Temp (°C) & Humidity (%)</label><input type="text" id="tempHumidity"></div>
-              <div><label>Insulation Test (> 125 kΩ)</label><input type="text" id="insulationTest" placeholder="YES / Valeur kΩ"></div>
-              <div><label>Earth Resistance (< 1 Ω)</label><input type="text" id="earthTest" placeholder="YES / Valeur Ω"></div>
-              <div><label>CAN Bus Termination (120Ω / 360Ω)</label><select id="canTest"><option value="">-- Choisir --</option><option value="YES">YES</option><option value="NO">NO</option></select></div>
+              <div>
+                <label>Température (°C)</label>
+                <input type="number" inputmode="decimal" step="0.1" id="ambientTemp" placeholder="Ex: 22">
+              </div>
+              <div>
+                <label>Humidité (%)</label>
+                <input type="number" inputmode="decimal" step="1" id="ambientHumidity" placeholder="Ex: 55">
+              </div>
+            </div>
+
+            <div class="section-label">Tests d'isolement circuit 96V (Seuil minimum : 250 k&Omega;)</div>
+            <div class="grid">
+              <div>
+                <label>96V (+) / Terre (DC+ to Earth)</label>
+                <div class="input-unit-group">
+                  <input type="number" inputmode="decimal" step="0.01" id="insulPosVal" placeholder="Valeur" oninput="checkInsulationValues()">
+                  <select id="insulPosUnit" onchange="checkInsulationValues()">
+                    <option value="kOhm">k&Omega;</option>
+                    <option value="MOhm" selected>M&Omega;</option>
+                  </select>
+                </div>
+                <div id="insulPosMsg" class="insul-msg"></div>
+              </div>
+              <div>
+                <label>96V (-) / Terre (DC- to Earth)</label>
+                <div class="input-unit-group">
+                  <input type="number" inputmode="decimal" step="0.01" id="insulNegVal" placeholder="Valeur" oninput="checkInsulationValues()">
+                  <select id="insulNegUnit" onchange="checkInsulationValues()">
+                    <option value="kOhm">k&Omega;</option>
+                    <option value="MOhm" selected>M&Omega;</option>
+                  </select>
+                </div>
+                <div id="insulNegMsg" class="insul-msg"></div>
+              </div>
+            </div>
+
+            <div class="section-label">Continuité de terre & Bus CAN</div>
+            <div class="grid">
+              <div>
+                <label>Earth Resistance (&lt; 1 &Omega;)</label>
+                <input type="number" inputmode="decimal" step="0.01" id="earthTest" placeholder="Ex: 0.2">
+              </div>
+              <div>
+                <label>CAN Bus Termination (120&Omega; / 360&Omega;)</label>
+                <select id="canTest"><option value="">-- Choisir --</option><option value="YES">YES</option><option value="NO">NO</option></select>
+              </div>
             </div>
           </div>
 
@@ -593,7 +640,6 @@
     measurementId: "G-GCS82T485T"
   };
 
-  // Enregistrement du Service Worker Hors-Ligne (PWA)
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
   }
@@ -638,6 +684,40 @@
     }
   });
 
+  // Vérification automatique des seuils d'isolement 96V (< 250 kOhm => alerte rouge)
+  window.checkInsulationValues = () => {
+    const pairs = [
+      { valId: 'insulPosVal', unitId: 'insulPosUnit', msgId: 'insulPosMsg' },
+      { valId: 'insulNegVal', unitId: 'insulNegUnit', msgId: 'insulNegMsg' }
+    ];
+    pairs.forEach(p => {
+      const inp = document.getElementById(p.valId);
+      const unit = document.getElementById(p.unitId).value;
+      const msg = document.getElementById(p.msgId);
+      const raw = inp.value.trim();
+
+      inp.classList.remove('insul-fail', 'insul-ok');
+      msg.className = 'insul-msg';
+      msg.innerText = '';
+
+      if (raw === '') return;
+      const num = parseFloat(raw);
+      if (isNaN(num)) return;
+
+      const kOhmValue = unit === 'MOhm' ? num * 1000 : num;
+      if (kOhmValue < 250) {
+        inp.classList.add('insul-fail');
+        msg.classList.add('fail');
+        msg.innerText = `< 250 kΩ (${kOhmValue} kΩ) — Défaut d'isolement`;
+      } else {
+        inp.classList.add('insul-ok');
+        msg.classList.add('ok');
+        msg.innerText = `Conforme (≥ 250 kΩ)`;
+      }
+    });
+    renderStepper();
+  };
+
   // Etapes du Wizard
   const stepNames = [
     "Vessel & Info", "System & S/N", "Install Check", "Appendices 1-2",
@@ -661,7 +741,7 @@
       return count === 21 ? 'complete' : 'partial';
     }
     if (stepNum === 4) {
-      const fields = ['tempHumidity', 'insulationTest', 'earthTest', 'canTest'];
+      const fields = ['ambientTemp', 'ambientHumidity', 'insulPosVal', 'insulNegVal', 'earthTest', 'canTest'];
       const count = fields.filter(val).length;
       if (count === 0) return 'empty';
       return count === fields.length ? 'complete' : 'partial';
@@ -1035,8 +1115,8 @@
   function computeCompletion(data) {
     const keyFields = [
       'vesselModel', 'location', 'makeBuilder', 'hullType', 'dimensions', 'fittedProp',
-      'origProp', 'installerName', 'installDate', 'serialNumbers', 'tempHumidity',
-      'insulationTest', 'earthTest', 'seaConditions', 'seaDatePers', 'runA_kw_100', 'runB_kw_100'
+      'origProp', 'installerName', 'installDate', 'serialNumbers', 'ambientTemp', 'ambientHumidity',
+      'insulPosVal', 'insulNegVal', 'earthTest', 'seaConditions', 'seaDatePers', 'runA_kw_100', 'runB_kw_100'
     ];
     let filled = 0;
     keyFields.forEach(f => { if (data[f] && String(data[f]).trim() !== "") filled++; });
@@ -1252,6 +1332,7 @@
         });
       }
 
+      checkInsulationValues();
       recalcSeaTrial();
       if(data.photos) { projectFiles = data.photos; renderGalleries(); }
       if(data.sigInstaller && data.sigInstaller.length > 2500) {
