@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
 <title>COMMISSION-X - Marine Commissioning Portal</title>
 <style>
   :root {
@@ -18,29 +18,30 @@
     --cx-muted: #64748B;
   }
   * { box-sizing: border-box; }
-  body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif; background: var(--cx-bg); color: var(--cx-text); margin: 0; min-height: 100vh; }
+  body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif; background: var(--cx-bg); color: var(--cx-text); margin: 0; min-height: 100vh; -webkit-text-size-adjust: 100%; }
 
   /* ICONES VECTORIELLES MONOCHROMES */
   .icon { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
   .icon-lg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; margin: 0 auto 6px auto; display: block; }
 
   /* BARRE SUPERIEURE MINIMALISTE */
-  .topbar { height: 60px; background: #fff; border-bottom: 1px solid var(--cx-border); padding: 0 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
-  .topbar-left { display: flex; align-items: center; gap: 14px; font-size: 14px; color: var(--cx-muted); }
-  .brand-pill { display: flex; align-items: center; gap: 9px; color: var(--cx-navy); font-weight: 700; font-size: 14.5px; letter-spacing: 0.8px; cursor: pointer; }
+  .topbar { height: 60px; background: #fff; border-bottom: 1px solid var(--cx-border); padding: 0 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 20; gap: 10px; }
+  .topbar-left { display: flex; align-items: center; gap: 12px; font-size: 14px; color: var(--cx-muted); min-width: 0; }
+  .brand-pill { display: flex; align-items: center; gap: 8px; color: var(--cx-navy); font-weight: 700; font-size: 14.5px; letter-spacing: 0.8px; cursor: pointer; flex-shrink: 0; }
   .cx-logo-mini { width: 24px; height: 24px; }
   .sep { color: #CBD5E1; }
-  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  #breadcrumbText { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .topbar-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
   .user-pill { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--cx-text); }
   .user-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--cx-navy); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; }
-  .offline-badge { font-size: 11.5px; padding: 4px 9px; border-radius: 12px; font-weight: 600; background: #FEF3C7; color: #B45309; border: 1px solid #FDE68A; }
+  .offline-badge { font-size: 11px; padding: 4px 8px; border-radius: 12px; font-weight: 600; background: #FEF3C7; color: #B45309; border: 1px solid #FDE68A; white-space: nowrap; }
 
   /* INDICATEUR DE MODIFICATIONS NON ENREGISTREES */
   .btn-unsaved { background: #FFFBEB !important; border-color: var(--cx-orange) !important; color: #B45309 !important; box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.25); }
 
   .content-area { padding: 28px 24px; max-width: 1120px; width: 100%; margin: 0 auto; }
   .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 22px; flex-wrap: wrap; gap: 10px; }
-  .page-title { font-size: 22px; font-weight: 600; color: var(--cx-text); margin: 0; }
+  .page-title { font-size: 22px; font-weight: 600; color: var(--cx-text); margin: 0; word-break: break-word; }
   .page-subtitle { font-size: 13px; color: var(--cx-muted); margin: 4px 0 0 0; }
 
   /* COMPTEURS ADMIN */
@@ -68,10 +69,9 @@
   .dot-mini { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
 
   /* CARTE PRINCIPALE BLANCHE */
-  .card { background: #fff; border: 1px solid var(--cx-border); border-radius: 10px; padding: 28px; flex: 1; box-shadow: 0 1px 4px rgba(0,0,0,0.03); min-width: 0; }
-  .card-head-flex { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
-  .card-title { font-size: 18px; font-weight: 600; color: var(--cx-text); margin: 0 0 4px 0; }
-  .card-desc { font-size: 13px; color: var(--cx-muted); margin: 0; }
+  .card { background: #fff; border: 1px solid var(--cx-border); border-radius: 10px; padding: 28px; flex: 1; box-shadow: 0 1px 4px rgba(0,0,0,0.03); min-width: 0; width: 100%; }
+  .card-title { font-size: 18px; font-weight: 600; color: var(--cx-text); margin: 0 0 6px 0; }
+  .card-desc { font-size: 13px; color: var(--cx-muted); margin: 0 0 18px 0; }
   .section-label { font-size: 12px; font-weight: 600; color: var(--cx-muted); margin: 16px 0 8px 0; text-transform: uppercase; letter-spacing: 0.4px; }
 
   /* CARTES DE SELECTION RADIO */
@@ -80,7 +80,7 @@
   .radio-card:hover { border-color: #93C5FD; }
   .radio-card.selected { border-color: var(--cx-blue); background: var(--cx-blue-light); }
   .radio-card-head { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; color: var(--cx-text); }
-  .radio-dot { width: 15px; height: 15px; border-radius: 50%; border: 2px solid #94A3B8; display: inline-block; position: relative; }
+  .radio-dot { width: 15px; height: 15px; border-radius: 50%; border: 2px solid #94A3B8; display: inline-block; position: relative; flex-shrink: 0; }
   .radio-card.selected .radio-dot { border-color: var(--cx-blue); }
   .radio-card.selected .radio-dot::after { content: ''; width: 7px; height: 7px; background: var(--cx-blue); border-radius: 50%; position: absolute; top: 2px; left: 2px; }
   .radio-card-sub { font-size: 12px; color: var(--cx-muted); margin: 4px 0 0 23px; }
@@ -88,65 +88,101 @@
 
   /* FORMULAIRES & GRILLES */
   .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
-  @media(max-width: 750px){
-    .wizard-layout { flex-direction: column; }
-    .stepper { position: static; width: 100%; display: flex; overflow-x: auto; gap: 6px; padding-bottom: 8px; }
-    .step-item { white-space: nowrap; }
-    .legend-box { display: none; }
-    .grid, .stats-grid { grid-template-columns: 1fr; }
-    .topbar { padding: 0 14px; }
-  }
   label { font-weight: 600; font-size: 12.5px; color: #334155; display: block; margin-top: 8px; }
   input, select, textarea { width: 100%; padding: 9px 11px; border: 1px solid #CBD5E1; border-radius: 6px; margin-top: 4px; font-size: 13.5px; color: var(--cx-text); background: #fff; font-family: inherit; }
   input:focus, select:focus, textarea:focus { outline: none; border-color: var(--cx-blue); box-shadow: 0 0 0 3px rgba(30,115,190,0.12); }
 
   /* CHECKLISTS */
-  .check-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; border-bottom: 1px solid #F1F5F9; font-size: 13.5px; }
+  .check-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px; border-bottom: 1px solid #F1F5F9; font-size: 13.5px; }
   .check-row:hover { background: #F8FAFC; }
-  .check-row select { width: 95px; padding: 5px 8px; margin: 0; }
+  .check-row span { flex: 1; line-height: 1.35; }
+  .check-row select { width: 95px; padding: 6px 8px; margin: 0; flex-shrink: 0; }
 
   /* BOUTONS */
-  .btn { background: var(--cx-blue); color: #fff; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-size: 13.5px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 7px; transition: 0.15s; }
+  .btn { background: var(--cx-blue); color: #fff; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-size: 13.5px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 7px; transition: 0.15s; }
   .btn:hover { background: #165B96; }
   .btn-outline { background: #fff; color: #334155; border: 1px solid #CBD5E1; }
   .btn-outline:hover { background: #F8FAFC; border-color: #94A3B8; }
   .btn-green { background: var(--cx-green); }
   .btn-green:hover { background: #218838; }
-  .btn-sm { padding: 6px 11px; font-size: 12px; }
-  .btn-red { background: #DC2626; padding: 5px 9px; font-size: 11.5px; }
+  .btn-sm { padding: 7px 12px; font-size: 12.5px; }
+  .btn-red { background: #DC2626; padding: 6px 10px; font-size: 12px; }
 
-  .wizard-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--cx-border); }
+  .wizard-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--cx-border); gap: 10px; }
+  .wizard-footer-btns { display: flex; gap: 10px; }
 
   /* TABLEAUX */
   table { width: 100%; border-collapse: collapse; margin-top: 12px; }
   th, td { border: 1px solid var(--cx-border); padding: 9px 8px; text-align: center; font-size: 13px; }
   th { background: #F8FAFC; color: #334155; font-weight: 600; }
-  .sea-table th { background: var(--cx-navy); color: #fff; }
-  .sea-table input { padding: 5px; text-align: center; margin: 0; font-size: 13px; }
-  .calc-cell { background: var(--cx-blue-light); font-weight: 700; color: var(--cx-blue); }
+  .sea-table { min-width: 640px; }
+  .sea-table th { background: var(--cx-navy); color: #fff; font-size: 12px; }
+  .sea-table input { padding: 6px 4px; text-align: center; margin: 0; font-size: 13px; min-width: 56px; }
+  .calc-cell { background: var(--cx-blue-light); font-weight: 700; color: var(--cx-blue); white-space: nowrap; }
 
   /* GRAPHIQUE ESSAIS EN MER */
   .chart-box { margin-top: 18px; border: 1px solid var(--cx-border); border-radius: 8px; padding: 14px; background: #FAFCFF; }
   .chart-legend { display: flex; gap: 18px; font-size: 12px; font-weight: 600; margin-bottom: 8px; justify-content: flex-end; }
 
   /* BARRE PROGRESSION */
-  .progress-wrap { background: #E2E8F0; border-radius: 10px; height: 18px; width: 100%; overflow: hidden; position: relative; }
+  .progress-wrap { background: #E2E8F0; border-radius: 10px; height: 18px; width: 100%; overflow: hidden; position: relative; min-width: 90px; }
   .progress-bar { background: var(--cx-green); height: 100%; transition: width 0.3s; }
   .progress-text { position: absolute; width: 100%; text-align: center; top: 0; left: 0; font-size: 11px; font-weight: 700; line-height: 18px; color: #0F172A; }
 
   /* GALERIE PHOTOS & DOCS */
-  .photo-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: 10px; margin-top: 8px; }
+  .photo-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: 8px; }
   .photo-card { border: 1px solid var(--cx-border); padding: 6px; border-radius: 6px; text-align: center; background: #F8FAFC; }
-  .photo-card img { width: 100%; height: 120px; object-fit: cover; border-radius: 4px; display: block; }
+  .photo-card img { width: 100%; height: 115px; object-fit: cover; border-radius: 4px; display: block; }
   .doc-badge { background: var(--cx-blue-light); color: var(--cx-blue); padding: 16px 8px; border-radius: 4px; font-weight: 700; font-size: 12px; border: 1px solid #BFDBFE; }
   .upload-status { font-size: 12px; color: #D97706; font-weight: 600; margin-top: 4px; }
 
   /* SIGNATURES & ADMIN */
-  canvas { border: 1.5px dashed #94A3B8; border-radius: 6px; width: 100%; height: 130px; touch-action: none; background: #F8FAFC; margin-top: 4px; }
+  canvas { border: 1.5px dashed #94A3B8; border-radius: 6px; width: 100%; height: 140px; touch-action: none; background: #F8FAFC; margin-top: 4px; }
   .admin-box { background: var(--cx-blue-light); border: 1.5px solid var(--cx-blue); padding: 18px; border-radius: 8px; margin-top: 22px; }
-  .login-box { max-width: 400px; margin: 70px auto; text-align: center; padding: 32px; border: 1px solid var(--cx-border); border-radius: 10px; background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+  .login-box { max-width: 400px; margin: 50px auto; text-align: center; padding: 28px 22px; border: 1px solid var(--cx-border); border-radius: 10px; background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
   .hidden { display: none !important; }
   .print-only { display: none; }
+
+  /* =========================================================
+     OPTIMISATION RESPONSIVE TELEPHONE (MOBILE < 768px)
+     ========================================================= */
+  @media(max-width: 768px) {
+    .topbar { padding: 0 12px; height: 54px; }
+    .topbar-left .sep, .topbar-left #breadcrumbText, #userRoleLabel { display: none; }
+    .brand-pill span { font-size: 13.5px; }
+    .content-area { padding: 14px 12px; }
+    .page-header { margin-bottom: 14px; }
+    .page-title { font-size: 18px; }
+
+    /* Stepper horizontal tactile fluide en haut */
+    .wizard-layout { flex-direction: column; gap: 12px; }
+    .stepper { position: static; width: 100%; background: #fff; border: 1px solid var(--cx-border); border-radius: 8px; padding: 8px; }
+    #stepperContainer { display: flex; overflow-x: auto; gap: 6px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+    #stepperContainer::-webkit-scrollbar { display: none; }
+    .step-item { white-space: nowrap; padding: 7px 10px; margin: 0; font-size: 12.5px; flex-shrink: 0; background: #F8FAFC; }
+    .step-item.active { background: var(--cx-blue-light); border-color: var(--cx-blue); }
+    .legend-box { flex-direction: row; justify-content: space-around; margin-top: 8px; padding-top: 8px; font-size: 11px; }
+
+    /* Carte et champs adaptés au tactile (16px évite le zoom auto iOS) */
+    .card { padding: 16px 14px; border-radius: 8px; }
+    .card-title { font-size: 16.5px; }
+    .grid, .stats-grid, .radio-cards { grid-template-columns: 1fr; gap: 10px; }
+    input, select, textarea { font-size: 16px; padding: 10px 12px; }
+
+    /* Checklists ergonomiques au pouce */
+    .check-row { flex-direction: column; align-items: stretch; gap: 8px; padding: 12px 6px; }
+    .check-row select { width: 100%; font-size: 15px; padding: 8px 10px; }
+
+    /* Galerie photos 2 colonnes sur mobile */
+    .photo-gallery { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .photo-card img { height: 100px; }
+
+    /* Pied de navigation mobile pleine largeur */
+    .wizard-footer { flex-direction: column; align-items: stretch; gap: 10px; }
+    #stepIndicatorText { text-align: center; }
+    .wizard-footer-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+    .wizard-footer-btns .btn { width: 100%; padding: 12px; }
+  }
 
   /* MISE EN PAGE RAPPORT PDF CONSTRUCTEUR */
   @media print {
@@ -159,6 +195,7 @@
     .print-stamp { border: 2px solid var(--cx-green); color: var(--cx-green); padding: 5px 12px; border-radius: 6px; font-weight: 700; font-size: 13px; text-transform: uppercase; }
     .step-section { display: block !important; break-inside: avoid; page-break-inside: avoid; margin-bottom: 20px; border-bottom: 1px solid #CBD5E1; padding-bottom: 14px; }
     .photo-card, .chart-box { break-inside: avoid; page-break-inside: avoid; }
+    .sea-table { min-width: 100%; }
     .sea-table input { border: none; background: transparent; }
     input, select, textarea { border: 1px solid #CBD5E1; padding: 5px 8px; font-size: 12px; }
   }
@@ -181,7 +218,7 @@
       <span id="breadcrumbText">Portal</span>
     </div>
     <div class="topbar-right">
-      <span id="offlineIndicator" class="offline-badge hidden">Mode Hors-Ligne Actif</span>
+      <span id="offlineIndicator" class="offline-badge hidden">Hors-Ligne</span>
       <button class="btn btn-outline btn-sm hidden" id="topSaveBtn" onclick="saveForm(null)">
         <svg class="icon" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
         <span id="topSaveLabel">Sauvegarder</span>
@@ -200,7 +237,7 @@
       <h2 style="margin-top:0; color:var(--cx-navy);">Accès Administration</h2>
       <p style="font-size:13px; color:var(--cx-muted);">Saisissez votre mot de passe pour gérer vos liens et dossiers de mise en service.</p>
       <input type="password" id="adminPwdInput" placeholder="Mot de passe Admin" onkeypress="if(event.key==='Enter') checkAdminLogin()">
-      <button class="btn" style="width:100%; justify-content:center; margin-top:14px;" onclick="checkAdminLogin()">Se connecter</button>
+      <button class="btn" style="width:100%; margin-top:14px;" onclick="checkAdminLogin()">Se connecter</button>
     </div>
 
     <!-- VUE ADMIN (LISTE DES PROJETS) -->
@@ -251,7 +288,7 @@
       </div>
 
       <div class="card" style="padding:0; overflow-x:auto;">
-        <table style="margin:0;">
+        <table style="margin:0; min-width:650px;">
           <thead>
             <tr>
               <th style="text-align:left; padding-left:16px;">Projet / Bateau</th>
@@ -284,17 +321,17 @@
           <h1 class="page-title" id="displayProjName">Installation & Commissioning Form</h1>
           <p class="page-subtitle">ID Dossier : <strong id="displayProjId"></strong></p>
         </div>
-        <div style="display:flex; gap:8px;">
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
           <a id="projectDriveLinkBtn" href="#" target="_blank" class="btn btn-green btn-sm hidden">
             <svg class="icon" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-            Dossier Google Drive
+            Dossier Drive
           </a>
           <button class="btn btn-outline btn-sm" id="backAdminBtn" onclick="goAdmin()">← Liste projets</button>
         </div>
       </div>
 
       <div class="wizard-layout">
-        <!-- PASTILLES D'ETAPES A GAUCHE -->
+        <!-- PASTILLES D'ETAPES -->
         <div class="stepper no-print">
           <div id="stepperContainer"></div>
           <div class="legend-box">
@@ -355,13 +392,8 @@
 
           <!-- ETAPE 3 : INSTALLATION CHECK (1 TO 21) -->
           <div class="step-section hidden" data-step="3">
-            <div class="card-head-flex">
-              <div>
-                <h2 class="card-title">3. Installation Check (1 to 21)</h2>
-                <p class="card-desc">Vérifiez chaque point mécanique et électrique avant la mise sous tension.</p>
-              </div>
-              <button type="button" class="btn btn-outline btn-sm no-print" onclick="markAllYes('inst', 21)">Tout marquer YES</button>
-            </div>
+            <h2 class="card-title">3. Installation Check (1 to 21)</h2>
+            <p class="card-desc">Vérifiez individuellement chaque point mécanique et électrique avant la mise sous tension.</p>
             <div id="installChecksContainer"></div>
             <label>Installation Comments</label>
             <textarea id="installComments" rows="2"></textarea>
@@ -395,13 +427,8 @@
 
           <!-- ETAPE 7 : POWER-ON & OPERATION CHECK -->
           <div class="step-section hidden" data-step="7">
-            <div class="card-head-flex">
-              <div>
-                <h2 class="card-title">7. Power-On & Operation Check (1 to 16)</h2>
-                <p class="card-desc">Contrôles fonctionnels après mise sous tension du système de propulsion.</p>
-              </div>
-              <button type="button" class="btn btn-outline btn-sm no-print" onclick="markAllYes('pwr', 16)">Tout marquer YES</button>
-            </div>
+            <h2 class="card-title">7. Power-On & Operation Check (1 to 16)</h2>
+            <p class="card-desc">Contrôles fonctionnels après mise sous tension du système de propulsion.</p>
             <div id="powerChecksContainer"></div>
             <label>Power-On Comments</label>
             <textarea id="powerComments" rows="2"></textarea>
@@ -437,7 +464,7 @@
               <div><label>Sea Trial Date & Personnel</label><input type="text" id="seaDatePers"></div>
             </div>
 
-            <div style="overflow-x:auto;">
+            <div style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
               <table class="sea-table">
                 <thead>
                   <tr>
@@ -463,7 +490,7 @@
 
             <!-- GRAPHIQUE AUTOMATIQUE PUISSANCE & VITESSE -->
             <div class="chart-box">
-              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
                 <strong style="font-size:13px; color:var(--cx-navy);">Courbes de performance (Puissance & Vitesse moyennes)</strong>
                 <div class="chart-legend">
                   <span style="color:var(--cx-blue);">— Puissance Moy. (kW)</span>
@@ -479,13 +506,8 @@
 
           <!-- ETAPE 9 : HANDOVER, SIGNATURES & ADMIN -->
           <div class="step-section hidden" data-step="9">
-            <div class="card-head-flex">
-              <div>
-                <h2 class="card-title">9. Handover & Signatures</h2>
-                <p class="card-desc">Validation de la prise en main avec le propriétaire et signatures électroniques.</p>
-              </div>
-              <button type="button" class="btn btn-outline btn-sm no-print" onclick="markAllYes('hnd', 5)">Tout marquer YES</button>
-            </div>
+            <h2 class="card-title">9. Handover & Signatures</h2>
+            <p class="card-desc">Validation de la prise en main avec le propriétaire et signatures électroniques.</p>
             <div id="handoverChecksContainer"></div>
             <label>Customer Comments</label>
             <textarea id="customerComments" rows="2"></textarea>
@@ -504,7 +526,7 @@
             </div>
 
             <div class="no-print" style="margin-top:16px;">
-              <button class="btn" onclick="saveForm('En cours / Rempli Installateur')">
+              <button class="btn" style="width:100%;" onclick="saveForm('En cours / Rempli Installateur')">
                 <svg class="icon" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
                 Sauvegarder & Finaliser partie Installateur
               </button>
@@ -537,7 +559,7 @@
           <!-- PIED DE NAVIGATION WIZARD (BACK / CONTINUE) -->
           <div class="wizard-footer no-print">
             <span style="font-size:12.5px; color:var(--cx-muted);" id="stepIndicatorText">Step 1 of 9</span>
-            <div style="display:flex; gap:10px;">
+            <div class="wizard-footer-btns">
               <button type="button" class="btn btn-outline" id="prevStepBtn" onclick="changeStep(-1)">← BACK</button>
               <button type="button" class="btn" id="nextStepBtn" onclick="changeStep(1)">CONTINUE →</button>
             </div>
@@ -691,6 +713,10 @@
           <span>${name}</span>
         </div>`;
     });
+    const activeEl = container.querySelector('.step-item.active');
+    if (activeEl && window.innerWidth <= 768) {
+      activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
   };
 
   window.goToStep = (stepNum, autoSave = true) => {
@@ -708,15 +734,6 @@
   };
 
   window.changeStep = (delta) => goToStep(currentStep + delta, true);
-
-  window.markAllYes = (prefix, count) => {
-    for (let i = 0; i < count; i++) {
-      const el = document.getElementById(`${prefix}_${i}`);
-      if (el && el.value === "") el.value = "YES";
-    }
-    renderStepper();
-    markUnsaved();
-  };
 
   window.selectDrive = (val, el) => {
     document.getElementById('driveSystem').value = val;
@@ -773,10 +790,10 @@
       <tr>
         <td><strong>${pct}%</strong></td>
         <td id="theo_${pct}" class="calc-cell">0.0</td>
-        <td><input type="number" step="0.1" id="runA_kw_${pct}" oninput="recalcSeaTrial()"></td>
-        <td><input type="number" step="0.1" id="runA_kts_${pct}" oninput="recalcSeaTrial()"></td>
-        <td><input type="number" step="0.1" id="runB_kw_${pct}" oninput="recalcSeaTrial()"></td>
-        <td><input type="number" step="0.1" id="runB_kts_${pct}" oninput="recalcSeaTrial()"></td>
+        <td><input type="number" inputmode="decimal" step="0.1" id="runA_kw_${pct}" oninput="recalcSeaTrial()"></td>
+        <td><input type="number" inputmode="decimal" step="0.1" id="runA_kts_${pct}" oninput="recalcSeaTrial()"></td>
+        <td><input type="number" inputmode="decimal" step="0.1" id="runB_kw_${pct}" oninput="recalcSeaTrial()"></td>
+        <td><input type="number" inputmode="decimal" step="0.1" id="runB_kts_${pct}" oninput="recalcSeaTrial()"></td>
         <td id="avg_kw_${pct}" class="calc-cell">-</td>
         <td id="avg_kts_${pct}" class="calc-cell">-</td>
         <td id="eff_${pct}" class="calc-cell">-</td>
