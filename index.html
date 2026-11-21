@@ -36,7 +36,6 @@
   .user-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--cx-navy); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; }
   .offline-badge { font-size: 11px; padding: 4px 8px; border-radius: 12px; font-weight: 600; background: #FEF3C7; color: #B45309; border: 1px solid #FDE68A; white-space: nowrap; }
 
-  /* INDICATEUR DE MODIFICATIONS NON ENREGISTREES */
   .btn-unsaved { background: #FFFBEB !important; border-color: var(--cx-orange) !important; color: #B45309 !important; box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.25); }
 
   .content-area { padding: 28px 24px; max-width: 1120px; width: 100%; margin: 0 auto; }
@@ -50,14 +49,14 @@
   .stat-label { font-size: 12px; color: var(--cx-muted); font-weight: 600; text-transform: uppercase; }
   .stat-val { font-size: 24px; font-weight: 700; color: var(--cx-navy); margin-top: 4px; }
 
-  /* LAYOUT WIZARD : PASTILLES GAUCHE + CARTE CENTRALE */
+  /* LAYOUT WIZARD */
   .wizard-layout { display: flex; gap: 28px; align-items: flex-start; }
   .stepper { width: 205px; flex-shrink: 0; padding-top: 6px; position: sticky; top: 82px; }
   .step-item { display: flex; align-items: center; gap: 12px; padding: 9px 10px; cursor: pointer; font-size: 13.5px; color: var(--cx-muted); border-radius: 8px; transition: 0.15s; margin-bottom: 2px; border: 1px solid transparent; }
   .step-item:hover { background: rgba(30,115,190,0.06); color: var(--cx-text); }
   .step-item.active { background: #fff; border-color: var(--cx-border); color: var(--cx-text); font-weight: 700; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
 
-  /* COULEURS DES PASTILLES SELON LE REMPLISSAGE */
+  /* PASTILLES DYNAMIQUES */
   .step-circle { width: 25px; height: 25px; border-radius: 50%; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #fff; transition: 0.2s; }
   .step-item.status-empty .step-circle { background: var(--cx-red); }
   .step-item.status-partial .step-circle { background: var(--cx-orange); }
@@ -68,11 +67,22 @@
   .legend-row { display: flex; align-items: center; gap: 8px; }
   .dot-mini { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
 
-  /* CARTE PRINCIPALE BLANCHE */
+  /* CARTE PRINCIPALE */
   .card { background: #fff; border: 1px solid var(--cx-border); border-radius: 10px; padding: 28px; flex: 1; box-shadow: 0 1px 4px rgba(0,0,0,0.03); min-width: 0; width: 100%; }
   .card-title { font-size: 18px; font-weight: 600; color: var(--cx-text); margin: 0 0 6px 0; }
   .card-desc { font-size: 13px; color: var(--cx-muted); margin: 0 0 18px 0; }
   .section-label { font-size: 12px; font-weight: 600; color: var(--cx-muted); margin: 16px 0 8px 0; text-transform: uppercase; letter-spacing: 0.4px; }
+
+  /* BLOCS PHOTO INDIVIDUELS AVEC CASE N/A */
+  .photo-req-block { border: 1px solid var(--cx-border); border-radius: 8px; padding: 14px; margin-bottom: 12px; background: #FAFCFF; transition: 0.2s; }
+  .photo-req-block.req-done { border-left: 4px solid var(--cx-green); background: #fff; }
+  .photo-req-block.req-na { border-left: 4px solid #94A3B8; background: #F8FAFC; opacity: 0.85; }
+  .photo-req-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+  .photo-req-title { font-weight: 700; font-size: 13.5px; color: var(--cx-navy); }
+  .photo-req-hint { font-size: 12px; color: var(--cx-muted); margin-top: 2px; }
+  .na-toggle { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: #475569; background: #E2E8F0; padding: 5px 10px; border-radius: 6px; cursor: pointer; user-select: none; flex-shrink: 0; margin: 0; }
+  .na-toggle input { width: auto; margin: 0; cursor: pointer; }
+  .photo-req-block.req-na .na-toggle { background: var(--cx-navy); color: #fff; }
 
   /* CARTES DE SELECTION RADIO */
   .radio-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 16px; }
@@ -92,7 +102,7 @@
   input, select, textarea { width: 100%; padding: 9px 11px; border: 1px solid #CBD5E1; border-radius: 6px; margin-top: 4px; font-size: 13.5px; color: var(--cx-text); background: #fff; font-family: inherit; }
   input:focus, select:focus, textarea:focus { outline: none; border-color: var(--cx-blue); box-shadow: 0 0 0 3px rgba(30,115,190,0.12); }
 
-  /* GROUPE VALEUR + UNITE (ISOLEMENT 96V) & ALERTE ROUGE < 250 kOhm */
+  /* GROUPE VALEUR + UNITE (ISOLEMENT 96V) */
   .input-unit-group { display: flex; gap: 8px; align-items: center; margin-top: 4px; }
   .input-unit-group input { flex: 1; margin-top: 0; }
   .input-unit-group select { width: 92px; margin-top: 0; font-weight: 600; flex-shrink: 0; }
@@ -141,7 +151,7 @@
 
   /* GALERIE PHOTOS & DOCS */
   .photo-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: 8px; }
-  .photo-card { border: 1px solid var(--cx-border); padding: 6px; border-radius: 6px; text-align: center; background: #F8FAFC; }
+  .photo-card { border: 1px solid var(--cx-border); padding: 6px; border-radius: 6px; text-align: center; background: #fff; }
   .photo-card img { width: 100%; height: 115px; object-fit: cover; border-radius: 4px; display: block; }
   .doc-badge { background: var(--cx-blue-light); color: var(--cx-blue); padding: 16px 8px; border-radius: 4px; font-weight: 700; font-size: 12px; border: 1px solid #BFDBFE; }
   .upload-status { font-size: 12px; color: #D97706; font-weight: 600; margin-top: 4px; }
@@ -197,7 +207,7 @@
     .print-header { display: flex !important; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--cx-navy); padding-bottom: 12px; margin-bottom: 18px; }
     .print-stamp { border: 2px solid var(--cx-green); color: var(--cx-green); padding: 5px 12px; border-radius: 6px; font-weight: 700; font-size: 13px; text-transform: uppercase; }
     .step-section { display: block !important; break-inside: avoid; page-break-inside: avoid; margin-bottom: 20px; border-bottom: 1px solid #CBD5E1; padding-bottom: 14px; }
-    .photo-card, .chart-box { break-inside: avoid; page-break-inside: avoid; }
+    .photo-req-block, .photo-card, .chart-box { break-inside: avoid; page-break-inside: avoid; }
     .sea-table { min-width: 100%; }
     .sea-table input { border: none; background: transparent; }
     input, select, textarea { border: 1px solid #CBD5E1; padding: 5px 8px; font-size: 12px; }
@@ -458,17 +468,17 @@
             </div>
           </div>
 
-          <!-- ETAPE 5 : REQUIRED COMMISSIONING PHOTOS -->
+          <!-- ETAPE 5 : 17 RUBRIQUES PHOTOS OBLIGATOIRES + CASE N/A -->
           <div class="step-section hidden" data-step="5">
-            <h2 class="card-title">5. Required Commissioning Photos</h2>
-            <p class="card-desc">Sélectionnez vos photos : prévisualisation instantanée et archivage automatique en haute définition sur Google Drive.</p>
+            <h2 class="card-title">5. Required Commissioning Photos (17 points)</h2>
+            <p class="card-desc">Ajoutez une photo par rubrique (archivée dans <strong>01_Photos</strong> sur Drive). Si un élément n'équipe pas le bateau, cochez <strong>N/A</strong>.</p>
             <div id="photoSectionsContainer"></div>
           </div>
 
-          <!-- ETAPE 6 : TECHNICAL PLANS & BOAT MANUAL -->
+          <!-- ETAPE 6 : TECHNICAL PLANS & BOAT MANUAL (DOSSIER 02_Documents) -->
           <div class="step-section hidden" data-step="6">
             <h2 class="card-title">6. Technical Plans, Schematics & Boat Manual</h2>
-            <p class="card-desc">Ajoutez les schémas électriques, plans mécaniques/3D et le manuel du bateau (classés automatiquement sur Drive).</p>
+            <p class="card-desc">Ajoutez les schémas électriques, plans mécaniques/3D et le manuel du bateau (classés dans <strong>02_Documents</strong> sur Drive).</p>
             <div id="docSectionsContainer"></div>
           </div>
 
@@ -653,6 +663,7 @@
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
   let projectFiles = [];
+  let photoNaState = {};
   let allProjectsCache = [];
   let currentProjectName = "";
   let currentDriveFolderUrl = "";
@@ -718,10 +729,38 @@
     renderStepper();
   };
 
+  // 17 RUBRIQUES PHOTOS PRECISES & OBLIGATOIRES (AVEC CASE N/A)
+  const photoCategories = [
+    { id: "boat_side", drivePrefix: "01_Bateau_Profil", label: "1. Vues extérieures du bateau (Profil bâbord / tribord)", hint: "Vue latérale d'ensemble du navire" },
+    { id: "boat_stern", drivePrefix: "02_Bateau_Arriere", label: "2. Vue arrière du bateau & Tableau arrière", hint: "Vue de l'arrière du bateau et du tableau arrière" },
+    { id: "helm_station", drivePrefix: "03_Poste_Pilotage", label: "3. Poste de pilotage (Console, manette & écran)", hint: "Vue d'ensemble du poste de barre et des commandes" },
+    { id: "device_list", drivePrefix: "04_Device_List_Ecran", label: "4. Device List sur l'écran système", hint: "Photo nette de la liste des équipements et numéros de série affichés" },
+    { id: "motor_main", drivePrefix: "05_Moteur_Principal", label: "5. Moteur principal & Supports / Silentblocs", hint: "Vue générale du moteur installé et de ses fixations" },
+    { id: "motor_plate", drivePrefix: "06_Plaque_Moteur", label: "6. Plaque signalétique moteur (Numéro de série)", hint: "Gros plan lisible sur l'étiquette constructeur du moteur" },
+    { id: "mech_coupling", drivePrefix: "07_Accouplement_Mecanique", label: "7. Accouplement mécanique / Tourteau / Alignement arbre", hint: "Liaison mécanique moteur-arbre, accouplement souple ou presse-étoupe" },
+    { id: "prop_drive", drivePrefix: "08_Helice_Saildrive_Pod", label: "8. Hélice / Saildrive / Pod / Embase", hint: "Vue de la propulsion immergée, hélice et anodes" },
+    { id: "hv_crimping", drivePrefix: "09_Sertissage_Cables_96V", label: "9. Sertissage des câbles puissance 96V", hint: "Gros plan sur les cosses serties et gaines thermo haute tension" },
+    { id: "box_96v_ext", drivePrefix: "10_BusBox_96V_Exterieur", label: "10. Bus Box / Boîte de distribution 96V DC (Extérieur)", hint: "Emplacement, fixation et presse-étoupes de la boîte 96V" },
+    { id: "box_96v_int", drivePrefix: "11_BusBox_96V_Interieur", label: "11. Intérieur de la Bus Box / Boîte 96V DC", hint: "Capot ouvert montrant les connexions internes, barres et fusibles HV" },
+    { id: "bat_96v", drivePrefix: "12_Batteries_96V", label: "12. Parc batteries principal (96V) & Arrimage", hint: "Vue d'ensemble des batteries haute tension et de leur fixation" },
+    { id: "bat_12v", drivePrefix: "13_Batterie_12V_Fusible", label: "13. Batterie auxiliaire 12V & Fusible", hint: "Batterie 12V dédiée au contrôle et sa protection fusible" },
+    { id: "chargers_dcdc", drivePrefix: "14_Chargeurs_DCDC", label: "14. Chargeur(s) & Convertisseur(s) DC-DC", hint: "Vue d'ensemble des chargeurs et convertisseurs installés" },
+    { id: "box_220v_ext", drivePrefix: "15_Boite_220V_Exterieur", label: "15. Boîte de distribution 220V AC (Extérieur)", hint: "Coffret 220V AC, disjoncteurs différentiels et prise de quai" },
+    { id: "box_220v_int", drivePrefix: "16_Boite_220V_Interieur", label: "16. Intérieur de la boîte de distribution 220V AC", hint: "Capot ouvert montrant le câblage interne Phase / Neutre / Terre" },
+    { id: "earth_can", drivePrefix: "17_Terre_et_Reseau_CAN", label: "17. Busbar de terre, liaison batteries & Nœuds CAN", hint: "Barre de terre, mise à la terre des batteries, tés et terminaisons CAN" }
+  ];
+
+  const docCategories = [
+    { id: "elec_schema", drivePrefix: "Schema_Electrique", label: "1. Schémas électriques d'installation" },
+    { id: "mech_3d", drivePrefix: "Plan_Mecanique_3D", label: "2. Plans mécaniques & Fichiers 3D" },
+    { id: "boat_manual", drivePrefix: "Manuel_Bateau", label: "3. Manuel du bateau / Documentation chantier" }
+  ];
+  const allCategories = [...photoCategories, ...docCategories];
+
   // Etapes du Wizard
   const stepNames = [
     "Vessel & Info", "System & S/N", "Install Check", "Appendices 1-2",
-    "Photos Drive", "Plans & Manual", "Power-On Check", "Sea Trial", "Handover & Sign"
+    "Photos (17)", "Plans & Manual", "Power-On Check", "Sea Trial", "Handover & Sign"
   ];
 
   function getStepStatus(stepNum) {
@@ -747,10 +786,10 @@
       return count === fields.length ? 'complete' : 'partial';
     }
     if (stepNum === 5) {
-      const cats = ['vessel', 'battery', 'motor', 'cabling'];
-      const filledCats = cats.filter(c => projectFiles.some(f => f.cat === c)).length;
-      if (filledCats === 0) return 'empty';
-      return filledCats === cats.length ? 'complete' : 'partial';
+      // Chaque rubrique photo est validée si elle contient >= 1 photo OU si elle est cochée N/A
+      const completedCount = photoCategories.filter(c => photoNaState[c.id] || projectFiles.some(f => f.cat === c.id)).length;
+      if (completedCount === 0) return 'empty';
+      return completedCount === photoCategories.length ? 'complete' : 'partial';
     }
     if (stepNum === 6) {
       const docCount = projectFiles.filter(f => ['elec_schema', 'mech_3d', 'boat_manual'].includes(f.cat)).length;
@@ -862,7 +901,7 @@
   renderChecks(powerItems, "powerChecksContainer", "pwr");
   renderChecks(handoverItems, "handoverChecksContainer", "hnd");
 
-  // Tableau Sea Trial + Tracé automatique de la courbe SVG
+  // Tableau Sea Trial + Courbe SVG
   const throttleSteps = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
   const seaBody = document.getElementById('seaTrialTableBody');
   throttleSteps.forEach(pct => {
@@ -944,30 +983,59 @@
   };
   recalcSeaTrial();
 
-  // Rubriques Photos & Documents Google Drive
-  const photoCategories = [
-    { id: "vessel", label: "1. Vues extérieures du bateau & Hélice / Saildrive / Pod" },
-    { id: "battery", label: "2. Compartiment batteries & Connexions" },
-    { id: "motor", label: "3. Moteur principal, Écran (liste N° série) & Manette" },
-    { id: "cabling", label: "4. Chargeur, DCDC, Câblage HV / 12V / Terre / Réseau CAN" }
-  ];
-  const docCategories = [
-    { id: "elec_schema", label: "1. Schémas électriques d'installation" },
-    { id: "mech_3d", label: "2. Plans mécaniques & Fichiers 3D" },
-    { id: "boat_manual", label: "3. Manuel du bateau / Documentation chantier" }
-  ];
-
+  // Rendu des 17 blocs Photos avec case N/A
   const photoContainer = document.getElementById('photoSectionsContainer');
   photoCategories.forEach(cat => {
     photoContainer.innerHTML += `
-      <div class="section-label">${cat.label}</div>
-      <div class="no-print">
-        <input type="file" accept="image/*" multiple onchange="uploadToDrive(this.files, '${cat.id}')">
-        <div id="status_${cat.id}" class="upload-status"></div>
-      </div>
-      <div id="gal_${cat.id}" class="photo-gallery"></div>`;
+      <div class="photo-req-block" id="block_${cat.id}">
+        <div class="photo-req-head">
+          <div>
+            <div class="photo-req-title">${cat.label}</div>
+            <div class="photo-req-hint">${cat.hint}</div>
+          </div>
+          <label class="na-toggle no-print">
+            <input type="checkbox" id="na_${cat.id}" onchange="togglePhotoNa('${cat.id}', this.checked)">
+            N/A
+          </label>
+        </div>
+        <div class="no-print" id="inputWrap_${cat.id}">
+          <input type="file" accept="image/*" multiple onchange="uploadToDrive(this.files, '${cat.id}')">
+          <div id="status_${cat.id}" class="upload-status"></div>
+        </div>
+        <div id="naPrintNote_${cat.id}" class="hidden" style="font-size:12px; color:#64748B; font-style:italic;">Non applicable sur ce navire (N/A)</div>
+        <div id="gal_${cat.id}" class="photo-gallery"></div>
+      </div>`;
   });
 
+  window.togglePhotoNa = (catId, isChecked) => {
+    photoNaState[catId] = isChecked;
+    updatePhotoBlockVisuals();
+    renderStepper();
+    markUnsaved();
+  };
+
+  function updatePhotoBlockVisuals() {
+    photoCategories.forEach(cat => {
+      const block = document.getElementById(`block_${cat.id}`);
+      const cb = document.getElementById(`na_${cat.id}`);
+      const inputWrap = document.getElementById(`inputWrap_${cat.id}`);
+      const naNote = document.getElementById(`naPrintNote_${cat.id}`);
+      const isNa = !!photoNaState[cat.id];
+      const hasPhoto = projectFiles.some(f => f.cat === cat.id);
+
+      if (cb) cb.checked = isNa;
+      if (inputWrap) inputWrap.classList.toggle('hidden', isNa);
+      if (naNote) naNote.classList.toggle('hidden', !isNa);
+
+      if (block) {
+        block.classList.remove('req-done', 'req-na');
+        if (isNa) block.classList.add('req-na');
+        else if (hasPhoto) block.classList.add('req-done');
+      }
+    });
+  }
+
+  // Rendu des 3 blocs Documents (02_Documents)
   const docContainer = document.getElementById('docSectionsContainer');
   docCategories.forEach(cat => {
     docContainer.innerHTML += `
@@ -978,8 +1046,6 @@
       </div>
       <div id="gal_${cat.id}" class="photo-gallery"></div>`;
   });
-
-  const allCategories = [...photoCategories, ...docCategories];
 
   function createThumbnail(file, maxWidth = 420, quality = 0.6) {
     return new Promise((resolve) => {
@@ -1011,6 +1077,9 @@
   window.uploadToDrive = async (files, catId) => {
     markUnsaved();
     const statusEl = document.getElementById(`status_${catId}`);
+    const catObj = allCategories.find(c => c.id === catId);
+    const catPrefix = catObj ? catObj.drivePrefix : catId;
+
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const isImg = file.type.startsWith("image/");
@@ -1036,8 +1105,14 @@
         const res = await fetch(GOOGLE_SCRIPT_URL, {
           method: "POST",
           body: JSON.stringify({
-            action: "uploadFile", projectId: projectId, projectName: currentProjectName,
-            category: catId, fileName: file.name, mimeType: file.type || "application/octet-stream", fileData: base64Data
+            action: "uploadFile",
+            projectId: projectId,
+            projectName: currentProjectName,
+            category: catId,
+            categoryLabel: catPrefix,
+            fileName: file.name,
+            mimeType: file.type || "application/octet-stream",
+            fileData: base64Data
           })
         });
         const result = await res.json();
@@ -1057,7 +1132,7 @@
   function renderGalleries() {
     allCategories.forEach(cat => { document.getElementById(`gal_${cat.id}`).innerHTML = ""; });
     projectFiles.forEach((p, idx) => {
-      const target = document.getElementById(`gal_${p.cat}`) || document.getElementById('gal_vessel');
+      const target = document.getElementById(`gal_${p.cat}`) || document.getElementById('gal_boat_side');
       const imgSrc = p.thumb || p.directImgUrl || "";
       const linkAttr = p.fileUrl && p.fileUrl !== "#" ? `href="${p.fileUrl}" target="_blank"` : ``;
       const statusBadge = p.uploading ? `<div style="font-size:10px; color:#D97706;">En attente Drive</div>` : `<div style="font-size:10px; color:#28A745;">Sur Drive (HD)</div>`;
@@ -1074,6 +1149,7 @@
           <button type="button" class="btn btn-red no-print" onclick="removeFile(${idx})">Retirer</button>
         </div>`;
     });
+    updatePhotoBlockVisuals();
   }
   window.removeFile = (idx) => { projectFiles.splice(idx, 1); renderGalleries(); renderStepper(); markUnsaved(); };
 
@@ -1169,6 +1245,7 @@
 
     const basePayload = templateData ? { ...templateData } : {};
     delete basePayload.photos;
+    delete basePayload.photoNaState;
     delete basePayload.sigInstaller;
     delete basePayload.sigCustomer;
     delete basePayload.adminNotes;
@@ -1181,7 +1258,8 @@
       installerEmail: email,
       status: "En attente Installateur",
       driveFolderUrl: driveUrl,
-      photos: []
+      photos: [],
+      photoNaState: {}
     });
 
     document.getElementById('newProjectName').value = "";
@@ -1318,7 +1396,7 @@
 
       Object.keys(data).forEach(k => {
         const el = document.getElementById(k);
-        if(el && el.tagName !== 'CANVAS' && el.type !== 'file') el.value = data[k];
+        if(el && el.tagName !== 'CANVAS' && el.type !== 'file' && el.type !== 'checkbox') el.value = data[k];
       });
 
       if (data.driveSystem) {
@@ -1332,9 +1410,12 @@
         });
       }
 
+      photoNaState = data.photoNaState || {};
       checkInsulationValues();
       recalcSeaTrial();
-      if(data.photos) { projectFiles = data.photos; renderGalleries(); }
+      if(data.photos) projectFiles = data.photos;
+      renderGalleries();
+
       if(data.sigInstaller && data.sigInstaller.length > 2500) {
         sigInstSigned = true;
         const img = new Image();
@@ -1359,13 +1440,17 @@
 
   window.saveForm = async (newStatus, silent = false) => {
     const cleanPhotos = projectFiles.map(({ uploading, ...rest }) => rest);
-    const payload = { photos: cleanPhotos, driveFolderUrl: currentDriveFolderUrl };
+    const payload = {
+      photos: cleanPhotos,
+      photoNaState: photoNaState,
+      driveFolderUrl: currentDriveFolderUrl
+    };
     if (newStatus) {
       payload.status = newStatus;
       document.getElementById('printStatusStamp').innerText = newStatus;
     }
     document.querySelectorAll('input, select, textarea').forEach(el => {
-      if(el.id && el.type !== 'file' && el.id !== 'adminPwdInput') payload[el.id] = el.value;
+      if(el.id && el.type !== 'file' && el.type !== 'checkbox' && el.id !== 'adminPwdInput') payload[el.id] = el.value;
     });
     payload.sigInstaller = document.getElementById('sigInstaller').toDataURL();
     payload.sigCustomer = document.getElementById('sigCustomer').toDataURL();
