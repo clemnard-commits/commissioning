@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>COMMISSION-X | Marine Commissioning Portal</title>
+<title>COMMISSION-X - Marine Commissioning Portal</title>
 <style>
   :root {
     --ep-navy: #0A365C;
@@ -28,7 +28,7 @@
   .topbar { height: 60px; background: #fff; border-bottom: 1px solid var(--ep-border); padding: 0 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
   .topbar-left { display: flex; align-items: center; gap: 14px; font-size: 14px; color: var(--ep-muted); }
   .brand-pill { display: flex; align-items: center; gap: 9px; color: var(--ep-navy); font-weight: 700; font-size: 14.5px; letter-spacing: 0.8px; cursor: pointer; }
-  .cx-logo-mini { width: 24px; height: 24px; stroke: var(--ep-navy); fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+  .cx-logo-mini { width: 24px; height: 24px; }
   .sep { color: #CBD5E1; }
   .topbar-right { display: flex; align-items: center; gap: 12px; }
   .user-pill { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--ep-text); }
@@ -58,4 +58,462 @@
   .dot-mini { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
 
   /* CARTE PRINCIPALE BLANCHE */
-  .card { background: #fff; border: 1px solid var(--ep-border); border-radius: 10px; padding: 28
+  .card { background: #fff; border: 1px solid var(--ep-border); border-radius: 10px; padding: 28px; flex: 1; box-shadow: 0 1px 4px rgba(0,0,0,0.03); min-width: 0; }
+  .card-title { font-size: 18px; font-weight: 600; color: var(--ep-text); margin: 0 0 6px 0; }
+  .card-desc { font-size: 13px; color: var(--ep-muted); margin: 0 0 20px 0; }
+  .section-label { font-size: 12px; font-weight: 600; color: var(--ep-muted); margin: 16px 0 8px 0; text-transform: uppercase; letter-spacing: 0.4px; }
+
+  /* CARTES DE SELECTION RADIO */
+  .radio-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 16px; }
+  .radio-card { border: 1.5px solid var(--ep-border); border-radius: 8px; padding: 14px; cursor: pointer; transition: 0.15s; background: #fff; }
+  .radio-card:hover { border-color: #93C5FD; }
+  .radio-card.selected { border-color: var(--ep-blue); background: var(--ep-blue-light); }
+  .radio-card-head { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; color: var(--ep-text); }
+  .radio-dot { width: 15px; height: 15px; border-radius: 50%; border: 2px solid #94A3B8; display: inline-block; position: relative; }
+  .radio-card.selected .radio-dot { border-color: var(--ep-blue); }
+  .radio-card.selected .radio-dot::after { content: ''; width: 7px; height: 7px; background: var(--ep-blue); border-radius: 50%; position: absolute; top: 2px; left: 2px; }
+  .radio-card-sub { font-size: 12px; color: var(--ep-muted); margin: 4px 0 0 23px; }
+  .radio-card-tag { font-size: 11.5px; color: var(--ep-blue); font-weight: 600; margin: 3px 0 0 23px; }
+
+  /* FORMULAIRES & GRILLES */
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  @media(max-width: 750px){
+    .wizard-layout { flex-direction: column; }
+    .stepper { position: static; width: 100%; display: flex; overflow-x: auto; gap: 6px; padding-bottom: 8px; }
+    .step-item { white-space: nowrap; }
+    .legend-box { display: none; }
+    .grid { grid-template-columns: 1fr; }
+    .topbar { padding: 0 14px; }
+  }
+  label { font-weight: 600; font-size: 12.5px; color: #334155; display: block; margin-top: 8px; }
+  input, select, textarea { width: 100%; padding: 9px 11px; border: 1px solid #CBD5E1; border-radius: 6px; margin-top: 4px; font-size: 13.5px; color: var(--ep-text); background: #fff; font-family: inherit; }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--ep-blue); box-shadow: 0 0 0 3px rgba(30,115,190,0.12); }
+
+  /* CHECKLISTS */
+  .check-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; border-bottom: 1px solid #F1F5F9; font-size: 13.5px; }
+  .check-row:hover { background: #F8FAFC; }
+  .check-row select { width: 95px; padding: 5px 8px; margin: 0; }
+
+  /* BOUTONS */
+  .btn { background: var(--ep-blue); color: #fff; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-size: 13.5px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 7px; transition: 0.15s; }
+  .btn:hover { background: #165B96; }
+  .btn-outline { background: #fff; color: #334155; border: 1px solid #CBD5E1; }
+  .btn-outline:hover { background: #F8FAFC; border-color: #94A3B8; }
+  .btn-green { background: var(--ep-green); }
+  .btn-green:hover { background: #218838; }
+  .btn-sm { padding: 6px 11px; font-size: 12px; }
+  .btn-red { background: #DC2626; padding: 5px 9px; font-size: 11.5px; }
+
+  .wizard-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--ep-border); }
+
+  /* TABLEAUX */
+  table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+  th, td { border: 1px solid var(--ep-border); padding: 9px 8px; text-align: center; font-size: 13px; }
+  th { background: #F8FAFC; color: #334155; font-weight: 600; }
+  .sea-table th { background: var(--ep-navy); color: #fff; }
+  .sea-table input { padding: 5px; text-align: center; margin: 0; font-size: 13px; }
+  .calc-cell { background: var(--ep-blue-light); font-weight: 700; color: var(--ep-blue); }
+
+  /* BARRE PROGRESSION */
+  .progress-wrap { background: #E2E8F0; border-radius: 10px; height: 18px; width: 100%; overflow: hidden; position: relative; }
+  .progress-bar { background: var(--ep-green); height: 100%; transition: width 0.3s; }
+  .progress-text { position: absolute; width: 100%; text-align: center; top: 0; left: 0; font-size: 11px; font-weight: 700; line-height: 18px; color: #0F172A; }
+
+  /* GALERIE PHOTOS & DOCS */
+  .photo-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: 10px; margin-top: 8px; }
+  .photo-card { border: 1px solid var(--ep-border); padding: 6px; border-radius: 6px; text-align: center; background: #F8FAFC; }
+  .photo-card img { width: 100%; height: 120px; object-fit: cover; border-radius: 4px; display: block; }
+  .doc-badge { background: var(--ep-blue-light); color: var(--ep-blue); padding: 16px 8px; border-radius: 4px; font-weight: 700; font-size: 12px; border: 1px solid #BFDBFE; }
+  .upload-status { font-size: 12px; color: #D97706; font-weight: 600; margin-top: 4px; }
+
+  /* SIGNATURES & ADMIN */
+  canvas { border: 1.5px dashed #94A3B8; border-radius: 6px; width: 100%; height: 130px; touch-action: none; background: #F8FAFC; margin-top: 4px; }
+  .admin-box { background: var(--ep-blue-light); border: 1.5px solid var(--ep-blue); padding: 18px; border-radius: 8px; margin-top: 22px; }
+  .login-box { max-width: 400px; margin: 70px auto; text-align: center; padding: 32px; border: 1px solid var(--ep-border); border-radius: 10px; background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+  .hidden { display: none !important; }
+
+  /* IMPRESSION PDF */
+  @media print {
+    .topbar, .stepper, .wizard-footer, .no-print { display: none !important; }
+    body { background: #fff; }
+    .content-area { padding: 0; max-width: 100%; }
+    .card { border: none; box-shadow: none; padding: 0; }
+    .step-section { display: block !important; page-break-inside: avoid; margin-bottom: 22px; border-bottom: 1px solid #ccc; padding-bottom: 15px; }
+    .sea-table input { border: none; background: transparent; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- BARRE SUPERIEURE MINIMALISTE -->
+  <header class="topbar no-print">
+    <div class="topbar-left">
+      <div class="brand-pill" onclick="goAdmin()">
+        <svg class="cx-logo-mini" viewBox="0 0 24 24" fill="none" stroke="#0A365C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/>
+          <line x1="8" y1="8" x2="16" y2="16"/>
+          <line x1="16" y1="8" x2="8" y2="16"/>
+        </svg>
+        <span>COMMISSION-X</span>
+      </div>
+      <span class="sep">/</span>
+      <span id="breadcrumbText">Portal</span>
+    </div>
+    <div class="topbar-right">
+      <button class="btn btn-outline btn-sm hidden" id="topSaveBtn" onclick="saveForm(null)">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Sauvegarder
+      </button>
+      <div class="user-pill">
+        <div class="user-avatar">CX</div>
+        <span id="userRoleLabel">Installateur</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="content-area">
+
+    <!-- ECRAN DE CONNEXION ADMIN -->
+    <div id="loginScreen" class="login-box hidden no-print">
+      <h2 style="margin-top:0; color:var(--ep-navy);">Accès Administration</h2>
+      <p style="font-size:13px; color:var(--ep-muted);">Saisissez votre mot de passe pour gérer vos liens et dossiers de mise en service.</p>
+      <input type="password" id="adminPwdInput" placeholder="Mot de passe Admin" onkeypress="if(event.key==='Enter') checkAdminLogin()">
+      <button class="btn" style="width:100%; justify-content:center; margin-top:14px;" onclick="checkAdminLogin()">Se connecter</button>
+    </div>
+
+    <!-- VUE ADMIN (LISTE DES PROJETS) -->
+    <div id="adminDashboard" class="hidden no-print">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Tableau de suivi Commissioning</h1>
+          <p class="page-subtitle">Créez un projet pour générer automatiquement son lien unique et son arborescence Google Drive.</p>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="logoutAdmin()">Déconnexion</button>
+      </div>
+
+      <div class="card" style="margin-bottom:20px;">
+        <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;">
+          <div style="flex:2; min-width:220px;">
+            <label style="margin-top:0;">Nom du bateau / Client</label>
+            <input type="text" id="newProjectName" placeholder="Ex: Beneteau Oceanis 38 - M. Martin">
+          </div>
+          <div style="flex:1; min-width:160px;">
+            <label style="margin-top:0;">Installateur assigné</label>
+            <input type="text" id="newInstallerName" placeholder="Ex: Jean Dupont">
+          </div>
+          <button class="btn" id="createProjBtn" onclick="createProject()">+ Créer Projet & Dossier Drive</button>
+        </div>
+      </div>
+
+      <div class="card" style="padding:0; overflow-x:auto;">
+        <table style="margin:0;">
+          <thead>
+            <tr>
+              <th style="text-align:left; padding-left:16px;">Projet / Bateau</th>
+              <th>Installateur</th>
+              <th style="width:140px;">Remplissage</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="projectList"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- VUE FORMULAIRE WIZARD (9 ETAPES) -->
+    <div id="projectForm" class="hidden">
+      <div class="page-header no-print">
+        <div>
+          <h1 class="page-title" id="displayProjName">Installation & Commissioning Form</h1>
+          <p class="page-subtitle">ID Dossier : <strong id="displayProjId"></strong></p>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <a id="projectDriveLinkBtn" href="#" target="_blank" class="btn btn-green btn-sm hidden">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+            Dossier Google Drive
+          </a>
+          <button class="btn btn-outline btn-sm" id="backAdminBtn" onclick="goAdmin()">← Liste projets</button>
+        </div>
+      </div>
+
+      <div class="wizard-layout">
+        <!-- PASTILLES D'ETAPES A GAUCHE -->
+        <div class="stepper no-print">
+          <div id="stepperContainer"></div>
+          <div class="legend-box">
+            <div class="legend-row"><span class="dot-mini" style="background:var(--ep-green);"></span> Complet (100%)</div>
+            <div class="legend-row"><span class="dot-mini" style="background:var(--ep-orange);"></span> En cours</div>
+            <div class="legend-row"><span class="dot-mini" style="background:var(--ep-red);"></span> Non rempli</div>
+          </div>
+        </div>
+
+        <!-- CARTE CENTRALE DU FORMULAIRE -->
+        <div class="card">
+
+          <!-- ETAPE 1 : VESSEL & INSTALLATION INFO -->
+          <div class="step-section" data-step="1">
+            <h2 class="card-title">1. Vessel & Installation Info</h2>
+            <p class="card-desc">Renseignez les caractéristiques du navire et le système de propulsion installé.</p>
+
+            <div class="section-label">Drive System</div>
+            <div class="radio-cards" id="driveCards">
+              <div class="radio-card selected" onclick="selectDrive('Shaft', this)">
+                <div class="radio-card-head"><span class="radio-dot"></span> Shaft Drive</div>
+                <div class="radio-card-sub">Ligne d'arbre</div>
+                <div class="radio-card-tag">Inboard System</div>
+              </div>
+              <div class="radio-card" onclick="selectDrive('Saildrive', this)">
+                <div class="radio-card-head"><span class="radio-dot"></span> Saildrive</div>
+                <div class="radio-card-sub">Embase voilier</div>
+                <div class="radio-card-tag">Saildrive / Pod</div>
+              </div>
+              <div class="radio-card" onclick="selectDrive('Pod', this)">
+                <div class="radio-card-head"><span class="radio-dot"></span> Pod / Outboard</div>
+                <div class="radio-card-sub">Pod fixe ou Hors-bord</div>
+                <div class="radio-card-tag">Pod / Outboard</div>
+              </div>
+            </div>
+            <input type="hidden" id="driveSystem" value="Shaft">
+
+            <div class="grid">
+              <div><label>Vessel Model</label><input type="text" id="vesselModel"></div>
+              <div><label>Location (Port / Chantier)</label><input type="text" id="location"></div>
+              <div><label>Make / Builder</label><input type="text" id="makeBuilder"></div>
+              <div><label>Hull Type</label><input type="text" id="hullType"></div>
+              <div><label>LOA / LWL / Beam / Draught / Displacement</label><input type="text" id="dimensions"></div>
+              <div><label>Fitted Prop (Size & Type)</label><input type="text" id="fittedProp"></div>
+              <div><label>Original Propulsion System</label><input type="text" id="origProp"></div>
+              <div><label>Installer Name</label><input type="text" id="installerName"></div>
+              <div><label>Installation Date</label><input type="date" id="installDate"></div>
+            </div>
+          </div>
+
+          <!-- ETAPE 2 : SYSTEM INFO & SERIAL NUMBERS -->
+          <div class="step-section hidden" data-step="2">
+            <h2 class="card-title">2. System Info & Serial Numbers</h2>
+            <p class="card-desc">Listez les modèles et numéros de série de chaque composant (moteurs, batteries, afficheurs, chargeurs).</p>
+            <label>Motors, Batteries & Components (Model + Serial Number)</label>
+            <textarea id="serialNumbers" rows="6" placeholder="Ex:&#10;Motor P: 20kW SN 12345&#10;Battery Master: 100Ah SN 67890&#10;Battery Slave 1: 100Ah SN 67891"></textarea>
+          </div>
+
+          <!-- ETAPE 3 : INSTALLATION CHECK (1 TO 21) -->
+          <div class="step-section hidden" data-step="3">
+            <h2 class="card-title">3. Installation Check (1 to 21)</h2>
+            <p class="card-desc">Vérifiez chaque point mécanique et électrique avant la mise sous tension.</p>
+            <div id="installChecksContainer"></div>
+            <label>Installation Comments</label>
+            <textarea id="installComments" rows="2"></textarea>
+          </div>
+
+          <!-- ETAPE 4 : APPENDICES 1 & 2 -->
+          <div class="step-section hidden" data-step="4">
+            <h2 class="card-title">4. Appendices 1 & 2 (Insulation, Earth & CAN)</h2>
+            <p class="card-desc">Mesures d'isolement (> 125 kΩ), résistance de terre (< 1 Ω) et terminaisons bus CAN.</p>
+            <div class="grid">
+              <div><label>Temp (°C) & Humidity (%)</label><input type="text" id="tempHumidity"></div>
+              <div><label>Insulation Test (> 125 kΩ)</label><input type="text" id="insulationTest" placeholder="YES / Valeur kΩ"></div>
+              <div><label>Earth Resistance (< 1 Ω)</label><input type="text" id="earthTest" placeholder="YES / Valeur Ω"></div>
+              <div><label>CAN Bus Termination (120Ω / 360Ω)</label><select id="canTest"><option value="">-- Choisir --</option><option value="YES">YES</option><option value="NO">NO</option></select></div>
+            </div>
+          </div>
+
+          <!-- ETAPE 5 : REQUIRED COMMISSIONING PHOTOS -->
+          <div class="step-section hidden" data-step="5">
+            <h2 class="card-title">5. Required Commissioning Photos</h2>
+            <p class="card-desc">Sélectionnez vos photos : prévisualisation instantanée et archivage automatique en haute définition sur Google Drive.</p>
+            <div id="photoSectionsContainer"></div>
+          </div>
+
+          <!-- ETAPE 6 : TECHNICAL PLANS & BOAT MANUAL -->
+          <div class="step-section hidden" data-step="6">
+            <h2 class="card-title">6. Technical Plans, Schematics & Boat Manual</h2>
+            <p class="card-desc">Ajoutez les schémas électriques, plans mécaniques/3D et le manuel du bateau (classés automatiquement sur Drive).</p>
+            <div id="docSectionsContainer"></div>
+          </div>
+
+          <!-- ETAPE 7 : POWER-ON & OPERATION CHECK -->
+          <div class="step-section hidden" data-step="7">
+            <h2 class="card-title">7. Power-On & Operation Check (1 to 16)</h2>
+            <p class="card-desc">Contrôles fonctionnels après mise sous tension du système de propulsion.</p>
+            <div id="powerChecksContainer"></div>
+            <label>Power-On Comments</label>
+            <textarea id="powerComments" rows="2"></textarea>
+          </div>
+
+          <!-- ETAPE 8 : SEA TRIAL -->
+          <div class="step-section hidden" data-step="8">
+            <h2 class="card-title">8. Sea Trial (Runs A & B - 0% to 100%)</h2>
+            <p class="card-desc">Sélectionnez la puissance nominale pour calculer automatiquement les moyennes aller/retour et le rendement.</p>
+
+            <div class="section-label">Motor Power Rating</div>
+            <div class="radio-cards" id="motorCards">
+              <div class="radio-card" onclick="selectMotor('12', this)">
+                <div class="radio-card-head"><span class="radio-dot"></span> 12 kW System</div>
+                <div class="radio-card-sub">12 kW Rated Power</div>
+                <div class="radio-card-tag">Electric Drive</div>
+              </div>
+              <div class="radio-card selected" onclick="selectMotor('20', this)">
+                <div class="radio-card-head"><span class="radio-dot"></span> 20 kW System</div>
+                <div class="radio-card-sub">20 kW Rated Power</div>
+                <div class="radio-card-tag">Electric Drive</div>
+              </div>
+              <div class="radio-card" onclick="selectMotor('40', this)">
+                <div class="radio-card-head"><span class="radio-dot"></span> 40 kW System</div>
+                <div class="radio-card-sub">40 kW Rated Power</div>
+                <div class="radio-card-tag">Electric Drive</div>
+              </div>
+            </div>
+            <input type="hidden" id="seaModel" value="20">
+
+            <div class="grid">
+              <div><label>Location / Wind (Kts) / Tide / Water Temp</label><input type="text" id="seaConditions"></div>
+              <div><label>Sea Trial Date & Personnel</label><input type="text" id="seaDatePers"></div>
+            </div>
+
+            <div style="overflow-x:auto;">
+              <table class="sea-table">
+                <thead>
+                  <tr>
+                    <th rowspan="2">Gaz (%)</th>
+                    <th rowspan="2">Théorique</th>
+                    <th colspan="2">Run A (Aller)</th>
+                    <th colspan="2">Run B (Retour 180°)</th>
+                    <th colspan="3">Moyennes Calculées (A + B)</th>
+                  </tr>
+                  <tr>
+                    <th>Conso (kW)</th>
+                    <th>Vitesse (Kts)</th>
+                    <th>Conso (kW)</th>
+                    <th>Vitesse (Kts)</th>
+                    <th>Conso Moy.</th>
+                    <th>Vitesse Moy.</th>
+                    <th>kWh / NM</th>
+                  </tr>
+                </thead>
+                <tbody id="seaTrialTableBody"></tbody>
+              </table>
+            </div>
+            <label>Sea Trial Comments</label>
+            <textarea id="seaData" rows="2"></textarea>
+          </div>
+
+          <!-- ETAPE 9 : HANDOVER, SIGNATURES & ADMIN -->
+          <div class="step-section hidden" data-step="9">
+            <h2 class="card-title">9. Handover & Signatures</h2>
+            <p class="card-desc">Validation de la prise en main avec le propriétaire et signatures électroniques.</p>
+            <div id="handoverChecksContainer"></div>
+            <label>Customer Comments</label>
+            <textarea id="customerComments" rows="2"></textarea>
+
+            <div class="grid">
+              <div>
+                <label>Installer Signature</label>
+                <canvas id="sigInstaller"></canvas>
+                <button type="button" class="btn btn-outline btn-sm no-print" onclick="clearCanvas('sigInstaller')">Effacer</button>
+              </div>
+              <div>
+                <label>Customer Signature</label>
+                <canvas id="sigCustomer"></canvas>
+                <button type="button" class="btn btn-outline btn-sm no-print" onclick="clearCanvas('sigCustomer')">Effacer</button>
+              </div>
+            </div>
+
+            <div class="no-print" style="margin-top:16px;">
+              <button class="btn" onclick="saveForm('En cours / Rempli Installateur')">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                Sauvegarder & Finaliser partie Installateur
+              </button>
+            </div>
+
+            <!-- ENCADRE RESERVE ADMIN -->
+            <div class="admin-box" id="adminSection">
+              <h3 style="margin-top:0; color:var(--ep-navy);">Validation Interne & Export PDF (Admin)</h3>
+              <label>Notes de vérification interne</label>
+              <textarea id="adminNotes" rows="3"></textarea>
+              <label>Date de validation</label>
+              <input type="date" id="adminDate">
+              <div class="no-print" style="display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;">
+                <button class="btn btn-green" onclick="saveForm('Validé & Terminé')">
+                  <svg class="icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                  Valider le dossier
+                </button>
+                <button class="btn" onclick="window.print()">
+                  <svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                  Générer le rapport PDF
+                </button>
+                <a id="adminDriveBtn" href="#" target="_blank" class="btn btn-outline">
+                  <svg class="icon" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                  Ouvrir le dossier Drive
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- PIED DE NAVIGATION WIZARD (BACK / CONTINUE) -->
+          <div class="wizard-footer no-print">
+            <span style="font-size:12.5px; color:var(--ep-muted);" id="stepIndicatorText">Step 1 of 9</span>
+            <div style="display:flex; gap:10px;">
+              <button type="button" class="btn btn-outline" id="prevStepBtn" onclick="changeStep(-1)">← BACK</button>
+              <button type="button" class="btn" id="nextStepBtn" onclick="changeStep(1)">CONTINUE →</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+<!-- FIREBASE SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, doc, setDoc, getDoc, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  // 1. VOTRE MOT DE PASSE ADMIN
+  const ADMIN_PASSWORD = "ChangezMoi2026";
+
+  // 2. VOTRE URL GOOGLE APPS SCRIPT
+  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyy3Gd589o9OkJOhHCMoKLsilfGZMD8kGgWIVW3uNZpob-SaLKvNXX32X6Xh7ikhkIw/exec";
+
+  // 3. VOTRE CONFIGURATION FIREBASE
+  const firebaseConfig = {
+    apiKey: "AIzaSyBiNU1SuighjrYDKarEta5GmtPv8xQEryk",
+    authDomain: "epropulsion-form.firebaseapp.com",
+    projectId: "epropulsion-form",
+    storageBucket: "epropulsion-form.firebasestorage.app",
+    messagingSenderId: "250052554418",
+    appId: "1:250052554418:web:420842e332df0e5bff63ab",
+    measurementId: "G-GCS82T485T"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  let projectFiles = [];
+  let currentProjectName = "";
+  let currentDriveFolderUrl = "";
+  let currentStep = 1;
+  let sigInstSigned = false;
+  let sigCustSigned = false;
+
+  // Etapes du Wizard
+  const stepNames = [
+    "Vessel & Info", "System & S/N", "Install Check", "Appendices 1-2",
+    "Photos Drive", "Plans & Manual", "Power-On Check", "Sea Trial", "Handover & Sign"
+  ];
+
+  // Calcul du statut de chaque étape : 'empty' (rouge), 'partial' (orange), 'complete' (vert)
+  function getStepStatus(stepNum) {
+    const val = id => { const el = document.getElementById(id); return el && el.value && el.value.trim() !== ""; };
+
+    if (stepNum === 1) {
+      const fields = ['vesselModel', 'location', 'makeBuilder', 'hullType', 'dimensions', 'fittedProp', 'origProp', 'installerName', 'installDate'];
+      const count = fields.filter(val).length;
+      if (count === 0) return 'empty';
+      return count === fields.length ? 'complete' : 'partial';
+    }
+    if (stepNum === 2) {
+      return val('serialNumbers') ? 'complete' : 'empty';
+    }
+    if (stepNum === 3) {
+      let count =
