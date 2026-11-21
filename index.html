@@ -34,6 +34,9 @@
   .user-pill { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--cx-text); }
   .user-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--cx-navy); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; }
 
+  /* INDICATEUR DE MODIFICATIONS NON ENREGISTREES SUR LE BOUTON SAUVEGARDER */
+  .btn-unsaved { background: #FFFBEB !important; border-color: var(--cx-orange) !important; color: #B45309 !important; box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.25); }
+
   .content-area { padding: 28px 24px; max-width: 1100px; width: 100%; margin: 0 auto; }
   .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 22px; flex-wrap: wrap; gap: 10px; }
   .page-title { font-size: 22px; font-weight: 600; color: var(--cx-text); margin: 0; }
@@ -162,7 +165,7 @@
     <div class="topbar-right">
       <button class="btn btn-outline btn-sm hidden" id="topSaveBtn" onclick="saveForm(null)">
         <svg class="icon" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-        Sauvegarder
+        <span id="topSaveLabel">Sauvegarder</span>
       </button>
       <div class="user-pill">
         <div class="user-avatar">CX</div>
@@ -495,6 +498,32 @@
   let currentStep = 1;
   let sigInstSigned = false;
   let sigCustSigned = false;
+  let hasUnsavedChanges = false;
+
+  // Gestion de l'état "non enregistré" + Pop-up de confirmation avant fermeture de l'onglet
+  function markUnsaved() {
+    hasUnsavedChanges = true;
+    const btn = document.getElementById('topSaveBtn');
+    const lbl = document.getElementById('topSaveLabel');
+    if (btn) btn.classList.add('btn-unsaved');
+    if (lbl) lbl.innerText = "Sauvegarder *";
+  }
+
+  function markSaved() {
+    hasUnsavedChanges = false;
+    const btn = document.getElementById('topSaveBtn');
+    const lbl = document.getElementById('topSaveLabel');
+    if (btn) btn.classList.remove('btn-unsaved');
+    if (lbl) lbl.innerText = "Sauvegarder";
+  }
+
+  window.addEventListener('beforeunload', (e) => {
+    if (hasUnsavedChanges && projectId) {
+      e.preventDefault();
+      e.returnValue = "Vous avez des modifications non enregistrées. Voulez-vous vraiment quitter sans sauvegarder ?";
+      return e.returnValue;
+    }
+  });
 
   // Etapes du Wizard
   const stepNames = [
@@ -576,7 +605,7 @@
     });
   };
 
-  window.goToStep = (stepNum) => {
+  window.goToStep = (stepNum, autoSave = true) => {
     if (stepNum < 1 || stepNum > 9) return;
     currentStep = stepNum;
     document.querySelectorAll('.step-section').forEach(sec => {
@@ -587,16 +616,17 @@
     document.getElementById('nextStepBtn').style.display = currentStep === 9 ? "none" : "inline-flex";
     renderStepper();
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    if (projectId) saveForm(null, true);
+    if (projectId && autoSave && hasUnsavedChanges) saveForm(null, true);
   };
 
-  window.changeStep = (delta) => goToStep(currentStep + delta);
+  window.changeStep = (delta) => goToStep(currentStep + delta, true);
 
   // Cartes visuelles Drive & Motor
   window.selectDrive = (val, el) => {
     document.getElementById('driveSystem').value = val;
     document.querySelectorAll('#driveCards .radio-card').forEach(c => c.classList.remove('selected'));
     if (el) el.classList.add('selected');
+    markUnsaved();
   };
 
   window.selectMotor = (kw, el) => {
@@ -604,6 +634,7 @@
     document.querySelectorAll('#motorCards .radio-card').forEach(c => c.classList.remove('selected'));
     if (el) el.classList.add('selected');
     recalcSeaTrial();
+    markUnsaved();
   };
 
   // Listes des points de contrôle
@@ -741,6 +772,7 @@
   }
 
   window.uploadToDrive = async (files, catId) => {
+    markUnsaved();
     const statusEl = document.getElementById(`status_${catId}`);
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
@@ -801,7 +833,7 @@
         </div>`;
     });
   }
-  window.removeFile = (idx) => { projectFiles.splice(idx, 1); renderGalleries(); renderStepper(); };
+  window.removeFile = (idx) => { projectFiles.splice(idx, 1); renderGalleries(); renderStepper(); markUnsaved(); };
 
   // Signatures au doigt
   ['sigInstaller', 'sigCustomer'].forEach(id => {
@@ -818,6 +850,7 @@
       if (id === 'sigInstaller') sigInstSigned = true;
       if (id === 'sigCustomer') sigCustSigned = true;
       renderStepper();
+      markUnsaved();
       const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y);
     };
     const move = e => { if(!drawing) return; e.preventDefault(); const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); };
@@ -831,10 +864,11 @@
     if (id === 'sigInstaller') sigInstSigned = false;
     if (id === 'sigCustomer') sigCustSigned = false;
     renderStepper();
+    markUnsaved();
   };
 
-  document.getElementById('projectForm').addEventListener('input', () => renderStepper());
-  document.getElementById('projectForm').addEventListener('change', () => renderStepper());
+  document.getElementById('projectForm').addEventListener('input', () => { renderStepper(); markUnsaved(); });
+  document.getElementById('projectForm').addEventListener('change', () => { renderStepper(); markUnsaved(); });
 
   // Calcul pourcentage global (tableau Admin)
   function computeCompletion(data) {
@@ -1001,7 +1035,8 @@
         img.onload = () => document.getElementById('sigCustomer').getContext('2d').drawImage(img, 0, 0);
         img.src = data.sigCustomer;
       }
-      goToStep(1);
+      goToStep(1, false);
+      markSaved();
     } else alert("Projet introuvable. Vérifiez le lien.");
   }
 
@@ -1016,6 +1051,7 @@
     payload.sigCustomer = document.getElementById('sigCustomer').toDataURL();
     try {
       await setDoc(doc(db, "projects", projectId), payload, { merge: true });
+      markSaved();
       if (!silent) alert("Enregistré avec succès !");
     } catch (e) {
       if (!silent) alert("Erreur lors de la sauvegarde : " + e.message);
@@ -1024,6 +1060,10 @@
 
   window.goAdmin = () => {
     if (sessionStorage.getItem('isAdminAuth') === 'true') {
+      if (hasUnsavedChanges && !confirm("Vous avez des modifications non enregistrées. Quitter quand même vers la liste des projets ?")) {
+        return;
+      }
+      hasUnsavedChanges = false;
       window.location.href = window.location.href.split('?')[0];
     }
   };
