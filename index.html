@@ -33,14 +33,21 @@
   .topbar-right { display: flex; align-items: center; gap: 12px; }
   .user-pill { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--cx-text); }
   .user-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--cx-navy); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; }
+  .offline-badge { font-size: 11.5px; padding: 4px 9px; border-radius: 12px; font-weight: 600; background: #FEF3C7; color: #B45309; border: 1px solid #FDE68A; }
 
-  /* INDICATEUR DE MODIFICATIONS NON ENREGISTREES SUR LE BOUTON SAUVEGARDER */
+  /* INDICATEUR DE MODIFICATIONS NON ENREGISTREES */
   .btn-unsaved { background: #FFFBEB !important; border-color: var(--cx-orange) !important; color: #B45309 !important; box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.25); }
 
-  .content-area { padding: 28px 24px; max-width: 1100px; width: 100%; margin: 0 auto; }
+  .content-area { padding: 28px 24px; max-width: 1120px; width: 100%; margin: 0 auto; }
   .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 22px; flex-wrap: wrap; gap: 10px; }
   .page-title { font-size: 22px; font-weight: 600; color: var(--cx-text); margin: 0; }
   .page-subtitle { font-size: 13px; color: var(--cx-muted); margin: 4px 0 0 0; }
+
+  /* COMPTEURS ADMIN */
+  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+  .stat-card { background: #fff; border: 1px solid var(--cx-border); border-radius: 8px; padding: 14px 18px; }
+  .stat-label { font-size: 12px; color: var(--cx-muted); font-weight: 600; text-transform: uppercase; }
+  .stat-val { font-size: 24px; font-weight: 700; color: var(--cx-navy); margin-top: 4px; }
 
   /* LAYOUT WIZARD : PASTILLES GAUCHE + CARTE CENTRALE */
   .wizard-layout { display: flex; gap: 28px; align-items: flex-start; }
@@ -62,8 +69,9 @@
 
   /* CARTE PRINCIPALE BLANCHE */
   .card { background: #fff; border: 1px solid var(--cx-border); border-radius: 10px; padding: 28px; flex: 1; box-shadow: 0 1px 4px rgba(0,0,0,0.03); min-width: 0; }
-  .card-title { font-size: 18px; font-weight: 600; color: var(--cx-text); margin: 0 0 6px 0; }
-  .card-desc { font-size: 13px; color: var(--cx-muted); margin: 0 0 20px 0; }
+  .card-head-flex { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+  .card-title { font-size: 18px; font-weight: 600; color: var(--cx-text); margin: 0 0 4px 0; }
+  .card-desc { font-size: 13px; color: var(--cx-muted); margin: 0; }
   .section-label { font-size: 12px; font-weight: 600; color: var(--cx-muted); margin: 16px 0 8px 0; text-transform: uppercase; letter-spacing: 0.4px; }
 
   /* CARTES DE SELECTION RADIO */
@@ -85,7 +93,7 @@
     .stepper { position: static; width: 100%; display: flex; overflow-x: auto; gap: 6px; padding-bottom: 8px; }
     .step-item { white-space: nowrap; }
     .legend-box { display: none; }
-    .grid { grid-template-columns: 1fr; }
+    .grid, .stats-grid { grid-template-columns: 1fr; }
     .topbar { padding: 0 14px; }
   }
   label { font-weight: 600; font-size: 12.5px; color: #334155; display: block; margin-top: 8px; }
@@ -117,6 +125,10 @@
   .sea-table input { padding: 5px; text-align: center; margin: 0; font-size: 13px; }
   .calc-cell { background: var(--cx-blue-light); font-weight: 700; color: var(--cx-blue); }
 
+  /* GRAPHIQUE ESSAIS EN MER */
+  .chart-box { margin-top: 18px; border: 1px solid var(--cx-border); border-radius: 8px; padding: 14px; background: #FAFCFF; }
+  .chart-legend { display: flex; gap: 18px; font-size: 12px; font-weight: 600; margin-bottom: 8px; justify-content: flex-end; }
+
   /* BARRE PROGRESSION */
   .progress-wrap { background: #E2E8F0; border-radius: 10px; height: 18px; width: 100%; overflow: hidden; position: relative; }
   .progress-bar { background: var(--cx-green); height: 100%; transition: width 0.3s; }
@@ -134,15 +146,21 @@
   .admin-box { background: var(--cx-blue-light); border: 1.5px solid var(--cx-blue); padding: 18px; border-radius: 8px; margin-top: 22px; }
   .login-box { max-width: 400px; margin: 70px auto; text-align: center; padding: 32px; border: 1px solid var(--cx-border); border-radius: 10px; background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
   .hidden { display: none !important; }
+  .print-only { display: none; }
 
-  /* IMPRESSION PDF */
+  /* MISE EN PAGE RAPPORT PDF CONSTRUCTEUR */
   @media print {
     .topbar, .stepper, .wizard-footer, .no-print { display: none !important; }
-    body { background: #fff; }
+    .print-only { display: block !important; }
+    body { background: #fff; font-size: 12px; }
     .content-area { padding: 0; max-width: 100%; }
     .card { border: none; box-shadow: none; padding: 0; }
-    .step-section { display: block !important; page-break-inside: avoid; margin-bottom: 22px; border-bottom: 1px solid #ccc; padding-bottom: 15px; }
+    .print-header { display: flex !important; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--cx-navy); padding-bottom: 12px; margin-bottom: 18px; }
+    .print-stamp { border: 2px solid var(--cx-green); color: var(--cx-green); padding: 5px 12px; border-radius: 6px; font-weight: 700; font-size: 13px; text-transform: uppercase; }
+    .step-section { display: block !important; break-inside: avoid; page-break-inside: avoid; margin-bottom: 20px; border-bottom: 1px solid #CBD5E1; padding-bottom: 14px; }
+    .photo-card, .chart-box { break-inside: avoid; page-break-inside: avoid; }
     .sea-table input { border: none; background: transparent; }
+    input, select, textarea { border: 1px solid #CBD5E1; padding: 5px 8px; font-size: 12px; }
   }
 </style>
 </head>
@@ -163,6 +181,7 @@
       <span id="breadcrumbText">Portal</span>
     </div>
     <div class="topbar-right">
+      <span id="offlineIndicator" class="offline-badge hidden">Mode Hors-Ligne Actif</span>
       <button class="btn btn-outline btn-sm hidden" id="topSaveBtn" onclick="saveForm(null)">
         <svg class="icon" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
         <span id="topSaveLabel">Sauvegarder</span>
@@ -189,11 +208,19 @@
       <div class="page-header">
         <div>
           <h1 class="page-title">Tableau de suivi Commissioning</h1>
-          <p class="page-subtitle">Créez un projet pour générer automatiquement son lien unique et son arborescence Google Drive.</p>
+          <p class="page-subtitle">Pilotez vos mises en service, dupliquez vos modèles et accédez aux dossiers Google Drive.</p>
         </div>
         <button class="btn btn-outline btn-sm" onclick="logoutAdmin()">Déconnexion</button>
       </div>
 
+      <!-- COMPTEURS SYNTHETIQUES -->
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-label">Total Projets</div><div class="stat-val" id="statTotal">0</div></div>
+        <div class="stat-card"><div class="stat-label">En cours / Attente</div><div class="stat-val" style="color:var(--cx-orange);" id="statPending">0</div></div>
+        <div class="stat-card"><div class="stat-label">Validés & Terminés</div><div class="stat-val" style="color:var(--cx-green);" id="statDone">0</div></div>
+      </div>
+
+      <!-- CREATION NOUVEAU PROJET -->
       <div class="card" style="margin-bottom:20px;">
         <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;">
           <div style="flex:2; min-width:200px;">
@@ -210,6 +237,17 @@
           </div>
           <button class="btn" id="createProjBtn" onclick="createProject()">+ Créer Projet & Dossier Drive</button>
         </div>
+      </div>
+
+      <!-- FILTRE & RECHERCHE -->
+      <div style="display:flex; gap:10px; margin-bottom:12px; flex-wrap:wrap;">
+        <input type="text" id="searchProjectInput" style="flex:2; min-width:200px; margin:0;" placeholder="Rechercher un bateau, un ID ou un installateur..." oninput="filterProjects()">
+        <select id="filterStatusSelect" style="flex:1; min-width:160px; margin:0;" onchange="filterProjects()">
+          <option value="ALL">Tous les statuts</option>
+          <option value="En attente">En attente Installateur</option>
+          <option value="En cours">En cours</option>
+          <option value="Validé">Validé & Terminé</option>
+        </select>
       </div>
 
       <div class="card" style="padding:0; overflow-x:auto;">
@@ -230,6 +268,17 @@
 
     <!-- VUE FORMULAIRE WIZARD (9 ETAPES) -->
     <div id="projectForm" class="hidden">
+
+      <!-- EN-TETE OFFICIEL POUR L'IMPRESSION PDF UNIQUEMENT -->
+      <div class="print-header print-only">
+        <div>
+          <div style="font-size:20px; font-weight:700; color:var(--cx-navy); letter-spacing:1px;">COMMISSION-X</div>
+          <div style="font-size:13px; color:var(--cx-muted);">Marine Propulsion Installation & Commissioning Report</div>
+          <div style="font-size:13px; margin-top:6px;"><strong>Projet :</strong> <span id="printProjName"></span> • <strong>ID :</strong> <span id="printProjId"></span></div>
+        </div>
+        <div class="print-stamp" id="printStatusStamp">DOSSIER TECHNIQUE</div>
+      </div>
+
       <div class="page-header no-print">
         <div>
           <h1 class="page-title" id="displayProjName">Installation & Commissioning Form</h1>
@@ -306,8 +355,13 @@
 
           <!-- ETAPE 3 : INSTALLATION CHECK (1 TO 21) -->
           <div class="step-section hidden" data-step="3">
-            <h2 class="card-title">3. Installation Check (1 to 21)</h2>
-            <p class="card-desc">Vérifiez chaque point mécanique et électrique avant la mise sous tension.</p>
+            <div class="card-head-flex">
+              <div>
+                <h2 class="card-title">3. Installation Check (1 to 21)</h2>
+                <p class="card-desc">Vérifiez chaque point mécanique et électrique avant la mise sous tension.</p>
+              </div>
+              <button type="button" class="btn btn-outline btn-sm no-print" onclick="markAllYes('inst', 21)">Tout marquer YES</button>
+            </div>
             <div id="installChecksContainer"></div>
             <label>Installation Comments</label>
             <textarea id="installComments" rows="2"></textarea>
@@ -341,17 +395,22 @@
 
           <!-- ETAPE 7 : POWER-ON & OPERATION CHECK -->
           <div class="step-section hidden" data-step="7">
-            <h2 class="card-title">7. Power-On & Operation Check (1 to 16)</h2>
-            <p class="card-desc">Contrôles fonctionnels après mise sous tension du système de propulsion.</p>
+            <div class="card-head-flex">
+              <div>
+                <h2 class="card-title">7. Power-On & Operation Check (1 to 16)</h2>
+                <p class="card-desc">Contrôles fonctionnels après mise sous tension du système de propulsion.</p>
+              </div>
+              <button type="button" class="btn btn-outline btn-sm no-print" onclick="markAllYes('pwr', 16)">Tout marquer YES</button>
+            </div>
             <div id="powerChecksContainer"></div>
             <label>Power-On Comments</label>
             <textarea id="powerComments" rows="2"></textarea>
           </div>
 
-          <!-- ETAPE 8 : SEA TRIAL -->
+          <!-- ETAPE 8 : SEA TRIAL + GRAPHIQUE -->
           <div class="step-section hidden" data-step="8">
             <h2 class="card-title">8. Sea Trial (Runs A & B - 0% to 100%)</h2>
-            <p class="card-desc">Sélectionnez la puissance nominale pour calculer automatiquement les moyennes aller/retour et le rendement.</p>
+            <p class="card-desc">Sélectionnez la puissance nominale pour calculer automatiquement les moyennes aller/retour et tracer les courbes.</p>
 
             <div class="section-label">Motor Power Rating</div>
             <div class="radio-cards" id="motorCards">
@@ -401,14 +460,32 @@
                 <tbody id="seaTrialTableBody"></tbody>
               </table>
             </div>
+
+            <!-- GRAPHIQUE AUTOMATIQUE PUISSANCE & VITESSE -->
+            <div class="chart-box">
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
+                <strong style="font-size:13px; color:var(--cx-navy);">Courbes de performance (Puissance & Vitesse moyennes)</strong>
+                <div class="chart-legend">
+                  <span style="color:var(--cx-blue);">— Puissance Moy. (kW)</span>
+                  <span style="color:var(--cx-green);">— Vitesse Moy. (Kts)</span>
+                </div>
+              </div>
+              <svg id="seaTrialChart" viewBox="0 0 640 210" style="width:100%; height:auto; display:block;"></svg>
+            </div>
+
             <label>Sea Trial Comments</label>
             <textarea id="seaData" rows="2"></textarea>
           </div>
 
           <!-- ETAPE 9 : HANDOVER, SIGNATURES & ADMIN -->
           <div class="step-section hidden" data-step="9">
-            <h2 class="card-title">9. Handover & Signatures</h2>
-            <p class="card-desc">Validation de la prise en main avec le propriétaire et signatures électroniques.</p>
+            <div class="card-head-flex">
+              <div>
+                <h2 class="card-title">9. Handover & Signatures</h2>
+                <p class="card-desc">Validation de la prise en main avec le propriétaire et signatures électroniques.</p>
+              </div>
+              <button type="button" class="btn btn-outline btn-sm no-print" onclick="markAllYes('hnd', 5)">Tout marquer YES</button>
+            </div>
             <div id="handoverChecksContainer"></div>
             <label>Customer Comments</label>
             <textarea id="customerComments" rows="2"></textarea>
@@ -445,7 +522,7 @@
                   <svg class="icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
                   Valider le dossier
                 </button>
-                <button class="btn" onclick="window.print()">
+                <button class="btn" onclick="prepareAndPrint()">
                   <svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                   Générer le rapport PDF
                 </button>
@@ -494,9 +571,21 @@
     measurementId: "G-GCS82T485T"
   };
 
+  // Enregistrement du Service Worker Hors-Ligne (PWA)
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  }
+  function updateOnlineStatus() {
+    document.getElementById('offlineIndicator').classList.toggle('hidden', navigator.onLine);
+  }
+  window.addEventListener('online', updateOnlineStatus);
+  window.addEventListener('offline', updateOnlineStatus);
+  updateOnlineStatus();
+
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
   let projectFiles = [];
+  let allProjectsCache = [];
   let currentProjectName = "";
   let currentDriveFolderUrl = "";
   let currentStep = 1;
@@ -504,7 +593,7 @@
   let sigCustSigned = false;
   let hasUnsavedChanges = false;
 
-  // Gestion de l'état "non enregistré" + Pop-up de confirmation avant fermeture de l'onglet
+  // Protection anti-perte avant fermeture onglet
   function markUnsaved() {
     hasUnsavedChanges = true;
     const btn = document.getElementById('topSaveBtn');
@@ -512,7 +601,6 @@
     if (btn) btn.classList.add('btn-unsaved');
     if (lbl) lbl.innerText = "Sauvegarder *";
   }
-
   function markSaved() {
     hasUnsavedChanges = false;
     const btn = document.getElementById('topSaveBtn');
@@ -520,11 +608,10 @@
     if (btn) btn.classList.remove('btn-unsaved');
     if (lbl) lbl.innerText = "Sauvegarder";
   }
-
   window.addEventListener('beforeunload', (e) => {
     if (hasUnsavedChanges && projectId) {
       e.preventDefault();
-      e.returnValue = "Vous avez des modifications non enregistrées. Voulez-vous vraiment quitter sans sauvegarder ?";
+      e.returnValue = "Vous avez des modifications non enregistrées.";
       return e.returnValue;
     }
   });
@@ -535,7 +622,6 @@
     "Photos Drive", "Plans & Manual", "Power-On Check", "Sea Trial", "Handover & Sign"
   ];
 
-  // Calcul du statut de chaque étape : 'empty' (rouge), 'partial' (orange), 'complete' (vert)
   function getStepStatus(stepNum) {
     const val = id => { const el = document.getElementById(id); return el && el.value && el.value.trim() !== ""; };
 
@@ -545,9 +631,7 @@
       if (count === 0) return 'empty';
       return count === fields.length ? 'complete' : 'partial';
     }
-    if (stepNum === 2) {
-      return val('serialNumbers') ? 'complete' : 'empty';
-    }
+    if (stepNum === 2) return val('serialNumbers') ? 'complete' : 'empty';
     if (stepNum === 3) {
       let count = 0;
       for (let i = 0; i < 21; i++) if (val(`inst_${i}`)) count++;
@@ -625,7 +709,15 @@
 
   window.changeStep = (delta) => goToStep(currentStep + delta, true);
 
-  // Cartes visuelles Drive & Motor
+  window.markAllYes = (prefix, count) => {
+    for (let i = 0; i < count; i++) {
+      const el = document.getElementById(`${prefix}_${i}`);
+      if (el && el.value === "") el.value = "YES";
+    }
+    renderStepper();
+    markUnsaved();
+  };
+
   window.selectDrive = (val, el) => {
     document.getElementById('driveSystem').value = val;
     document.querySelectorAll('#driveCards .radio-card').forEach(c => c.classList.remove('selected'));
@@ -673,7 +765,7 @@
   renderChecks(powerItems, "powerChecksContainer", "pwr");
   renderChecks(handoverItems, "handoverChecksContainer", "hnd");
 
-  // Tableau Sea Trial (0% à 100%)
+  // Tableau Sea Trial + Tracé automatique de la courbe SVG
   const throttleSteps = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
   const seaBody = document.getElementById('seaTrialTableBody');
   throttleSteps.forEach(pct => {
@@ -691,8 +783,48 @@
       </tr>`;
   });
 
+  function drawSeaTrialChart(maxKw, kwPoints, ktsPoints) {
+    const svg = document.getElementById('seaTrialChart');
+    if (!svg) return;
+    const W = 640, H = 210, padL = 42, padR = 42, padT = 18, padB = 28;
+    const plotW = W - padL - padR, plotH = H - padT - padB;
+    const maxKts = Math.max(12, ...ktsPoints.filter(v => v !== null).map(v => Math.ceil(v + 2)));
+
+    let html = `<rect x="${padL}" y="${padT}" width="${plotW}" height="${plotH}" fill="#fff" stroke="#E2E8F0"/>`;
+    for (let i = 0; i <= 4; i++) {
+      const y = padT + (plotH * i) / 4;
+      const kwLabel = ((maxKw * (4 - i)) / 4).toFixed(0);
+      const ktsLabel = ((maxKts * (4 - i)) / 4).toFixed(0);
+      html += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="#F1F5F9"/>`;
+      html += `<text x="${padL - 6}" y="${y + 4}" font-size="10" fill="#1E73BE" text-anchor="end">${kwLabel}kW</text>`;
+      html += `<text x="${W - padR + 6}" y="${y + 4}" font-size="10" fill="#28A745" text-anchor="start">${ktsLabel}kt</text>`;
+    }
+    throttleSteps.forEach((pct, idx) => {
+      const x = padL + (plotW * idx) / (throttleSteps.length - 1);
+      html += `<text x="${x}" y="${H - 8}" font-size="10" fill="#64748B" text-anchor="middle">${pct}%</text>`;
+    });
+
+    const buildPolyline = (pts, maxVal, color) => {
+      let coords = [], dots = "";
+      pts.forEach((val, idx) => {
+        if (val !== null) {
+          const x = padL + (plotW * idx) / (throttleSteps.length - 1);
+          const y = padT + plotH - (Math.min(val, maxVal) / maxVal) * plotH;
+          coords.push(`${x.toFixed(1)},${y.toFixed(1)}`);
+          dots += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.5" fill="${color}"/>`;
+        }
+      });
+      return (coords.length > 1 ? `<polyline fill="none" stroke="${color}" stroke-width="2.5" points="${coords.join(' ')}"/>` : '') + dots;
+    };
+
+    html += buildPolyline(kwPoints, maxKw, "#1E73BE");
+    html += buildPolyline(ktsPoints, maxKts, "#28A745");
+    svg.innerHTML = html;
+  }
+
   window.recalcSeaTrial = () => {
     const maxKw = parseFloat(document.getElementById('seaModel').value) || 20;
+    const kwPoints = [], ktsPoints = [];
     throttleSteps.forEach(pct => {
       document.getElementById(`theo_${pct}`).innerText = ((maxKw * pct) / 100).toFixed(1) + " kW";
       const kwA = parseFloat(document.getElementById(`runA_kw_${pct}`).value);
@@ -703,10 +835,14 @@
       let avgKw = !isNaN(kwA) && !isNaN(kwB) ? (kwA + kwB) / 2 : (!isNaN(kwA) ? kwA : (!isNaN(kwB) ? kwB : null));
       let avgKts = !isNaN(ktsA) && !isNaN(ktsB) ? (ktsA + ktsB) / 2 : (!isNaN(ktsA) ? ktsA : (!isNaN(ktsB) ? ktsB : null));
 
+      kwPoints.push(avgKw);
+      ktsPoints.push(avgKts);
+
       document.getElementById(`avg_kw_${pct}`).innerText = avgKw !== null ? avgKw.toFixed(1) : "-";
       document.getElementById(`avg_kts_${pct}`).innerText = avgKts !== null ? avgKts.toFixed(1) : "-";
       document.getElementById(`eff_${pct}`).innerText = (avgKw !== null && avgKts !== null && avgKts > 0) ? (avgKw / avgKts).toFixed(2) : "-";
     });
+    drawSeaTrialChart(maxKw, kwPoints, ktsPoints);
     renderStepper();
   };
   recalcSeaTrial();
@@ -792,6 +928,11 @@
       renderGalleries();
       renderStepper();
 
+      if (!navigator.onLine) {
+        statusEl.innerText = "Hors-ligne : miniature conservée. Pensez à renvoyer le fichier HD une fois connecté.";
+        continue;
+      }
+
       statusEl.innerText = `Envoi HD vers Google Drive (${i + 1}/${files.length}) : ${file.name}...`;
       try {
         const base64Data = await readFileAsDataURL(file);
@@ -822,7 +963,7 @@
       const target = document.getElementById(`gal_${p.cat}`) || document.getElementById('gal_vessel');
       const imgSrc = p.thumb || p.directImgUrl || "";
       const linkAttr = p.fileUrl && p.fileUrl !== "#" ? `href="${p.fileUrl}" target="_blank"` : ``;
-      const statusBadge = p.uploading ? `<div style="font-size:10px; color:#D97706;">Envoi Drive...</div>` : `<div style="font-size:10px; color:#28A745;">Sur Drive (HD)</div>`;
+      const statusBadge = p.uploading ? `<div style="font-size:10px; color:#D97706;">En attente Drive</div>` : `<div style="font-size:10px; color:#28A745;">Sur Drive (HD)</div>`;
 
       const previewHtml = p.type === 'image'
         ? `<a ${linkAttr} title="Voir l'original HD sur Google Drive"><img src="${imgSrc}" alt="${p.name}"></a>`
@@ -874,7 +1015,6 @@
   document.getElementById('projectForm').addEventListener('input', () => { renderStepper(); markUnsaved(); });
   document.getElementById('projectForm').addEventListener('change', () => { renderStepper(); markUnsaved(); });
 
-  // Calcul pourcentage global (tableau Admin)
   function computeCompletion(data) {
     const keyFields = [
       'vesselModel', 'location', 'makeBuilder', 'hullType', 'dimensions', 'fittedProp',
@@ -911,10 +1051,10 @@
   const params = new URLSearchParams(window.location.search);
   const projectId = params.get('id');
 
-  window.createProject = async () => {
-    const name = document.getElementById('newProjectName').value;
-    const inst = document.getElementById('newInstallerName').value;
-    const email = document.getElementById('newInstallerEmail').value;
+  window.createProject = async (templateData = null, customName = null) => {
+    const name = customName || document.getElementById('newProjectName').value;
+    const inst = templateData ? (templateData.installerName || "") : document.getElementById('newInstallerName').value;
+    const email = templateData ? (templateData.installerEmail || "") : document.getElementById('newInstallerEmail').value;
     if(!name) return alert("Entrez un nom de projet");
     const btn = document.getElementById('createProjBtn');
     btn.disabled = true; btn.innerText = "Création dossier Drive...";
@@ -930,8 +1070,21 @@
       if (result.status === "ok") driveUrl = result.folderUrl;
     } catch (e) { console.error(e); }
 
+    const basePayload = templateData ? { ...templateData } : {};
+    delete basePayload.photos;
+    delete basePayload.sigInstaller;
+    delete basePayload.sigCustomer;
+    delete basePayload.adminNotes;
+    delete basePayload.adminDate;
+
     await setDoc(doc(db, "projects", id), {
-      projectName: name, installerName: inst, installerEmail: email, status: "En attente Installateur", driveFolderUrl: driveUrl, photos: []
+      ...basePayload,
+      projectName: name,
+      installerName: inst,
+      installerEmail: email,
+      status: "En attente Installateur",
+      driveFolderUrl: driveUrl,
+      photos: []
     });
 
     document.getElementById('newProjectName').value = "";
@@ -941,11 +1094,77 @@
     loadDashboard();
   };
 
+  window.duplicateProject = async (sourceId) => {
+    const found = allProjectsCache.find(p => p.id === sourceId);
+    if (!found) return;
+    const newName = prompt("Nom du nouveau projet (copie de " + found.data.projectName + ") :", found.data.projectName + " (Copie)");
+    if (!newName) return;
+    await createProject(found.data, newName);
+  };
+
   window.deleteProject = async (id) => {
     if(confirm("Supprimer ce projet de la liste ? (Le dossier Google Drive sera conservé par sécurité)")) {
       await deleteDoc(doc(db, "projects", id));
       loadDashboard();
     }
+  };
+
+  window.filterProjects = () => {
+    const query = (document.getElementById('searchProjectInput').value || "").toLowerCase();
+    const statusFilter = document.getElementById('filterStatusSelect').value;
+    const tbody = document.getElementById('projectList');
+    tbody.innerHTML = "";
+    const baseUrl = window.location.href.split('?')[0];
+
+    allProjectsCache.forEach(({ id, data }) => {
+      const matchText = `${data.projectName} ${id} ${data.installerName || ''}`.toLowerCase().includes(query);
+      const matchStatus = statusFilter === "ALL" || (data.status || "").includes(statusFilter);
+      if (!matchText || !matchStatus) return;
+
+      const pct = computeCompletion(data);
+      const linkInst = `${baseUrl}?id=${id}`;
+      const linkAdmin = `${baseUrl}?id=${id}&admin=1`;
+      const driveBtn = data.driveFolderUrl
+        ? `<a href="${data.driveFolderUrl}" target="_blank" class="btn btn-green btn-sm"><svg class="icon" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Drive</a>`
+        : ``;
+
+      const safeProj = (data.projectName || '').replace(/'/g, "\\'");
+      const safeInst = (data.installerName || '').replace(/'/g, "\\'");
+      const safeMail = (data.installerEmail || '').replace(/'/g, "\\'");
+
+      tbody.innerHTML += `<tr>
+        <td style="text-align:left; padding-left:16px;"><strong>${data.projectName}</strong><br><small style="color:var(--cx-muted);">${id}</small></td>
+        <td>${data.installerName || '-'}${data.installerEmail ? `<br><small style="color:var(--cx-muted);">${data.installerEmail}</small>` : ''}</td>
+        <td>
+          <div class="progress-wrap">
+            <div class="progress-bar" style="width:${pct}%;"></div>
+            <div class="progress-text">${pct}%</div>
+          </div>
+        </td>
+        <td>${data.status || 'Nouveau'}</td>
+        <td style="display:flex; gap:5px; justify-content:center; flex-wrap:wrap; border:none;">
+          <button class="btn btn-outline btn-sm" onclick="navigator.clipboard.writeText('${linkInst}'); alert('Lien installateur copié !')" title="Copier le lien">
+            <svg class="icon" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Lien
+          </button>
+          <button class="btn btn-outline btn-sm" onclick="sendProjectEmail('${safeProj}', '${safeInst}', '${safeMail}', '${linkInst}')" title="Envoyer par e-mail">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            Email
+          </button>
+          <a href="${linkAdmin}" class="btn btn-sm">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Ouvrir
+          </a>
+          <button class="btn btn-outline btn-sm" onclick="duplicateProject('${id}')" title="Dupliquer ce modèle">
+            <svg class="icon" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+          </button>
+          ${driveBtn}
+          <button class="btn btn-red" onclick="deleteProject('${id}')" title="Supprimer">
+            <svg class="icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          </button>
+        </td>
+      </tr>`;
+    });
   };
 
   async function loadDashboard() {
@@ -956,51 +1175,19 @@
     const tbody = document.getElementById('projectList');
     tbody.innerHTML = "<tr><td colspan='5'>Chargement...</td></tr>";
     const snap = await getDocs(collection(db, "projects"));
-    tbody.innerHTML = "";
-    const baseUrl = window.location.href.split('?')[0];
+    allProjectsCache = [];
+    let doneCount = 0;
+
     snap.forEach(d => {
       const data = d.data();
-      const pct = computeCompletion(data);
-      const linkInst = `${baseUrl}?id=${d.id}`;
-      const linkAdmin = `${baseUrl}?id=${d.id}&admin=1`;
-      const driveBtn = data.driveFolderUrl
-        ? `<a href="${data.driveFolderUrl}" target="_blank" class="btn btn-green btn-sm"><svg class="icon" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Drive</a>`
-        : ``;
-
-      const safeProj = (data.projectName || '').replace(/'/g, "\\'");
-      const safeInst = (data.installerName || '').replace(/'/g, "\\'");
-      const safeMail = (data.installerEmail || '').replace(/'/g, "\\'");
-
-      tbody.innerHTML += `<tr>
-        <td style="text-align:left; padding-left:16px;"><strong>${data.projectName}</strong><br><small style="color:var(--cx-muted);">${d.id}</small></td>
-        <td>${data.installerName || '-'}${data.installerEmail ? `<br><small style="color:var(--cx-muted);">${data.installerEmail}</small>` : ''}</td>
-        <td>
-          <div class="progress-wrap">
-            <div class="progress-bar" style="width:${pct}%;"></div>
-            <div class="progress-text">${pct}%</div>
-          </div>
-        </td>
-        <td>${data.status || 'Nouveau'}</td>
-        <td style="display:flex; gap:5px; justify-content:center; flex-wrap:wrap; border:none;">
-          <button class="btn btn-outline btn-sm" onclick="navigator.clipboard.writeText('${linkInst}'); alert('Lien installateur copié !')">
-            <svg class="icon" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-            Lien
-          </button>
-          <button class="btn btn-outline btn-sm" onclick="sendProjectEmail('${safeProj}', '${safeInst}', '${safeMail}', '${linkInst}')" title="Envoyer le lien par e-mail">
-            <svg class="icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-            Email
-          </button>
-          <a href="${linkAdmin}" class="btn btn-sm">
-            <svg class="icon" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-            Ouvrir
-          </a>
-          ${driveBtn}
-          <button class="btn btn-red" onclick="deleteProject('${d.id}')" title="Supprimer">
-            <svg class="icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-          </button>
-        </td>
-      </tr>`;
+      allProjectsCache.push({ id: d.id, data });
+      if ((data.status || "").includes("Validé")) doneCount++;
     });
+
+    document.getElementById('statTotal').innerText = allProjectsCache.length;
+    document.getElementById('statDone').innerText = doneCount;
+    document.getElementById('statPending').innerText = allProjectsCache.length - doneCount;
+    filterProjects();
   }
 
   async function loadProject(id, isAuthAdmin) {
@@ -1021,6 +1208,9 @@
       currentDriveFolderUrl = data.driveFolderUrl || "";
       document.getElementById('displayProjName').innerText = currentProjectName;
       document.getElementById('displayProjId').innerText = id;
+      document.getElementById('printProjName').innerText = currentProjectName;
+      document.getElementById('printProjId').innerText = id;
+      document.getElementById('printStatusStamp').innerText = data.status || "EN COURS";
       document.getElementById('breadcrumbText').innerText = `Commissioning / ${currentProjectName}`;
 
       if (currentDriveFolderUrl && isAuthAdmin) {
@@ -1064,10 +1254,18 @@
     } else alert("Projet introuvable. Vérifiez le lien.");
   }
 
+  window.prepareAndPrint = () => {
+    recalcSeaTrial();
+    window.print();
+  };
+
   window.saveForm = async (newStatus, silent = false) => {
     const cleanPhotos = projectFiles.map(({ uploading, ...rest }) => rest);
     const payload = { photos: cleanPhotos, driveFolderUrl: currentDriveFolderUrl };
-    if (newStatus) payload.status = newStatus;
+    if (newStatus) {
+      payload.status = newStatus;
+      document.getElementById('printStatusStamp').innerText = newStatus;
+    }
     document.querySelectorAll('input, select, textarea').forEach(el => {
       if(el.id && el.type !== 'file' && el.id !== 'adminPwdInput') payload[el.id] = el.value;
     });
