@@ -516,4 +516,527 @@
       return val('serialNumbers') ? 'complete' : 'empty';
     }
     if (stepNum === 3) {
-      let count =
+      let count = 0;
+      for (let i = 0; i < 21; i++) if (val(`inst_${i}`)) count++;
+      if (count === 0) return 'empty';
+      return count === 21 ? 'complete' : 'partial';
+    }
+    if (stepNum === 4) {
+      const fields = ['tempHumidity', 'insulationTest', 'earthTest', 'canTest'];
+      const count = fields.filter(val).length;
+      if (count === 0) return 'empty';
+      return count === fields.length ? 'complete' : 'partial';
+    }
+    if (stepNum === 5) {
+      const cats = ['vessel', 'battery', 'motor', 'cabling'];
+      const filledCats = cats.filter(c => projectFiles.some(f => f.cat === c)).length;
+      if (filledCats === 0) return 'empty';
+      return filledCats === cats.length ? 'complete' : 'partial';
+    }
+    if (stepNum === 6) {
+      const docCount = projectFiles.filter(f => ['elec_schema', 'mech_3d', 'boat_manual'].includes(f.cat)).length;
+      return docCount > 0 ? 'complete' : 'empty';
+    }
+    if (stepNum === 7) {
+      let count = 0;
+      for (let i = 0; i < 16; i++) if (val(`pwr_${i}`)) count++;
+      if (count === 0) return 'empty';
+      return count === 16 ? 'complete' : 'partial';
+    }
+    if (stepNum === 8) {
+      const conds = val('seaConditions') && val('seaDatePers');
+      const fullThrottle = val('runA_kw_100') && val('runA_kts_100') && val('runB_kw_100') && val('runB_kts_100');
+      const anyFilled = val('seaConditions') || val('seaDatePers') || val('runA_kw_100') || val('runA_kw_50');
+      if (!anyFilled) return 'empty';
+      return (conds && fullThrottle) ? 'complete' : 'partial';
+    }
+    if (stepNum === 9) {
+      let checks = 0;
+      for (let i = 0; i < 5; i++) if (val(`hnd_${i}`)) checks++;
+      if (checks === 0 && !sigInstSigned && !sigCustSigned) return 'empty';
+      return (checks === 5 && sigInstSigned && sigCustSigned) ? 'complete' : 'partial';
+    }
+    return 'empty';
+  }
+
+  window.renderStepper = () => {
+    const container = document.getElementById('stepperContainer');
+    if (!container) return;
+    container.innerHTML = "";
+    stepNames.forEach((name, idx) => {
+      const stepNum = idx + 1;
+      const status = getStepStatus(stepNum);
+      const isActive = stepNum === currentStep ? "active" : "";
+      const icon = status === 'complete' ? "✓" : stepNum;
+      container.innerHTML += `
+        <div class="step-item status-${status} ${isActive}" onclick="goToStep(${stepNum})">
+          <span class="step-circle">${icon}</span>
+          <span>${name}</span>
+        </div>`;
+    });
+  };
+
+  window.goToStep = (stepNum) => {
+    if (stepNum < 1 || stepNum > 9) return;
+    currentStep = stepNum;
+    document.querySelectorAll('.step-section').forEach(sec => {
+      sec.classList.toggle('hidden', parseInt(sec.dataset.step) !== currentStep);
+    });
+    document.getElementById('stepIndicatorText').innerText = `Step ${currentStep} of 9 • ${stepNames[currentStep - 1]}`;
+    document.getElementById('prevStepBtn').style.visibility = currentStep === 1 ? "hidden" : "visible";
+    document.getElementById('nextStepBtn').style.display = currentStep === 9 ? "none" : "inline-flex";
+    renderStepper();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (projectId) saveForm(null, true);
+  };
+
+  window.changeStep = (delta) => goToStep(currentStep + delta);
+
+  // Cartes visuelles Drive & Motor
+  window.selectDrive = (val, el) => {
+    document.getElementById('driveSystem').value = val;
+    document.querySelectorAll('#driveCards .radio-card').forEach(c => c.classList.remove('selected'));
+    if (el) el.classList.add('selected');
+  };
+
+  window.selectMotor = (kw, el) => {
+    document.getElementById('seaModel').value = kw;
+    document.querySelectorAll('#motorCards .radio-card').forEach(c => c.classList.remove('selected'));
+    if (el) el.classList.add('selected');
+    recalcSeaTrial();
+  };
+
+  // Listes des points de contrôle
+  const installItems = [
+    "1. Components match packing list", "2. Installed in clean dry area", "3. Structurally safe mounting",
+    "4. No potential leaks", "5. Oil / Coolant levels match", "6. Power cables wired per drawing",
+    "7. Communication cables connected", "8. Connections torqued", "9. Propeller & Anode fitted",
+    "10. Adequate ventilation", "11. Insulation/ground tests pass", "12. CAN bus terminator check",
+    "13. No drop cables extended", "14. Battery CAN 2x terminators", "15. Battery CAN parallel cables",
+    "16. 12V battery normal voltage", "17. Shaft aligned (Inboard)", "18. Cable bend < 45 deg",
+    "19. Motor proper height (Outboard)", "20. Twin motors distance (Outboard)", "21. Steering/Trim space (Outboard)"
+  ];
+  const powerItems = [
+    "1. Isolator & breakers ON", "2. No display errors", "3. Components visible in Display",
+    "4. Latest software version", "5. GPS & Telemetry functioning", "6. Cooling system operational",
+    "7. F/N/R shift operational", "8. Kill switch works", "9. Shore power charging",
+    "10. Solar/Gen charging", "11. DCDC power operational", "12. Fan / Water pump operational",
+    "13. Steer/Trim max limit", "14. Steer/Trim full range", "15. Boost / Turbo operation", "16. Cloud Link operational"
+  ];
+  const handoverItems = [
+    "1. Components explained", "2. Operation & maintenance explained", "3. Troubleshooting explained",
+    "4. Manuals delivered", "5. Warranty policy explained"
+  ];
+
+  function renderChecks(list, containerId, prefix) {
+    const el = document.getElementById(containerId);
+    list.forEach((text, i) => {
+      el.innerHTML += `<div class="check-row"><span>${text}</span><select id="${prefix}_${i}"><option value="">--</option><option value="YES">YES</option><option value="NO">NO</option><option value="N/A">N/A</option></select></div>`;
+    });
+  }
+  renderChecks(installItems, "installChecksContainer", "inst");
+  renderChecks(powerItems, "powerChecksContainer", "pwr");
+  renderChecks(handoverItems, "handoverChecksContainer", "hnd");
+
+  // Tableau Sea Trial (0% à 100%)
+  const throttleSteps = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+  const seaBody = document.getElementById('seaTrialTableBody');
+  throttleSteps.forEach(pct => {
+    seaBody.innerHTML += `
+      <tr>
+        <td><strong>${pct}%</strong></td>
+        <td id="theo_${pct}" class="calc-cell">0.0</td>
+        <td><input type="number" step="0.1" id="runA_kw_${pct}" oninput="recalcSeaTrial()"></td>
+        <td><input type="number" step="0.1" id="runA_kts_${pct}" oninput="recalcSeaTrial()"></td>
+        <td><input type="number" step="0.1" id="runB_kw_${pct}" oninput="recalcSeaTrial()"></td>
+        <td><input type="number" step="0.1" id="runB_kts_${pct}" oninput="recalcSeaTrial()"></td>
+        <td id="avg_kw_${pct}" class="calc-cell">-</td>
+        <td id="avg_kts_${pct}" class="calc-cell">-</td>
+        <td id="eff_${pct}" class="calc-cell">-</td>
+      </tr>`;
+  });
+
+  window.recalcSeaTrial = () => {
+    const maxKw = parseFloat(document.getElementById('seaModel').value) || 20;
+    throttleSteps.forEach(pct => {
+      document.getElementById(`theo_${pct}`).innerText = ((maxKw * pct) / 100).toFixed(1) + " kW";
+      const kwA = parseFloat(document.getElementById(`runA_kw_${pct}`).value);
+      const kwB = parseFloat(document.getElementById(`runB_kw_${pct}`).value);
+      const ktsA = parseFloat(document.getElementById(`runA_kts_${pct}`).value);
+      const ktsB = parseFloat(document.getElementById(`runB_kts_${pct}`).value);
+
+      let avgKw = !isNaN(kwA) && !isNaN(kwB) ? (kwA + kwB) / 2 : (!isNaN(kwA) ? kwA : (!isNaN(kwB) ? kwB : null));
+      let avgKts = !isNaN(ktsA) && !isNaN(ktsB) ? (ktsA + ktsB) / 2 : (!isNaN(ktsA) ? ktsA : (!isNaN(ktsB) ? ktsB : null));
+
+      document.getElementById(`avg_kw_${pct}`).innerText = avgKw !== null ? avgKw.toFixed(1) : "-";
+      document.getElementById(`avg_kts_${pct}`).innerText = avgKts !== null ? avgKts.toFixed(1) : "-";
+      document.getElementById(`eff_${pct}`).innerText = (avgKw !== null && avgKts !== null && avgKts > 0) ? (avgKw / avgKts).toFixed(2) : "-";
+    });
+    renderStepper();
+  };
+  recalcSeaTrial();
+
+  // Rubriques Photos & Documents Google Drive
+  const photoCategories = [
+    { id: "vessel", label: "1. Vues extérieures du bateau & Hélice / Saildrive / Pod" },
+    { id: "battery", label: "2. Compartiment batteries & Connexions" },
+    { id: "motor", label: "3. Moteur principal, Écran (liste N° série) & Manette" },
+    { id: "cabling", label: "4. Chargeur, DCDC, Câblage HV / 12V / Terre / Réseau CAN" }
+  ];
+  const docCategories = [
+    { id: "elec_schema", label: "1. Schémas électriques d'installation" },
+    { id: "mech_3d", label: "2. Plans mécaniques & Fichiers 3D" },
+    { id: "boat_manual", label: "3. Manuel du bateau / Documentation chantier" }
+  ];
+
+  const photoContainer = document.getElementById('photoSectionsContainer');
+  photoCategories.forEach(cat => {
+    photoContainer.innerHTML += `
+      <div class="section-label">${cat.label}</div>
+      <div class="no-print">
+        <input type="file" accept="image/*" multiple onchange="uploadToDrive(this.files, '${cat.id}')">
+        <div id="status_${cat.id}" class="upload-status"></div>
+      </div>
+      <div id="gal_${cat.id}" class="photo-gallery"></div>`;
+  });
+
+  const docContainer = document.getElementById('docSectionsContainer');
+  docCategories.forEach(cat => {
+    docContainer.innerHTML += `
+      <div class="section-label">${cat.label}</div>
+      <div class="no-print">
+        <input type="file" multiple onchange="uploadToDrive(this.files, '${cat.id}')">
+        <div id="status_${cat.id}" class="upload-status"></div>
+      </div>
+      <div id="gal_${cat.id}" class="photo-gallery"></div>`;
+  });
+
+  const allCategories = [...photoCategories, ...docCategories];
+
+  function createThumbnail(file, maxWidth = 420, quality = 0.6) {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let w = img.width, h = img.height;
+          if (w > maxWidth) { h = Math.round((h * maxWidth) / w); w = maxWidth; }
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function readFileAsDataURL(file) {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target.result);
+      reader.readAsDataURL(file);
+    });
+  }
+
+  window.uploadToDrive = async (files, catId) => {
+    const statusEl = document.getElementById(`status_${catId}`);
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const isImg = file.type.startsWith("image/");
+      let thumbData = isImg ? await createThumbnail(file) : null;
+
+      const tempItem = {
+        cat: catId, type: isImg ? "image" : "doc", name: file.name,
+        thumb: thumbData, fileUrl: "#", uploading: true
+      };
+      projectFiles.push(tempItem);
+      const itemIndex = projectFiles.length - 1;
+      renderGalleries();
+      renderStepper();
+
+      statusEl.innerText = `Envoi HD vers Google Drive (${i + 1}/${files.length}) : ${file.name}...`;
+      try {
+        const base64Data = await readFileAsDataURL(file);
+        const res = await fetch(GOOGLE_SCRIPT_URL, {
+          method: "POST",
+          body: JSON.stringify({
+            action: "uploadFile", projectId: projectId, projectName: currentProjectName,
+            category: catId, fileName: file.name, mimeType: file.type || "application/octet-stream", fileData: base64Data
+          })
+        });
+        const result = await res.json();
+        if (result.status === "ok") {
+          projectFiles[itemIndex].fileUrl = result.fileUrl;
+          projectFiles[itemIndex].uploading = false;
+          if (result.folderUrl) currentDriveFolderUrl = result.folderUrl;
+          renderGalleries();
+          await saveForm(null, true);
+        } else alert("Erreur Google Drive : " + result.message);
+      } catch (err) { alert("Erreur lors de l'envoi : " + err.message); }
+    }
+    statusEl.innerText = "Fichier(s) enregistré(s) en HD sur Google Drive.";
+    setTimeout(() => { statusEl.innerText = ""; }, 4000);
+  };
+
+  function renderGalleries() {
+    allCategories.forEach(cat => { document.getElementById(`gal_${cat.id}`).innerHTML = ""; });
+    projectFiles.forEach((p, idx) => {
+      const target = document.getElementById(`gal_${p.cat}`) || document.getElementById('gal_vessel');
+      const imgSrc = p.thumb || p.directImgUrl || "";
+      const linkAttr = p.fileUrl && p.fileUrl !== "#" ? `href="${p.fileUrl}" target="_blank"` : ``;
+      const statusBadge = p.uploading ? `<div style="font-size:10px; color:#D97706;">Envoi Drive...</div>` : `<div style="font-size:10px; color:#28A745;">Sur Drive (HD)</div>`;
+
+      const previewHtml = p.type === 'image'
+        ? `<a ${linkAttr} title="Voir l'original HD sur Google Drive"><img src="${imgSrc}" alt="${p.name}"></a>`
+        : `<div class="doc-badge"><svg class="icon-lg" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>DOCUMENT<br><a ${linkAttr} style="font-size:11px; color:#1E73BE;">Ouvrir sur Drive</a></div>`;
+
+      target.innerHTML += `
+        <div class="photo-card">
+          ${previewHtml}
+          <div style="font-size:11px; margin-top:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${p.name}">${p.name}</div>
+          ${statusBadge}
+          <button type="button" class="btn btn-red no-print" onclick="removeFile(${idx})">Retirer</button>
+        </div>`;
+    });
+  }
+  window.removeFile = (idx) => { projectFiles.splice(idx, 1); renderGalleries(); renderStepper(); };
+
+  // Signatures au doigt
+  ['sigInstaller', 'sigCustomer'].forEach(id => {
+    const canvas = document.getElementById(id);
+    const ctx = canvas.getContext('2d');
+    let drawing = false;
+    const getPos = e => {
+      const r = canvas.getBoundingClientRect();
+      const t = e.touches ? e.touches[0] : e;
+      return { x: (t.clientX - r.left) * (canvas.width / r.width), y: (t.clientY - r.top) * (canvas.height / r.height) };
+    };
+    const start = e => {
+      drawing = true;
+      if (id === 'sigInstaller') sigInstSigned = true;
+      if (id === 'sigCustomer') sigCustSigned = true;
+      renderStepper();
+      const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y);
+    };
+    const move = e => { if(!drawing) return; e.preventDefault(); const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); };
+    const end = () => { drawing = false; };
+    canvas.addEventListener('mousedown', start); canvas.addEventListener('mousemove', move); window.addEventListener('mouseup', end);
+    canvas.addEventListener('touchstart', start); canvas.addEventListener('touchmove', move); canvas.addEventListener('touchend', end);
+  });
+  window.clearCanvas = id => {
+    const c = document.getElementById(id);
+    c.getContext('2d').clearRect(0, 0, c.width, c.height);
+    if (id === 'sigInstaller') sigInstSigned = false;
+    if (id === 'sigCustomer') sigCustSigned = false;
+    renderStepper();
+  };
+
+  document.getElementById('projectForm').addEventListener('input', () => renderStepper());
+  document.getElementById('projectForm').addEventListener('change', () => renderStepper());
+
+  // Calcul pourcentage global (tableau Admin)
+  function computeCompletion(data) {
+    const keyFields = [
+      'vesselModel', 'location', 'makeBuilder', 'hullType', 'dimensions', 'fittedProp',
+      'origProp', 'installerName', 'installDate', 'serialNumbers', 'tempHumidity',
+      'insulationTest', 'earthTest', 'seaConditions', 'seaDatePers', 'runA_kw_100', 'runB_kw_100'
+    ];
+    let filled = 0;
+    keyFields.forEach(f => { if (data[f] && String(data[f]).trim() !== "") filled++; });
+    if (data.photos && data.photos.length > 0) filled += 2;
+    if (data.sigInstaller && data.sigInstaller.length > 2500) filled += 1;
+    if (data.sigCustomer && data.sigCustomer.length > 2500) filled += 1;
+    return Math.min(100, Math.round((filled / (keyFields.length + 4)) * 100));
+  }
+
+  // Authentification Admin
+  window.checkAdminLogin = () => {
+    if (document.getElementById('adminPwdInput').value === ADMIN_PASSWORD) {
+      sessionStorage.setItem('isAdminAuth', 'true');
+      initApp();
+    } else alert("Mot de passe incorrect.");
+  };
+  window.logoutAdmin = () => { sessionStorage.removeItem('isAdminAuth'); location.reload(); };
+
+  const params = new URLSearchParams(window.location.search);
+  const projectId = params.get('id');
+
+  window.createProject = async () => {
+    const name = document.getElementById('newProjectName').value;
+    const inst = document.getElementById('newInstallerName').value;
+    if(!name) return alert("Entrez un nom de projet");
+    const btn = document.getElementById('createProjBtn');
+    btn.disabled = true; btn.innerText = "Création dossier Drive...";
+
+    const id = "PROJ-" + Date.now().toString().slice(-5);
+    let driveUrl = "";
+    try {
+      const res = await fetch(GOOGLE_SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "createProjectFolder", projectId: id, projectName: name })
+      });
+      const result = await res.json();
+      if (result.status === "ok") driveUrl = result.folderUrl;
+    } catch (e) { console.error(e); }
+
+    await setDoc(doc(db, "projects", id), {
+      projectName: name, installerName: inst, status: "En attente Installateur", driveFolderUrl: driveUrl, photos: []
+    });
+
+    document.getElementById('newProjectName').value = "";
+    document.getElementById('newInstallerName').value = "";
+    btn.disabled = false; btn.innerText = "+ Créer Projet & Dossier Drive";
+    loadDashboard();
+  };
+
+  window.deleteProject = async (id) => {
+    if(confirm("Supprimer ce projet de la liste ? (Le dossier Google Drive sera conservé par sécurité)")) {
+      await deleteDoc(doc(db, "projects", id));
+      loadDashboard();
+    }
+  };
+
+  async function loadDashboard() {
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('adminDashboard').classList.remove('hidden');
+    document.getElementById('breadcrumbText').innerText = "Gestion des Projets";
+
+    const tbody = document.getElementById('projectList');
+    tbody.innerHTML = "<tr><td colspan='5'>Chargement...</td></tr>";
+    const snap = await getDocs(collection(db, "projects"));
+    tbody.innerHTML = "";
+    const baseUrl = window.location.href.split('?')[0];
+    snap.forEach(d => {
+      const data = d.data();
+      const pct = computeCompletion(data);
+      const linkInst = `${baseUrl}?id=${d.id}`;
+      const linkAdmin = `${baseUrl}?id=${d.id}&admin=1`;
+      const driveBtn = data.driveFolderUrl
+        ? `<a href="${data.driveFolderUrl}" target="_blank" class="btn btn-green btn-sm"><svg class="icon" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Drive</a>`
+        : ``;
+
+      tbody.innerHTML += `<tr>
+        <td style="text-align:left; padding-left:16px;"><strong>${data.projectName}</strong><br><small style="color:var(--ep-muted);">${d.id}</small></td>
+        <td>${data.installerName || '-'}</td>
+        <td>
+          <div class="progress-wrap">
+            <div class="progress-bar" style="width:${pct}%;"></div>
+            <div class="progress-text">${pct}%</div>
+          </div>
+        </td>
+        <td>${data.status || 'Nouveau'}</td>
+        <td style="display:flex; gap:5px; justify-content:center; flex-wrap:wrap; border:none;">
+          <button class="btn btn-outline btn-sm" onclick="navigator.clipboard.writeText('${linkInst}'); alert('Lien installateur copié !')">
+            <svg class="icon" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Lien
+          </button>
+          <a href="${linkAdmin}" class="btn btn-sm">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Ouvrir
+          </a>
+          ${driveBtn}
+          <button class="btn btn-red" onclick="deleteProject('${d.id}')" title="Supprimer">
+            <svg class="icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          </button>
+        </td>
+      </tr>`;
+    });
+  }
+
+  async function loadProject(id, isAuthAdmin) {
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('adminDashboard').classList.add('hidden');
+    document.getElementById('projectForm').classList.remove('hidden');
+    document.getElementById('topSaveBtn').classList.remove('hidden');
+
+    if(!isAuthAdmin) {
+      document.getElementById('adminSection').classList.add('hidden');
+      document.getElementById('backAdminBtn').classList.add('hidden');
+    }
+
+    const snap = await getDoc(doc(db, "projects", id));
+    if(snap.exists()) {
+      const data = snap.data();
+      currentProjectName = data.projectName || id;
+      currentDriveFolderUrl = data.driveFolderUrl || "";
+      document.getElementById('displayProjName').innerText = currentProjectName;
+      document.getElementById('displayProjId').innerText = id;
+      document.getElementById('breadcrumbText').innerText = `Commissioning / ${currentProjectName}`;
+
+      if (currentDriveFolderUrl && isAuthAdmin) {
+        document.getElementById('projectDriveLinkBtn').href = currentDriveFolderUrl;
+        document.getElementById('projectDriveLinkBtn').classList.remove('hidden');
+        document.getElementById('adminDriveBtn').href = currentDriveFolderUrl;
+      }
+
+      Object.keys(data).forEach(k => {
+        const el = document.getElementById(k);
+        if(el && el.tagName !== 'CANVAS' && el.type !== 'file') el.value = data[k];
+      });
+
+      if (data.driveSystem) {
+        document.querySelectorAll('#driveCards .radio-card').forEach(c => {
+          c.classList.toggle('selected', c.innerText.includes(data.driveSystem));
+        });
+      }
+      if (data.seaModel) {
+        document.querySelectorAll('#motorCards .radio-card').forEach(c => {
+          c.classList.toggle('selected', c.innerText.includes(data.seaModel));
+        });
+      }
+
+      recalcSeaTrial();
+      if(data.photos) { projectFiles = data.photos; renderGalleries(); }
+      if(data.sigInstaller && data.sigInstaller.length > 2500) {
+        sigInstSigned = true;
+        const img = new Image();
+        img.onload = () => document.getElementById('sigInstaller').getContext('2d').drawImage(img, 0, 0);
+        img.src = data.sigInstaller;
+      }
+      if(data.sigCustomer && data.sigCustomer.length > 2500) {
+        sigCustSigned = true;
+        const img = new Image();
+        img.onload = () => document.getElementById('sigCustomer').getContext('2d').drawImage(img, 0, 0);
+        img.src = data.sigCustomer;
+      }
+      goToStep(1);
+    } else alert("Projet introuvable. Vérifiez le lien.");
+  }
+
+  window.saveForm = async (newStatus, silent = false) => {
+    const cleanPhotos = projectFiles.map(({ uploading, ...rest }) => rest);
+    const payload = { photos: cleanPhotos, driveFolderUrl: currentDriveFolderUrl };
+    if (newStatus) payload.status = newStatus;
+    document.querySelectorAll('input, select, textarea').forEach(el => {
+      if(el.id && el.type !== 'file' && el.id !== 'adminPwdInput') payload[el.id] = el.value;
+    });
+    payload.sigInstaller = document.getElementById('sigInstaller').toDataURL();
+    payload.sigCustomer = document.getElementById('sigCustomer').toDataURL();
+    try {
+      await setDoc(doc(db, "projects", projectId), payload, { merge: true });
+      if (!silent) alert("Enregistré avec succès !");
+    } catch (e) {
+      if (!silent) alert("Erreur lors de la sauvegarde : " + e.message);
+    }
+  };
+
+  window.goAdmin = () => {
+    if (sessionStorage.getItem('isAdminAuth') === 'true') {
+      window.location.href = window.location.href.split('?')[0];
+    }
+  };
+
+  function initApp() {
+    const isAuthAdmin = sessionStorage.getItem('isAdminAuth') === 'true';
+    document.getElementById('userRoleLabel').innerText = isAuthAdmin ? "Administrateur" : "Installateur";
+    if (projectId) loadProject(projectId, isAuthAdmin);
+    else if (isAuthAdmin) loadDashboard();
+    else document.getElementById('loginScreen').classList.remove('hidden');
+  }
+
+  initApp();
+</script>
+</body>
+</html>
