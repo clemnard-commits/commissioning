@@ -128,7 +128,7 @@
   input, select, textarea { width: 100%; padding: 9px 11px; border: 1px solid #CBD5E1; border-radius: 6px; margin-top: 4px; font-size: 13.5px; color: var(--ep-text); background: #fff; font-family: inherit; }
   input:focus, select:focus, textarea:focus { outline: none; border-color: var(--ep-blue); box-shadow: 0 0 0 3px rgba(30,115,190,0.12); }
 
-  /* GROUPE VALEUR + UNITE (ISOLEMENT 96V) */
+  /* GROUPE VALEUR + UNITE (ISOLEMENT 96V) & VALIDATION VISUELLE */
   .input-unit-group { display: flex; gap: 8px; align-items: center; margin-top: 4px; }
   .input-unit-group input { flex: 1; margin-top: 0; }
   .input-unit-group select { width: 92px; margin-top: 0; font-weight: 600; flex-shrink: 0; }
@@ -591,12 +591,22 @@
               </div>
             </div>
 
-            <div class="section-label">Continuité de terre & Bus CAN</div>
+            <div class="section-label">Continuité de terre (&lt; 1 &Omega;)</div>
             <div class="grid">
               <div>
-                <label>Earth Resistance (&lt; 1 &Omega;)</label>
-                <input type="number" inputmode="decimal" step="0.01" id="earthTest" placeholder="Ex: 0.2">
+                <label>Bus de terre général / Moteur (&Omega;)</label>
+                <input type="number" inputmode="decimal" step="0.01" id="earthMotorTest" placeholder="Ex: 0.15" oninput="checkEarthValues()">
+                <div id="earthMotorMsg" class="insul-msg"></div>
               </div>
+              <div>
+                <label>Bus de terre général / Batterie (&Omega;)</label>
+                <input type="number" inputmode="decimal" step="0.01" id="earthBatTest" placeholder="Ex: 0.12" oninput="checkEarthValues()">
+                <div id="earthBatMsg" class="insul-msg"></div>
+              </div>
+            </div>
+
+            <div class="section-label">Bus de communication</div>
+            <div class="grid">
               <div>
                 <label>EPCAN Termination (120&Omega; / 360&Omega;)</label>
                 <select id="canTest"><option value="">-- Choisir --</option><option value="YES">YES</option><option value="NO">NO</option></select>
@@ -628,4 +638,1789 @@
           </div>
 
           <!-- ETAPE 8 : SEA TRIAL + GRAPHIQUE -->
-          <div class
+          <div class="step-section hidden" data-step="8">
+            <h2 class="card-title">8. Sea Trial (Runs A & B - 0% to 100%)</h2>
+            <p class="card-desc">Sélectionnez la puissance nominale pour calculer automatiquement les moyennes aller/retour et tracer les courbes.</p>
+
+            <div class="section-label">Motor Series & Power</div>
+            <div class="radio-cards" id="motorCards">
+              <div class="radio-card" onclick="selectMotor('12', this)">
+                <div class="radio-card-head"><span class="radio-dot"></span> P12 / X12</div>
+                <div class="radio-card-sub">12 kW Rated Power</div>
+                <div class="radio-card-tag">eSSA System</div>
+              </div>
+              <div class="radio-card selected" onclick="selectMotor('20', this)">
+                <div class="radio-card-head"><span class="radio-dot"></span> P20 / X20 / I20</div>
+                <div class="radio-card-sub">20 kW Rated Power</div>
+                <div class="radio-card-tag">eSSA System</div>
+              </div>
+              <div class="radio-card" onclick="selectMotor('40', this)">
+                <div class="radio-card-head"><span class="radio-dot"></span> X40 / I40</div>
+                <div class="radio-card-sub">40 kW Rated Power</div>
+                <div class="radio-card-tag">eSSA System</div>
+              </div>
+            </div>
+            <input type="hidden" id="seaModel" value="20">
+
+            <div class="grid">
+              <div><label>Location / Wind (Kts) / Tide / Water Temp</label><input type="text" id="seaConditions"></div>
+              <div><label>Sea Trial Date & Personnel</label><input type="text" id="seaDatePers"></div>
+            </div>
+
+            <div style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
+              <table class="sea-table">
+                <thead>
+                  <tr>
+                    <th rowspan="2">Gaz (%)</th>
+                    <th rowspan="2">Théorique</th>
+                    <th colspan="2">Run A (Aller)</th>
+                    <th colspan="2">Run B (Retour 180°)</th>
+                    <th colspan="3">Moyennes Calculées (A + B)</th>
+                  </tr>
+                  <tr>
+                    <th>Conso (kW)</th>
+                    <th>Vitesse (Kts)</th>
+                    <th>Conso (kW)</th>
+                    <th>Vitesse (Kts)</th>
+                    <th>Conso Moy.</th>
+                    <th>Vitesse Moy.</th>
+                    <th>kWh / NM</th>
+                  </tr>
+                </thead>
+                <tbody id="seaTrialTableBody"></tbody>
+              </table>
+            </div>
+
+            <div class="chart-box">
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+                <strong style="font-size:13px; color:var(--ep-navy);">Courbes de performance (Puissance & Vitesse moyennes)</strong>
+                <div class="chart-legend">
+                  <span style="color:var(--ep-blue);">— Puissance Moy. (kW)</span>
+                  <span style="color:var(--ep-green);">— Vitesse Moy. (Kts)</span>
+                </div>
+              </div>
+              <svg id="seaTrialChart" viewBox="0 0 640 210" style="width:100%; height:auto; display:block;"></svg>
+            </div>
+
+            <label>Sea Trial Comments</label>
+            <textarea id="seaData" rows="2"></textarea>
+          </div>
+
+          <!-- ETAPE 9 : HANDOVER, SIGNATURES & SECTION STRICTEMENT RESERVEE ADMIN -->
+          <div class="step-section hidden" data-step="9">
+            <h2 class="card-title">9. Handover & Signatures</h2>
+            <p class="card-desc">Validation de la prise en main avec le propriétaire et signatures électroniques.</p>
+            <div id="handoverChecksContainer"></div>
+            <label>Customer Comments</label>
+            <textarea id="customerComments" rows="2"></textarea>
+
+            <div class="grid">
+              <div>
+                <label>Installer Signature</label>
+                <canvas id="sigInstaller"></canvas>
+                <button type="button" class="btn btn-outline btn-sm no-print" onclick="clearCanvas('sigInstaller')">Effacer</button>
+              </div>
+              <div>
+                <label>Customer Signature</label>
+                <canvas id="sigCustomer"></canvas>
+                <button type="button" class="btn btn-outline btn-sm no-print" onclick="clearCanvas('sigCustomer')">Effacer</button>
+              </div>
+            </div>
+
+            <div class="no-print" style="margin-top:16px;">
+              <button class="btn" style="width:100%;" onclick="saveForm('En cours / Rempli Installateur')">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                Sauvegarder & Finaliser partie Installateur
+              </button>
+            </div>
+
+            <!-- ENCADRE STRICTEMENT RESERVE A L'ADMINISTRATEUR AUTHENTIFIE -->
+            <div class="admin-box hidden" id="adminSection">
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
+                <h3 style="margin:0; color:var(--ep-navy);">Validation Interne, Rapport PDF & Certificat Final (Accès Admin)</h3>
+                <span style="font-size:11px; font-weight:700; color:var(--ep-blue); background:#fff; padding:3px 8px; border-radius:4px; border:1px solid #BFDBFE;">MODE ADMINISTRATEUR</span>
+              </div>
+              <label>Notes de vérification interne / Observations techniques</label>
+              <textarea id="adminNotes" rows="3" placeholder="Ex: Dossier conforme, courbes d'essais validées, garantie activée..."></textarea>
+              <label>Date de validation officielle</label>
+              <input type="date" id="adminDate">
+
+              <div class="no-print" style="display:flex; gap:10px; flex-wrap:wrap; margin-top:16px;">
+                <button class="btn btn-green" onclick="validateDossier()">
+                  <svg class="icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                  1. Valider le dossier
+                </button>
+                <button class="btn" onclick="printFullReport()">
+                  <svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                  2. Rapport PDF Complet (avec Photos)
+                </button>
+                <button class="btn btn-navy" id="btnPrintCert" onclick="printCertificate()">
+                  <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+                  3. Certificat de fin de Commissioning
+                </button>
+                <a id="adminDriveBtn" href="#" target="_blank" class="btn btn-outline">
+                  <svg class="icon" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                  Dossier Drive
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- PIED DE NAVIGATION WIZARD -->
+          <div class="wizard-footer no-print">
+            <span style="font-size:12.5px; color:var(--ep-muted);" id="stepIndicatorText">Step 1 of 9</span>
+            <div class="wizard-footer-btns">
+              <button type="button" class="btn btn-outline" id="prevStepBtn" onclick="changeStep(-1)">← BACK</button>
+              <button type="button" class="btn" id="nextStepBtn" onclick="changeStep(1)">CONTINUE →</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- MODALE CAMERA SCANNER QR / CODE-BARRES -->
+  <div id="scannerModal" class="scanner-modal hidden no-print">
+    <div class="scanner-box">
+      <h3 style="margin:0; color:var(--ep-navy);">Scanner le numéro de série</h3>
+      <p style="font-size:12.5px; color:var(--ep-muted); margin:4px 0 0 0;">Visez le QR code ou le code-barres de l'étiquette constructeur.</p>
+      <div id="qrReaderContainer"></div>
+      <button type="button" class="btn btn-outline" style="width:100%;" onclick="closeScanner()">Fermer la caméra</button>
+    </div>
+  </div>
+
+  <!-- CONTENEURS D'IMPRESSION PDF -->
+  <div id="printReportView"></div>
+  <div id="printCertificateView"></div>
+
+<!-- FIREBASE SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, doc, setDoc, getDoc, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  // 1. VOTRE MOT DE PASSE ADMIN
+  const ADMIN_PASSWORD = "ChangezMoi2026";
+
+  // 2. VOTRE URL GOOGLE APPS SCRIPT
+  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyy3Gd589o9OkJOhHCMoKLsilfGZMD8kGgWIVW3uNZpob-SaLKvNXX32X6Xh7ikhkIw/exec";
+
+  // 3. VOTRE CONFIGURATION FIREBASE
+  const firebaseConfig = {
+    apiKey: "AIzaSyBiNU1SuighjrYDKarEta5GmtPv8xQEryk",
+    authDomain: "epropulsion-form.firebaseapp.com",
+    projectId: "epropulsion-form",
+    storageBucket: "epropulsion-form.firebasestorage.app",
+    messagingSenderId: "250052554418",
+    appId: "1:250052554418:web:420842e332df0e5bff63ab",
+    measurementId: "G-GCS82T485T"
+  };
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(regs => {
+      regs.forEach(r => r.unregister());
+    }).catch(() => {});
+  }
+
+  function updateOnlineStatus() {
+    document.getElementById('offlineIndicator').classList.toggle('hidden', navigator.onLine);
+  }
+  window.addEventListener('online', updateOnlineStatus);
+  window.addEventListener('offline', updateOnlineStatus);
+  updateOnlineStatus();
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  let projectFiles = [];
+  let photoNaState = {};
+  let serialItems = [];
+  let coAdminsList = [];
+  let allProjectsCache = [];
+  let currentProjectName = "";
+  let currentProjectStatus = "En cours";
+  let currentDriveFolderUrl = "";
+  let currentStep = 1;
+  let sigInstSigned = false;
+  let sigCustSigned = false;
+  let hasUnsavedChanges = false;
+  let html5QrScanner = null;
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const projectId = urlParams.get('id');
+  const inviteToken = urlParams.get('invite');
+
+  if (inviteToken === "ep_admin_invite") {
+    sessionStorage.setItem('isAdminAuth', 'true');
+    const cleanUrl = window.location.href.split('?')[0] + (projectId ? `?id=${projectId}` : '');
+    window.history.replaceState({}, document.title, cleanUrl);
+  }
+
+  function isStrictAdmin() {
+    return sessionStorage.getItem('isAdminAuth') === 'true';
+  }
+
+  function markUnsaved() {
+    hasUnsavedChanges = true;
+    const btn = document.getElementById('topSaveBtn');
+    const lbl = document.getElementById('topSaveLabel');
+    if (btn) btn.classList.add('btn-unsaved');
+    if (lbl) lbl.innerText = "Sauvegarder *";
+  }
+  function markSaved() {
+    hasUnsavedChanges = false;
+    const btn = document.getElementById('topSaveBtn');
+    const lbl = document.getElementById('topSaveLabel');
+    if (btn) btn.classList.remove('btn-unsaved');
+    if (lbl) lbl.innerText = "Sauvegarder";
+  }
+  window.addEventListener('beforeunload', (e) => {
+    if (hasUnsavedChanges && projectId) {
+      e.preventDefault();
+      e.returnValue = "Vous avez des modifications non enregistrées.";
+      return e.returnValue;
+    }
+  });
+
+  // =========================================================================
+  // GESTION DES CO-ADMINISTRATEURS
+  // =========================================================================
+  window.toggleInviteAdminBox = () => {
+    document.getElementById('inviteAdminBox').classList.toggle('hidden');
+  };
+
+  async function loadCoAdmins() {
+    try {
+      const snap = await getDoc(doc(db, "settings", "admins"));
+      coAdminsList = snap.exists() && Array.isArray(snap.data().list) ? snap.data().list : [];
+    } catch (e) {
+      coAdminsList = [];
+    }
+    renderCoAdmins();
+  }
+
+  function renderCoAdmins() {
+    const container = document.getElementById('coAdminList');
+    if (!container) return;
+    if (coAdminsList.length === 0) {
+      container.innerHTML = `<span style="font-size:12px; color:#64748B;">Aucun autre administrateur invité pour le moment.</span>`;
+      return;
+    }
+    const baseUrl = window.location.href.split('?')[0];
+    const inviteLink = `${baseUrl}?invite=ep_admin_invite`;
+    container.innerHTML = coAdminsList.map((adm, idx) => `
+      <div class="admin-chip">
+        <strong>${esc(adm.name)}</strong> (${esc(adm.email)})
+        <button type="button" class="btn btn-outline btn-sm" style="padding:3px 7px; font-size:11px;" onclick="navigator.clipboard.writeText('${inviteLink}'); alert('Lien d\\'accès Admin copié !')">Copier lien</button>
+        <button type="button" class="btn btn-red" style="padding:3px 7px; font-size:11px;" onclick="removeCoAdmin(${idx})">Retirer</button>
+      </div>
+    `).join('');
+  }
+
+  window.inviteCoAdmin = async () => {
+    const name = document.getElementById('coAdminName').value.trim();
+    const email = document.getElementById('coAdminEmail').value.trim();
+    if (!name || !email) return alert("Veuillez renseigner le nom et l'e-mail de l'administrateur.");
+
+    coAdminsList.push({ name, email, invitedAt: new Date().toISOString() });
+    await setDoc(doc(db, "settings", "admins"), { list: coAdminsList }, { merge: true });
+    renderCoAdmins();
+
+    document.getElementById('coAdminName').value = "";
+    document.getElementById('coAdminEmail').value = "";
+
+    const baseUrl = window.location.href.split('?')[0];
+    const inviteLink = `${baseUrl}?invite=ep_admin_invite`;
+    const subject = encodeURIComponent("Invitation Administrateur • Portail Commissioning ePropulsion France");
+    const body = encodeURIComponent(
+      `Bonjour ${name},\n\nVous avez été invité(e) en tant qu'administrateur sur le portail de mise en service ePropulsion France.\n\nCliquez sur le lien ci-dessous pour accéder directement au tableau de bord administrateur (suivi des dossiers, rapports PDF et certificats) :\n\n${inviteLink}\n\nMot de passe administrateur de secours : ${ADMIN_PASSWORD}\n\nCordialement,\nL'équipe ePropulsion France`
+    );
+    window.location.href = `mailto:${encodeURIComponent(email)}?subject=${subject}&body=${body}`;
+  };
+
+  window.removeCoAdmin = async (idx) => {
+    if (!confirm("Retirer cet administrateur de la liste ?")) return;
+    coAdminsList.splice(idx, 1);
+    await setDoc(doc(db, "settings", "admins"), { list: coAdminsList }, { merge: true });
+    renderCoAdmins();
+  };
+
+  // =========================================================================
+  // ETAPE 2 : TABLEAU DYNAMIQUE DE NUMEROS DE SERIE + SCANNER
+  // =========================================================================
+  const componentTypes = [
+    "Moteur Principal", "Moteur Tribord", "Moteur Bâbord",
+    "Batterie Master", "Batterie Slave 1", "Batterie Slave 2", "Batterie Slave 3", "Batterie Slave 4",
+    "Bus Box / Contrôleur", "Afficheur (Display)", "Manette (Throttle)",
+    "Chargeur AC", "Convertisseur DC-DC", "Régulateur MPPT", "Antenne GPS / 4G", "Autre équipement"
+  ];
+
+  function renderSerialRows() {
+    const container = document.getElementById('serialListContainer');
+    if (!container) return;
+    if (serialItems.length === 0) {
+      serialItems = [
+        { type: "Moteur Principal", model: "", sn: "" },
+        { type: "Batterie Master", model: "", sn: "" }
+      ];
+    }
+
+    const snCounts = {};
+    serialItems.forEach(item => {
+      const cleanSn = (item.sn || "").trim().toUpperCase();
+      if (cleanSn) snCounts[cleanSn] = (snCounts[cleanSn] || 0) + 1;
+    });
+    let hasDuplicate = false;
+
+    container.innerHTML = "";
+    serialItems.forEach((item, idx) => {
+      const cleanSn = (item.sn || "").trim().toUpperCase();
+      const isDup = cleanSn && snCounts[cleanSn] > 1;
+      if (isDup) hasDuplicate = true;
+
+      const optionsHtml = componentTypes.map(t =>
+        `<option value="${t}" ${item.type === t ? 'selected' : ''}>${t}</option>`
+      ).join('');
+
+      container.innerHTML += `
+        <div class="sn-row">
+          <select onchange="updateSerialField(${idx}, 'type', this.value)">${optionsHtml}</select>
+          <input type="text" placeholder="Modèle (ex: X20)" value="${escAttr(item.model)}" oninput="updateSerialField(${idx}, 'model', this.value)">
+          <div class="sn-input-wrap">
+            <input type="text" class="${isDup ? 'sn-dup' : ''}" placeholder="N° de série (S/N)" value="${escAttr(item.sn)}" oninput="updateSerialField(${idx}, 'sn', this.value.toUpperCase())">
+            <button type="button" class="btn btn-outline btn-sm no-print" onclick="openScanner(${idx})" title="Scanner le code-barres / QR code">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="7" y1="12" x2="17" y2="12"/></svg>
+              Scan
+            </button>
+          </div>
+          <button type="button" class="btn btn-red no-print" onclick="removeSerialRow(${idx})" title="Supprimer cette ligne">Retirer</button>
+        </div>`;
+    });
+
+    document.getElementById('snDupWarning').classList.toggle('hidden', !hasDuplicate);
+    renderStepper();
+  }
+
+  function escAttr(str) {
+    return String(str || "").replace(/"/g, "&quot;");
+  }
+
+  window.updateSerialField = (idx, field, val) => {
+    serialItems[idx][field] = val;
+    if (field === 'sn') renderSerialRows();
+    else renderStepper();
+    markUnsaved();
+  };
+
+  window.addSerialRow = () => {
+    serialItems.push({ type: "Batterie Slave 1", model: "", sn: "" });
+    renderSerialRows();
+    markUnsaved();
+  };
+
+  window.removeSerialRow = (idx) => {
+    serialItems.splice(idx, 1);
+    renderSerialRows();
+    markUnsaved();
+  };
+
+  window.openScanner = async (rowIndex) => {
+    const modal = document.getElementById('scannerModal');
+    modal.classList.remove('hidden');
+
+    if (typeof Html5Qrcode === "undefined") {
+      alert("Le module caméra n'est pas disponible hors-ligne. Vous pouvez saisir le numéro manuellement.");
+      closeScanner();
+      return;
+    }
+
+    try {
+      html5QrScanner = new Html5Qrcode("qrReaderContainer");
+      await html5QrScanner.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 250, height: 140 } },
+        (decodedText) => {
+          serialItems[rowIndex].sn = decodedText.trim().toUpperCase();
+          closeScanner();
+          renderSerialRows();
+          markUnsaved();
+        }
+      );
+    } catch (err) {
+      alert("Impossible d'accéder à la caméra : vérifiez les autorisations de votre navigateur.");
+      closeScanner();
+    }
+  };
+
+  window.closeScanner = async () => {
+    if (html5QrScanner) {
+      try { await html5QrScanner.stop(); html5QrScanner.clear(); } catch (e) {}
+      html5QrScanner = null;
+    }
+    document.getElementById('scannerModal').classList.add('hidden');
+  };
+
+  // Vérification automatique des seuils d'isolement 96V (< 250 kOhm => alerte rouge)
+  window.checkInsulationValues = () => {
+    const pairs = [
+      { valId: 'insulPosVal', unitId: 'insulPosUnit', msgId: 'insulPosMsg' },
+      { valId: 'insulNegVal', unitId: 'insulNegUnit', msgId: 'insulNegMsg' }
+    ];
+    pairs.forEach(p => {
+      const inp = document.getElementById(p.valId);
+      const unit = document.getElementById(p.unitId).value;
+      const msg = document.getElementById(p.msgId);
+      const raw = inp.value.trim();
+
+      inp.classList.remove('insul-fail', 'insul-ok');
+      msg.className = 'insul-msg';
+      msg.innerText = '';
+
+      if (raw === '') return;
+      const num = parseFloat(raw);
+      if (isNaN(num)) return;
+
+      const kOhmValue = unit === 'MOhm' ? num * 1000 : num;
+      if (kOhmValue < 250) {
+        inp.classList.add('insul-fail');
+        msg.classList.add('fail');
+        msg.innerText = `< 250 kΩ (${kOhmValue} kΩ) — Défaut d'isolement`;
+      } else {
+        inp.classList.add('insul-ok');
+        msg.classList.add('ok');
+        msg.innerText = `Conforme (≥ 250 kΩ)`;
+      }
+    });
+    renderStepper();
+  };
+
+  // Vérification automatique des résistances de terre (< 1 Ohm => conforme, >= 1 Ohm => alerte rouge)
+  window.checkEarthValues = () => {
+    const pairs = [
+      { valId: 'earthMotorTest', msgId: 'earthMotorMsg' },
+      { valId: 'earthBatTest', msgId: 'earthBatMsg' }
+    ];
+    pairs.forEach(p => {
+      const inp = document.getElementById(p.valId);
+      const msg = document.getElementById(p.msgId);
+      if (!inp || !msg) return;
+      const raw = inp.value.trim();
+
+      inp.classList.remove('insul-fail', 'insul-ok');
+      msg.className = 'insul-msg';
+      msg.innerText = '';
+
+      if (raw === '') return;
+      const num = parseFloat(raw);
+      if (isNaN(num)) return;
+
+      if (num >= 1) {
+        inp.classList.add('insul-fail');
+        msg.classList.add('fail');
+        msg.innerText = `≥ 1 Ω (${num} Ω) — Résistance de terre trop élevée`;
+      } else {
+        inp.classList.add('insul-ok');
+        msg.classList.add('ok');
+        msg.innerText = `Conforme (< 1 Ω)`;
+      }
+    });
+    renderStepper();
+  };
+
+  // 15 RUBRIQUES PHOTOS ORDONNEES & STRICTES
+  const photoCategories = [
+    { id: "boat_views", drivePrefix: "01_Vues_Exterieures_Bateau", label: "1. Vues extérieures du bateau", hint: "Vue de face, vue arrière, vue de côté et vue à 45°" },
+    { id: "helm_station", drivePrefix: "02_Poste_de_Pilotage", label: "2. Poste de pilotage", hint: "Vue d'ensemble du poste de barre et des commandes" },
+    { id: "device_list", drivePrefix: "03_Device_List_Ecran", label: "3. Device List sur l'écran système", hint: "Photo nette de la liste des équipements et numéros de série affichés" },
+    { id: "motor_outboard", drivePrefix: "04_Moteur_Hors_Bord", label: "4. Moteur hors-bord", hint: "Vue moteur, fixation et étanchéité de la gaine" },
+    { id: "motor_inboard", drivePrefix: "05_Moteur_Inboard", label: "5. Moteur inboard", hint: "Châssis, fixation, accouplement d'arbre, hélice, système de refroidissement (filtres et vanne d'isolement)" },
+    { id: "motor_pod", drivePrefix: "06_Moteur_Pod_Saildrive", label: "6. Moteur Pod / Saildrive", hint: "Châssis Pod / Saildrive, module de direction (Steering) et hélice" },
+    { id: "hv_crimping", drivePrefix: "07_Sertissage_Cables_96V", label: "7. Sertissage des câbles puissance 96V", hint: "Gros plan sur les cosses serties et gaines thermo haute tension" },
+    { id: "box_96v", drivePrefix: "08_BusBox_96V_Int_Ext", label: "8. Bus Box / Boîte 96V DC (Intérieur & Extérieur)", hint: "Vue capot fermé et capot ouvert montrant les connexions internes, barres et fusibles HV" },
+    { id: "bat_isolator", drivePrefix: "09_Isolateur_Batterie", label: "9. Isolateur batterie (Vue externe & interne)", hint: "Vue externe du coupe-batterie et vue interne des raccordements" },
+    { id: "bat_96v", drivePrefix: "10_Parc_Batteries_96V", label: "10. Parc batteries principal (96V) & Arrimage", hint: "Vue d'ensemble des batteries haute tension et de leur fixation" },
+    { id: "bat_12v", drivePrefix: "11_Batterie_12V_Fusible", label: "11. Batterie auxiliaire 12V & Fusible", hint: "Batterie 12V dédiée au contrôle et sa protection fusible" },
+    { id: "chargers_dcdc", drivePrefix: "12_Chargeurs_DCDC_MPPT", label: "12. Chargeur(s), Convertisseur(s) DC-DC & MPPT", hint: "Vue d'ensemble des chargeurs, convertisseurs DC-DC et régulateurs MPPT installés" },
+    { id: "box_220v", drivePrefix: "13_Boite_220V_AC_Ext_Int", label: "13. Boîte de distribution 220V AC (Extérieur & Intérieur)", hint: "Coffret 220V AC externe, disjoncteurs différentiels, prise de quai et photo interne" },
+    { id: "can_network", drivePrefix: "14_Reseau_Noeuds_CAN_GPS_4G", label: "14. Réseau & Nœuds CAN", hint: "Nœuds, tés et terminaisons CAN, antennes GPS et 4G" },
+    { id: "earthing_sys", drivePrefix: "15_Systeme_Mise_a_la_Terre", label: "15. Système de mise à la terre", hint: "Mise à la terre batterie, mise à la terre moteur, mise à la terre devices et plaque de mise à la terre" }
+  ];
+
+  const docCategories = [
+    { id: "elec_schema", drivePrefix: "Schema_Electrique", label: "1. Schémas électriques d'installation" },
+    { id: "mech_3d", drivePrefix: "Plan_Mecanique_3D", label: "2. Plans mécaniques & Fichiers 3D" },
+    { id: "boat_manual", drivePrefix: "Manuel_Bateau", label: "3. Manuel du bateau / Documentation chantier" }
+  ];
+  const allCategories = [...photoCategories, ...docCategories];
+
+  const stepNames = [
+    "Vessel & Info",
+    "System & S/N",
+    "Install Check",
+    "Test d'isolement et de résistance",
+    "Photos (15)",
+    "Plans & Manual",
+    "Power-On Check",
+    "Sea Trial",
+    "Handover & Sign"
+  ];
+
+  function getStepStatus(stepNum) {
+    const val = id => { const el = document.getElementById(id); return el && el.value && el.value.trim() !== ""; };
+
+    if (stepNum === 1) {
+      const fields = [
+        'vesselModel', 'location', 'makeBuilder', 'hullType',
+        'vesselLoa', 'vesselLwl', 'vesselBeam', 'vesselDraught', 'vesselDisplacement',
+        'fittedProp', 'origProp', 'installerName', 'installDate'
+      ];
+      const count = fields.filter(val).length;
+      if (count === 0) return 'empty';
+      return count === fields.length ? 'complete' : 'partial';
+    }
+    if (stepNum === 2) {
+      const filledRows = serialItems.filter(it => (it.sn || "").trim() !== "");
+      if (filledRows.length === 0) return 'empty';
+      const allFilled = serialItems.every(it => (it.model || "").trim() !== "" && (it.sn || "").trim() !== "");
+      return allFilled ? 'complete' : 'partial';
+    }
+    if (stepNum === 3) {
+      let count = 0;
+      for (let i = 0; i < 21; i++) if (val(`inst_${i}`)) count++;
+      if (count === 0) return 'empty';
+      return count === 21 ? 'complete' : 'partial';
+    }
+    if (stepNum === 4) {
+      const fields = ['ambientTemp', 'ambientHumidity', 'insulPosVal', 'insulNegVal', 'earthMotorTest', 'earthBatTest', 'canTest'];
+      const count = fields.filter(val).length;
+      if (count === 0) return 'empty';
+      return count === fields.length ? 'complete' : 'partial';
+    }
+    if (stepNum === 5) {
+      const completedCount = photoCategories.filter(c => photoNaState[c.id] || projectFiles.some(f => f.cat === c.id)).length;
+      if (completedCount === 0) return 'empty';
+      return completedCount === photoCategories.length ? 'complete' : 'partial';
+    }
+    if (stepNum === 6) {
+      const docCount = projectFiles.filter(f => ['elec_schema', 'mech_3d', 'boat_manual'].includes(f.cat)).length;
+      return docCount > 0 ? 'complete' : 'empty';
+    }
+    if (stepNum === 7) {
+      let count = 0;
+      for (let i = 0; i < 16; i++) if (val(`pwr_${i}`)) count++;
+      if (count === 0) return 'empty';
+      return count === 16 ? 'complete' : 'partial';
+    }
+    if (stepNum === 8) {
+      const conds = val('seaConditions') && val('seaDatePers');
+      const fullThrottle = val('runA_kw_100') && val('runA_kts_100') && val('runB_kw_100') && val('runB_kts_100');
+      const anyFilled = val('seaConditions') || val('seaDatePers') || val('runA_kw_100') || val('runA_kw_50');
+      if (!anyFilled) return 'empty';
+      return (conds && fullThrottle) ? 'complete' : 'partial';
+    }
+    if (stepNum === 9) {
+      let checks = 0;
+      for (let i = 0; i < 5; i++) if (val(`hnd_${i}`)) checks++;
+      if (checks === 0 && !sigInstSigned && !sigCustSigned) return 'empty';
+      return (checks === 5 && sigInstSigned && sigCustSigned) ? 'complete' : 'partial';
+    }
+    return 'empty';
+  }
+
+  window.renderStepper = () => {
+    const container = document.getElementById('stepperContainer');
+    if (!container) return;
+    container.innerHTML = "";
+    stepNames.forEach((name, idx) => {
+      const stepNum = idx + 1;
+      const status = getStepStatus(stepNum);
+      const isActive = stepNum === currentStep ? "active" : "";
+      const icon = status === 'complete' ? "✓" : stepNum;
+      container.innerHTML += `
+        <div class="step-item status-${status} ${isActive}" onclick="goToStep(${stepNum})">
+          <span class="step-circle">${icon}</span>
+          <span>${name}</span>
+        </div>`;
+    });
+    const activeEl = container.querySelector('.step-item.active');
+    if (activeEl && window.innerWidth <= 768) {
+      activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+  };
+
+  window.goToStep = (stepNum, autoSave = true) => {
+    if (stepNum < 1 || stepNum > 9) return;
+    currentStep = stepNum;
+    document.querySelectorAll('.step-section').forEach(sec => {
+      sec.classList.toggle('hidden', parseInt(sec.dataset.step) !== currentStep);
+    });
+    document.getElementById('stepIndicatorText').innerText = `Step ${currentStep} of 9 • ${stepNames[currentStep - 1]}`;
+    document.getElementById('prevStepBtn').style.visibility = currentStep === 1 ? "hidden" : "visible";
+    document.getElementById('nextStepBtn').style.display = currentStep === 9 ? "none" : "inline-flex";
+    renderStepper();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (projectId && autoSave && hasUnsavedChanges) saveForm(null, true);
+  };
+
+  window.changeStep = (delta) => goToStep(currentStep + delta, true);
+
+  window.selectDrive = (val, el) => {
+    document.getElementById('driveSystem').value = val;
+    document.querySelectorAll('#driveCards .radio-card').forEach(c => c.classList.remove('selected'));
+    if (el) el.classList.add('selected');
+    markUnsaved();
+  };
+
+  window.selectMotor = (kw, el) => {
+    document.getElementById('seaModel').value = kw;
+    document.querySelectorAll('#motorCards .radio-card').forEach(c => c.classList.remove('selected'));
+    if (el) el.classList.add('selected');
+    recalcSeaTrial();
+    markUnsaved();
+  };
+
+  const installItems = [
+    "1. Components match packing list", "2. Installed in clean dry area", "3. Structurally safe mounting",
+    "4. No potential leaks", "5. Oil / Coolant levels match", "6. Power cables wired per drawing",
+    "7. Communication cables connected", "8. Connections torqued", "9. Propeller & Anode fitted",
+    "10. Adequate ventilation", "11. Insulation/ground tests pass", "12. EPCAN terminator check",
+    "13. No drop cables extended", "14. Battery CAN 2x terminators", "15. Battery CAN parallel cables",
+    "16. 12V battery normal voltage", "17. Shaft aligned (I series)", "18. Cable bend < 45 deg",
+    "19. Motor proper height (X series)", "20. Twin motors distance (X series)", "21. Steering/Trim space (X series)"
+  ];
+  const powerItems = [
+    "1. Isolator & breakers ON", "2. No display errors", "3. Components visible in Display",
+    "4. Latest software version", "5. GPS & 4G functioning", "6. Cooling system operational",
+    "7. F/N/R shift operational", "8. Kill switch works", "9. Shore power charging",
+    "10. Solar/Gen charging", "11. DCDC power operational", "12. Fan / Water pump operational",
+    "13. Steer/Trim max limit", "14. Steer/Trim full range (X)", "15. Turbo operation", "16. ePropulsion Link operational"
+  ];
+  const handoverItems = [
+    "1. Components explained", "2. Operation & maintenance explained", "3. Troubleshooting explained",
+    "4. Manuals delivered", "5. Warranty policy explained"
+  ];
+
+  function renderChecks(list, containerId, prefix) {
+    const el = document.getElementById(containerId);
+    list.forEach((text, i) => {
+      el.innerHTML += `<div class="check-row"><span>${text}</span><select id="${prefix}_${i}"><option value="">--</option><option value="YES">YES</option><option value="NO">NO</option><option value="N/A">N/A</option></select></div>`;
+    });
+  }
+  renderChecks(installItems, "installChecksContainer", "inst");
+  renderChecks(powerItems, "powerChecksContainer", "pwr");
+  renderChecks(handoverItems, "handoverChecksContainer", "hnd");
+
+  // Tableau Sea Trial + Courbe SVG
+  const throttleSteps = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+  const seaBody = document.getElementById('seaTrialTableBody');
+  throttleSteps.forEach(pct => {
+    seaBody.innerHTML += `
+      <tr>
+        <td><strong>${pct}%</strong></td>
+        <td id="theo_${pct}" class="calc-cell">0.0</td>
+        <td><input type="number" inputmode="decimal" step="0.1" id="runA_kw_${pct}" oninput="recalcSeaTrial()"></td>
+        <td><input type="number" inputmode="decimal" step="0.1" id="runA_kts_${pct}" oninput="recalcSeaTrial()"></td>
+        <td><input type="number" inputmode="decimal" step="0.1" id="runB_kw_${pct}" oninput="recalcSeaTrial()"></td>
+        <td><input type="number" inputmode="decimal" step="0.1" id="runB_kts_${pct}" oninput="recalcSeaTrial()"></td>
+        <td id="avg_kw_${pct}" class="calc-cell">-</td>
+        <td id="avg_kts_${pct}" class="calc-cell">-</td>
+        <td id="eff_${pct}" class="calc-cell">-</td>
+      </tr>`;
+  });
+
+  function drawSeaTrialChart(maxKw, kwPoints, ktsPoints) {
+    const svg = document.getElementById('seaTrialChart');
+    if (!svg) return;
+    const W = 640, H = 210, padL = 42, padR = 42, padT = 18, padB = 28;
+    const plotW = W - padL - padR, plotH = H - padT - padB;
+    const maxKts = Math.max(12, ...ktsPoints.filter(v => v !== null).map(v => Math.ceil(v + 2)));
+
+    let html = `<rect x="${padL}" y="${padT}" width="${plotW}" height="${plotH}" fill="#fff" stroke="#E2E8F0"/>`;
+    for (let i = 0; i <= 4; i++) {
+      const y = padT + (plotH * i) / 4;
+      const kwLabel = ((maxKw * (4 - i)) / 4).toFixed(0);
+      const ktsLabel = ((maxKts * (4 - i)) / 4).toFixed(0);
+      html += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="#F1F5F9"/>`;
+      html += `<text x="${padL - 6}" y="${y + 4}" font-size="10" fill="#1E73BE" text-anchor="end">${kwLabel}kW</text>`;
+      html += `<text x="${W - padR + 6}" y="${y + 4}" font-size="10" fill="#28A745" text-anchor="start">${ktsLabel}kt</text>`;
+    }
+    throttleSteps.forEach((pct, idx) => {
+      const x = padL + (plotW * idx) / (throttleSteps.length - 1);
+      html += `<text x="${x}" y="${H - 8}" font-size="10" fill="#64748B" text-anchor="middle">${pct}%</text>`;
+    });
+
+    const buildPolyline = (pts, maxVal, color) => {
+      let coords = [], dots = "";
+      pts.forEach((val, idx) => {
+        if (val !== null) {
+          const x = padL + (plotW * idx) / (throttleSteps.length - 1);
+          const y = padT + plotH - (Math.min(val, maxVal) / maxVal) * plotH;
+          coords.push(`${x.toFixed(1)},${y.toFixed(1)}`);
+          dots += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.5" fill="${color}"/>`;
+        }
+      });
+      return (coords.length > 1 ? `<polyline fill="none" stroke="${color}" stroke-width="2.5" points="${coords.join(' ')}"/>` : '') + dots;
+    };
+
+    html += buildPolyline(kwPoints, maxKw, "#1E73BE");
+    html += buildPolyline(ktsPoints, maxKts, "#28A745");
+    svg.innerHTML = html;
+  }
+
+  window.recalcSeaTrial = () => {
+    const maxKw = parseFloat(document.getElementById('seaModel').value) || 20;
+    const kwPoints = [], ktsPoints = [];
+    throttleSteps.forEach(pct => {
+      document.getElementById(`theo_${pct}`).innerText = ((maxKw * pct) / 100).toFixed(1) + " kW";
+      const kwA = parseFloat(document.getElementById(`runA_kw_${pct}`).value);
+      const kwB = parseFloat(document.getElementById(`runB_kw_${pct}`).value);
+      const ktsA = parseFloat(document.getElementById(`runA_kts_${pct}`).value);
+      const ktsB = parseFloat(document.getElementById(`runB_kts_${pct}`).value);
+
+      let avgKw = !isNaN(kwA) && !isNaN(kwB) ? (kwA + kwB) / 2 : (!isNaN(kwA) ? kwA : (!isNaN(kwB) ? kwB : null));
+      let avgKts = !isNaN(ktsA) && !isNaN(ktsB) ? (ktsA + ktsB) / 2 : (!isNaN(ktsA) ? ktsA : (!isNaN(ktsB) ? ktsB : null));
+
+      kwPoints.push(avgKw);
+      ktsPoints.push(avgKts);
+
+      document.getElementById(`avg_kw_${pct}`).innerText = avgKw !== null ? avgKw.toFixed(1) : "-";
+      document.getElementById(`avg_kts_${pct}`).innerText = avgKts !== null ? avgKts.toFixed(1) : "-";
+      document.getElementById(`eff_${pct}`).innerText = (avgKw !== null && avgKts !== null && avgKts > 0) ? (avgKw / avgKts).toFixed(2) : "-";
+    });
+    drawSeaTrialChart(maxKw, kwPoints, ktsPoints);
+    renderStepper();
+  };
+  recalcSeaTrial();
+
+  // Rendu des 15 blocs Photos avec case N/A
+  const photoContainer = document.getElementById('photoSectionsContainer');
+  photoCategories.forEach(cat => {
+    photoContainer.innerHTML += `
+      <div class="photo-req-block" id="block_${cat.id}">
+        <div class="photo-req-head">
+          <div>
+            <div class="photo-req-title">${cat.label}</div>
+            <div class="photo-req-hint">${cat.hint}</div>
+          </div>
+          <label class="na-toggle no-print">
+            <input type="checkbox" id="na_${cat.id}" onchange="togglePhotoNa('${cat.id}', this.checked)">
+            N/A
+          </label>
+        </div>
+        <div class="no-print" id="inputWrap_${cat.id}">
+          <input type="file" accept="image/*" multiple onchange="uploadToDrive(this.files, '${cat.id}')">
+          <div id="status_${cat.id}" class="upload-status"></div>
+        </div>
+        <div id="naPrintNote_${cat.id}" class="hidden" style="font-size:12px; color:#64748B; font-style:italic;">Non applicable sur ce navire (N/A)</div>
+        <div id="gal_${cat.id}" class="photo-gallery"></div>
+      </div>`;
+  });
+
+  window.togglePhotoNa = (catId, isChecked) => {
+    photoNaState[catId] = isChecked;
+    updatePhotoBlockVisuals();
+    renderStepper();
+    markUnsaved();
+  };
+
+  function updatePhotoBlockVisuals() {
+    photoCategories.forEach(cat => {
+      const block = document.getElementById(`block_${cat.id}`);
+      const cb = document.getElementById(`na_${cat.id}`);
+      const inputWrap = document.getElementById(`inputWrap_${cat.id}`);
+      const naNote = document.getElementById(`naPrintNote_${cat.id}`);
+      const isNa = !!photoNaState[cat.id];
+      const hasPhoto = projectFiles.some(f => f.cat === cat.id);
+
+      if (cb) cb.checked = isNa;
+      if (inputWrap) inputWrap.classList.toggle('hidden', isNa);
+      if (naNote) naNote.classList.toggle('hidden', !isNa);
+
+      if (block) {
+        block.classList.remove('req-done', 'req-na');
+        if (isNa) block.classList.add('req-na');
+        else if (hasPhoto) block.classList.add('req-done');
+      }
+    });
+  }
+
+  // Rendu des 3 blocs Documents
+  const docContainer = document.getElementById('docSectionsContainer');
+  docCategories.forEach(cat => {
+    docContainer.innerHTML += `
+      <div class="section-label">${cat.label}</div>
+      <div class="no-print">
+        <input type="file" multiple onchange="uploadToDrive(this.files, '${cat.id}')">
+        <div id="status_${cat.id}" class="upload-status"></div>
+      </div>
+      <div id="gal_${cat.id}" class="photo-gallery"></div>`;
+  });
+
+  function createThumbnail(file, maxWidth = 900, quality = 0.78) {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let w = img.width, h = img.height;
+          if (w > maxWidth) { h = Math.round((h * maxWidth) / w); w = maxWidth; }
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function readFileAsDataURL(file) {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target.result);
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function saveSingleFileToSubcollection(fileItem) {
+    if (!projectId) return;
+    const { uploading, ...cleanItem } = fileItem;
+    await setDoc(doc(db, "projects", projectId, "files", cleanItem.fileId), cleanItem);
+  }
+
+  window.uploadToDrive = async (files, catId) => {
+    markUnsaved();
+    const statusEl = document.getElementById(`status_${catId}`);
+    const catObj = allCategories.find(c => c.id === catId);
+    const catPrefix = catObj ? catObj.drivePrefix : catId;
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+
+      if (file.size > 45 * 1024 * 1024) {
+        alert(`Le fichier "${file.name}" dépasse 45 Mo. Veuillez le compresser avant de l'envoyer.`);
+        continue;
+      }
+
+      const isImg = file.type.startsWith("image/");
+      let thumbData = isImg ? await createThumbnail(file) : null;
+      const uniqueFileId = "FILE-" + Date.now() + "-" + Math.random().toString(36).slice(2, 6);
+
+      const tempItem = {
+        fileId: uniqueFileId,
+        cat: catId,
+        type: isImg ? "image" : "doc",
+        name: file.name,
+        thumb: thumbData,
+        fileUrl: "#",
+        uploading: true,
+        createdAt: Date.now()
+      };
+      projectFiles.push(tempItem);
+      const itemIndex = projectFiles.length - 1;
+      renderGalleries();
+      renderStepper();
+
+      if (!navigator.onLine) {
+        statusEl.innerText = "Hors-ligne : aperçu conservé. Pensez à renvoyer le fichier HD une fois connecté.";
+        continue;
+      }
+
+      statusEl.innerText = `Envoi HD vers Google Drive (${i + 1}/${files.length}) : ${file.name}...`;
+      try {
+        const base64Data = await readFileAsDataURL(file);
+        const res = await fetch(GOOGLE_SCRIPT_URL, {
+          method: "POST",
+          body: JSON.stringify({
+            action: "uploadFile",
+            projectId: projectId,
+            projectName: currentProjectName,
+            category: catId,
+            categoryLabel: catPrefix,
+            fileName: file.name,
+            mimeType: file.type || "application/octet-stream",
+            fileData: base64Data
+          })
+        });
+        const result = await res.json();
+        if (result.status === "ok") {
+          projectFiles[itemIndex].fileUrl = result.fileUrl;
+          projectFiles[itemIndex].uploading = false;
+          if (result.folderUrl) currentDriveFolderUrl = result.folderUrl;
+          renderGalleries();
+          await saveSingleFileToSubcollection(projectFiles[itemIndex]);
+          await saveForm(null, true);
+        } else alert("Erreur Google Drive : " + result.message);
+      } catch (err) { alert("Erreur lors de l'envoi : " + err.message); }
+    }
+    statusEl.innerText = "Fichier(s) enregistré(s) en HD sur Google Drive.";
+    setTimeout(() => { statusEl.innerText = ""; }, 4000);
+  };
+
+  function renderGalleries() {
+    allCategories.forEach(cat => { document.getElementById(`gal_${cat.id}`).innerHTML = ""; });
+    projectFiles.forEach((p, idx) => {
+      const target = document.getElementById(`gal_${p.cat}`) || document.getElementById('gal_boat_views');
+      const imgSrc = p.thumb || p.directImgUrl || "";
+      const linkAttr = p.fileUrl && p.fileUrl !== "#" ? `href="${p.fileUrl}" target="_blank"` : ``;
+      const statusBadge = p.uploading ? `<div style="font-size:10px; color:#D97706;">En attente Drive</div>` : `<div style="font-size:10px; color:#28A745;">Sur Drive (HD)</div>`;
+
+      const previewHtml = p.type === 'image'
+        ? `<a ${linkAttr} title="Voir l'original HD sur Google Drive"><img src="${imgSrc}" alt="${p.name}"></a>`
+        : `<div class="doc-badge"><svg class="icon-lg" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>DOCUMENT<br><a ${linkAttr} style="font-size:11px; color:#1E73BE;">Ouvrir sur Drive</a></div>`;
+
+      target.innerHTML += `
+        <div class="photo-card">
+          ${previewHtml}
+          <div style="font-size:11px; margin-top:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${p.name}">${p.name}</div>
+          ${statusBadge}
+          <button type="button" class="btn btn-red no-print" onclick="removeFile(${idx})">Retirer</button>
+        </div>`;
+    });
+    updatePhotoBlockVisuals();
+  }
+
+  window.removeFile = async (idx) => {
+    const removed = projectFiles[idx];
+    projectFiles.splice(idx, 1);
+    renderGalleries();
+    renderStepper();
+    markUnsaved();
+    if (removed && removed.fileId && projectId) {
+      try {
+        await deleteDoc(doc(db, "projects", projectId, "files", removed.fileId));
+      } catch (e) {}
+    }
+  };
+
+  // Signatures au doigt
+  ['sigInstaller', 'sigCustomer'].forEach(id => {
+    const canvas = document.getElementById(id);
+    const ctx = canvas.getContext('2d');
+    let drawing = false;
+    const getPos = e => {
+      const r = canvas.getBoundingClientRect();
+      const t = e.touches ? e.touches[0] : e;
+      return { x: (t.clientX - r.left) * (canvas.width / r.width), y: (t.clientY - r.top) * (canvas.height / r.height) };
+    };
+    const start = e => {
+      drawing = true;
+      if (id === 'sigInstaller') sigInstSigned = true;
+      if (id === 'sigCustomer') sigCustSigned = true;
+      renderStepper();
+      markUnsaved();
+      const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y);
+    };
+    const move = e => { if(!drawing) return; e.preventDefault(); const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); };
+    const end = () => { drawing = false; };
+    canvas.addEventListener('mousedown', start); canvas.addEventListener('mousemove', move); window.addEventListener('mouseup', end);
+    canvas.addEventListener('touchstart', start); canvas.addEventListener('touchmove', move); canvas.addEventListener('touchend', end);
+  });
+  window.clearCanvas = id => {
+    const c = document.getElementById(id);
+    c.getContext('2d').clearRect(0, 0, c.width, c.height);
+    if (id === 'sigInstaller') sigInstSigned = false;
+    if (id === 'sigCustomer') sigCustSigned = false;
+    renderStepper();
+    markUnsaved();
+  };
+
+  document.getElementById('projectForm').addEventListener('input', () => { renderStepper(); markUnsaved(); });
+  document.getElementById('projectForm').addEventListener('change', () => { renderStepper(); markUnsaved(); });
+
+  function computeCompletion(data) {
+    const keyFields = [
+      'vesselModel', 'location', 'makeBuilder', 'hullType',
+      'vesselLoa', 'vesselLwl', 'vesselBeam', 'vesselDraught', 'vesselDisplacement',
+      'fittedProp', 'origProp', 'installerName', 'installDate', 'ambientTemp', 'ambientHumidity',
+      'insulPosVal', 'insulNegVal', 'earthMotorTest', 'earthBatTest', 'seaConditions', 'seaDatePers', 'runA_kw_100', 'runB_kw_100'
+    ];
+    let filled = 0;
+    keyFields.forEach(f => { if (data[f] && String(data[f]).trim() !== "") filled++; });
+    if (data.serialItems && data.serialItems.some(s => (s.sn || "").trim() !== "")) filled += 1;
+    const totalFiles = data.filesCount || (data.photos ? data.photos.length : 0);
+    if (totalFiles > 0) filled += 2;
+    if (data.sigInstaller && data.sigInstaller.length > 2500) filled += 1;
+    if (data.sigCustomer && data.sigCustomer.length > 2500) filled += 1;
+    return Math.min(100, Math.round((filled / (keyFields.length + 5)) * 100));
+  }
+
+  window.sendProjectEmail = (projName, instName, instEmail, link) => {
+    const subject = encodeURIComponent(`ePropulsion France - Dossier de mise en service : ${projName}`);
+    const greeting = instName ? `Bonjour ${instName},` : `Bonjour,`;
+    const body = encodeURIComponent(
+      `${greeting}\n\nVeuillez trouver ci-dessous le lien d'accès au formulaire de mise en service (Commissioning) ePropulsion France pour le projet "${projName}" :\n\n${link}\n\nVous pouvez le remplir directement depuis votre téléphone, tablette ou ordinateur et y déposer les photos et schémas de l'installation.\n\nCordialement,\nePropulsion France`
+    );
+    window.location.href = `mailto:${encodeURIComponent(instEmail || '')}?subject=${subject}&body=${body}`;
+  };
+
+  // =========================================================================
+  // CONSTRUCTION DU RAPPORT TECHNIQUE HTML (UTILISE POUR PDF & ARCHIVE ZIP)
+  // =========================================================================
+  function esc(str) {
+    return String(str || "-").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  function formatAnswerPill(val) {
+    if (val === "YES") return `<span class="pill-yes">YES</span>`;
+    if (val === "NO") return `<span class="pill-no">NO</span>`;
+    if (val === "N/A") return `<span class="pill-na">N/A</span>`;
+    return `<span style="color:#94A3B8;">Non renseigné</span>`;
+  }
+
+  function buildSerialTableHtml() {
+    const validRows = serialItems.filter(it => (it.model || "").trim() !== "" || (it.sn || "").trim() !== "");
+    if (validRows.length === 0) return `<div style="padding:8px; color:#64748B;">Aucun numéro de série renseigné</div>`;
+    return `
+      <table class="rpt-table">
+        <thead><tr><th>Composant</th><th>Modèle / Référence</th><th>Numéro de Série (S/N)</th></tr></thead>
+        <tbody>
+          ${validRows.map(it => `
+            <tr>
+              <td><strong>${esc(it.type)}</strong></td>
+              <td>${esc(it.model)}</td>
+              <td style="font-family:monospace; font-weight:700;">${esc(it.sn)}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>`;
+  }
+
+  function buildFullReportHtml(useZipRelativePaths = false) {
+    recalcSeaTrial();
+    const g = id => (document.getElementById(id) ? document.getElementById(id).value.trim() : "");
+    const posVal = g('insulPosVal'), posUnit = g('insulPosUnit') === 'MOhm' ? 'MΩ' : 'kΩ';
+    const negVal = g('insulNegVal'), negUnit = g('insulNegUnit') === 'MOhm' ? 'MΩ' : 'kΩ';
+    const posK = posVal ? (g('insulPosUnit') === 'MOhm' ? parseFloat(posVal) * 1000 : parseFloat(posVal)) : null;
+    const negK = negVal ? (g('insulNegUnit') === 'MOhm' ? parseFloat(negVal) * 1000 : parseFloat(negVal)) : null;
+    const eMot = g('earthMotorTest'), eBat = g('earthBatTest');
+    const isValidated = currentProjectStatus.includes("Validé");
+
+    const buildCheckRows = (list, prefix) => list.map((txt, i) => `
+      <tr>
+        <td>${esc(txt)}</td>
+        <td style="width:90px; text-align:center;">${formatAnswerPill(g(`${prefix}_${i}`))}</td>
+      </tr>`).join('');
+
+    const photoSectionsHtml = photoCategories.map(cat => {
+      const isNa = !!photoNaState[cat.id];
+      const files = projectFiles.filter(f => f.cat === cat.id && f.type === 'image');
+      let bodyHtml = "";
+      if (isNa) {
+        bodyHtml = `<div style="font-size:11px; color:#64748B; font-style:italic; padding:6px;">Non applicable sur ce navire (N/A)</div>`;
+      } else if (files.length === 0) {
+        bodyHtml = `<div style="font-size:11px; color:#DC2626; font-weight:600; padding:6px;">Aucune photo fournie pour ce point</div>`;
+      } else {
+        bodyHtml = `<div class="rpt-photo-grid">` + files.map((f, fIdx) => {
+          const safeFileName = `${cat.drivePrefix}_${fIdx + 1}_${f.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+          const imgSrc = useZipRelativePaths ? `01_Photos/${safeFileName}` : f.thumb;
+          return `
+            <div class="rpt-photo-box">
+              <img src="${imgSrc}" alt="${esc(f.name)}">
+              <div class="rpt-photo-cap">${esc(f.name)}</div>
+            </div>`;
+        }).join('') + `</div>`;
+      }
+      return `
+        <div class="rpt-photo-item">
+          <div class="rpt-photo-head">
+            <div>
+              <div class="rpt-photo-title">${esc(cat.label)}</div>
+              <div style="font-size:10px; color:#64748B;">${esc(cat.hint)}</div>
+            </div>
+            <div>${isNa ? '<span class="pill-na">N/A</span>' : (files.length > 0 ? `<span class="pill-yes">${files.length} photo(s)</span>` : '<span class="pill-no">Manquant</span>')}</div>
+          </div>
+          ${bodyHtml}
+        </div>`;
+    }).join('');
+
+    const docFiles = projectFiles.filter(f => f.type === 'doc');
+    const docsListHtml = docFiles.length === 0
+      ? `<div style="padding:8px; color:#64748B;">Aucun document technique annexé</div>`
+      : `<ul style="margin:6px 0; padding-left:18px;">` + docFiles.map(d => {
+          const catObj = docCategories.find(c => c.id === d.cat);
+          const lbl = catObj ? catObj.label : "Document";
+          return `<li style="margin-bottom:4px;"><strong>${esc(lbl)} :</strong> ${esc(d.name)} ${d.fileUrl && d.fileUrl !== "#" ? `(<a href="${d.fileUrl}" target="_blank">Lien Drive</a>)` : ''}</li>`;
+        }).join('') + `</ul>`;
+
+    const seaRowsHtml = throttleSteps.map(pct => `
+      <tr>
+        <td><strong>${pct}%</strong></td>
+        <td>${esc(document.getElementById(`theo_${pct}`).innerText)}</td>
+        <td>${esc(g(`runA_kw_${pct}`))}</td>
+        <td>${esc(g(`runA_kts_${pct}`))}</td>
+        <td>${esc(g(`runB_kw_${pct}`))}</td>
+        <td>${esc(g(`runB_kts_${pct}`))}</td>
+        <td style="font-weight:700; color:#1E73BE;">${esc(document.getElementById(`avg_kw_${pct}`).innerText)}</td>
+        <td style="font-weight:700; color:#1E73BE;">${esc(document.getElementById(`avg_kts_${pct}`).innerText)}</td>
+        <td style="font-weight:700; color:#1E73BE;">${esc(document.getElementById(`eff_${pct}`).innerText)}</td>
+      </tr>`).join('');
+
+    const chartSvgHtml = document.getElementById('seaTrialChart').outerHTML;
+    const sigInstUrl = document.getElementById('sigInstaller').toDataURL();
+    const sigCustUrl = document.getElementById('sigCustomer').toDataURL();
+
+    return `
+      <div class="rpt-header">
+        <div>
+          <div class="rpt-brand">ePropulsion France • Commissioning</div>
+          <div class="rpt-sub">Rapport Technique d'Installation & Mise en Service (www.epropulsion.fr)</div>
+          <div style="margin-top:6px; font-size:12px;"><strong>Navire / Projet :</strong> ${esc(currentProjectName)} • <strong>Réf :</strong> ${esc(projectId)}</div>
+        </div>
+        <div class="rpt-badge ${isValidated ? 'valid' : ''}">${esc(currentProjectStatus)}</div>
+      </div>
+
+      <div class="rpt-sec">
+        <div class="rpt-sec-title">1. Informations Navire & Installation</div>
+        <div class="rpt-grid">
+          <div class="rpt-field"><strong>Modèle Navire :</strong> ${esc(g('vesselModel'))}</div>
+          <div class="rpt-field"><strong>Chantier / Constructeur :</strong> ${esc(g('makeBuilder'))}</div>
+          <div class="rpt-field"><strong>Type de Coque :</strong> ${esc(g('hullType'))}</div>
+          <div class="rpt-field"><strong>Transmission :</strong> ${esc(g('driveSystem'))}</div>
+          <div class="rpt-field"><strong>LOA / LWL :</strong> ${esc(g('vesselLoa'))} m / ${esc(g('vesselLwl'))} m</div>
+          <div class="rpt-field"><strong>Beam / Draught :</strong> ${esc(g('vesselBeam'))} m / ${esc(g('vesselDraught'))} m</div>
+          <div class="rpt-field"><strong>Displacement :</strong> ${esc(g('vesselDisplacement'))} kg</div>
+          <div class="rpt-field"><strong>Hélice installée :</strong> ${esc(g('fittedProp'))}</div>
+          <div class="rpt-field"><strong>Motorisation d'origine :</strong> ${esc(g('origProp'))}</div>
+          <div class="rpt-field"><strong>Lieu :</strong> ${esc(g('location'))}</div>
+          <div class="rpt-field"><strong>Installateur :</strong> ${esc(g('installerName'))}</div>
+          <div class="rpt-field"><strong>Date d'installation :</strong> ${esc(g('installDate'))}</div>
+        </div>
+      </div>
+
+      <div class="rpt-sec">
+        <div class="rpt-sec-title">2. Équipements & Numéros de Série</div>
+        ${buildSerialTableHtml()}
+      </div>
+
+      <div class="rpt-sec">
+        <div class="rpt-sec-title">3. Contrôles d'Installation (Points 1 à 21)</div>
+        <table class="rpt-table">
+          <thead><tr><th>Point de contrôle</th><th style="width:90px; text-align:center;">Statut</th></tr></thead>
+          <tbody>${buildCheckRows(installItems, 'inst')}</tbody>
+        </table>
+        ${g('installComments') ? `<div style="margin-top:6px; font-size:11px;"><strong>Observations :</strong> ${esc(g('installComments'))}</div>` : ''}
+      </div>
+
+      <div class="rpt-sec">
+        <div class="rpt-sec-title">4. Test d'isolement et de résistance (96V, Terre & CAN)</div>
+        <div class="rpt-grid">
+          <div class="rpt-field"><strong>Température ambiante :</strong> ${g('ambientTemp') ? esc(g('ambientTemp')) + ' °C' : '-'}</div>
+          <div class="rpt-field"><strong>Humidité ambiante :</strong> ${g('ambientHumidity') ? esc(g('ambientHumidity')) + ' %' : '-'}</div>
+          <div class="rpt-field"><strong>Isolement 96V (+) / Terre :</strong> ${posVal ? esc(posVal + ' ' + posUnit) + (posK < 250 ? ' <span class="pill-no">DÉFAUT &lt; 250kΩ</span>' : ' <span class="pill-yes">OK</span>') : '-'}</div>
+          <div class="rpt-field"><strong>Isolement 96V (-) / Terre :</strong> ${negVal ? esc(negVal + ' ' + negUnit) + (negK < 250 ? ' <span class="pill-no">DÉFAUT &lt; 250kΩ</span>' : ' <span class="pill-yes">OK</span>') : '-'}</div>
+          <div class="rpt-field"><strong>Terre Busbar / Moteur (&lt; 1Ω) :</strong> ${eMot ? esc(eMot) + ' Ω' + (parseFloat(eMot) >= 1 ? ' <span class="pill-no">DÉFAUT ≥ 1Ω</span>' : ' <span class="pill-yes">OK</span>') : '-'}</div>
+          <div class="rpt-field"><strong>Terre Busbar / Batterie (&lt; 1Ω) :</strong> ${eBat ? esc(eBat) + ' Ω' + (parseFloat(eBat) >= 1 ? ' <span class="pill-no">DÉFAUT ≥ 1Ω</span>' : ' <span class="pill-yes">OK</span>') : '-'}</div>
+          <div class="rpt-field"><strong>Terminaison Bus CAN :</strong> ${formatAnswerPill(g('canTest'))}</div>
+        </div>
+      </div>
+
+      <div class="rpt-sec">
+        <div class="rpt-sec-title">5. Contrôles Mise sous Tension (Points 1 à 16)</div>
+        <table class="rpt-table">
+          <thead><tr><th>Point de contrôle</th><th style="width:90px; text-align:center;">Statut</th></tr></thead>
+          <tbody>${buildCheckRows(powerItems, 'pwr')}</tbody>
+        </table>
+        ${g('powerComments') ? `<div style="margin-top:6px; font-size:11px;"><strong>Observations :</strong> ${esc(g('powerComments'))}</div>` : ''}
+      </div>
+
+      <div class="rpt-sec">
+        <div class="rpt-sec-title">6. Essais en Mer (Sea Trial — Runs A & B)</div>
+        <div class="rpt-grid" style="margin-bottom:8px;">
+          <div class="rpt-field"><strong>Puissance Nominale :</strong> ${esc(g('seaModel'))} kW</div>
+          <div class="rpt-field"><strong>Date & Équipage :</strong> ${esc(g('seaDatePers'))}</div>
+          <div class="rpt-field" style="grid-column:span 2;"><strong>Conditions météo / mer :</strong> ${esc(g('seaConditions'))}</div>
+        </div>
+        <table class="rpt-table" style="text-align:center;">
+          <thead>
+            <tr>
+              <th>Gaz</th><th>Théo.</th><th>Run A (kW)</th><th>Run A (Kts)</th><th>Run B (kW)</th><th>Run B (Kts)</th><th>Moy. kW</th><th>Moy. Kts</th><th>kWh/NM</th>
+            </tr>
+          </thead>
+          <tbody>${seaRowsHtml}</tbody>
+        </table>
+        <div style="margin-top:10px; border:1px solid #CBD5E1; padding:8px; border-radius:6px;">${chartSvgHtml}</div>
+        ${g('seaData') ? `<div style="margin-top:6px; font-size:11px;"><strong>Observations essais :</strong> ${esc(g('seaData'))}</div>` : ''}
+      </div>
+
+      <div class="rpt-sec">
+        <div class="rpt-sec-title">7. Documents Techniques & Plans Annexés</div>
+        <div style="border:1px solid #CBD5E1; padding:8px; border-radius:6px; background:#FAFCFF;">${docsListHtml}</div>
+      </div>
+
+      <div style="page-break-before: always;">
+        <div class="rpt-sec-title">8. Dossier Photographique de Contrôle (Points 1 à 15)</div>
+        ${photoSectionsHtml}
+      </div>
+
+      <div class="rpt-sec">
+        <div class="rpt-sec-title">9. Prise en Main, Signatures & Validation</div>
+        <table class="rpt-table" style="margin-bottom:10px;">
+          <thead><tr><th>Point de remise au client</th><th style="width:90px; text-align:center;">Statut</th></tr></thead>
+          <tbody>${buildCheckRows(handoverItems, 'hnd')}</tbody>
+        </table>
+        ${g('customerComments') ? `<div style="margin-bottom:8px; font-size:11px;"><strong>Commentaires Client :</strong> ${esc(g('customerComments'))}</div>` : ''}
+        <div class="rpt-grid" style="margin-bottom:10px;">
+          <div style="text-align:center;">
+            <strong>Signature Installateur</strong><br>
+            <img src="${sigInstUrl}" style="max-height:85px; border:1px solid #E2E8F0; margin-top:4px;">
+          </div>
+          <div style="text-align:center;">
+            <strong>Signature Client</strong><br>
+            <img src="${sigCustUrl}" style="max-height:85px; border:1px solid #E2E8F0; margin-top:4px;">
+          </div>
+        </div>
+        <div style="border:1.5px solid #0A365C; background:#EFF6FC; padding:10px; border-radius:6px;">
+          <strong>Validation Technique Interne (ePropulsion France) :</strong> ${esc(g('adminNotes'))}<br>
+          <strong>Date de validation :</strong> ${esc(g('adminDate'))}
+        </div>
+      </div>
+    `;
+  }
+
+  window.printClientReport = () => {
+    if (!currentProjectStatus.includes("Validé") && !isStrictAdmin()) {
+      return alert("Le rapport final sera disponible dès que le dossier aura été validé.");
+    }
+    document.getElementById('printReportView').innerHTML = buildFullReportHtml(false);
+    document.body.classList.remove('printing-certificate');
+    document.body.classList.add('printing-report');
+    window.print();
+  };
+
+  window.downloadProjectZip = async () => {
+    if (!currentProjectStatus.includes("Validé") && !isStrictAdmin()) {
+      return alert("Le téléchargement de l'archive ZIP est disponible une fois le dossier validé.");
+    }
+    if (typeof JSZip === "undefined") {
+      return alert("La librairie ZIP n'a pas pu être chargée. Vérifiez votre connexion internet.");
+    }
+
+    const btn = document.getElementById('downloadZipBtn');
+    const originalHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerText = "Préparation de l'archive ZIP...";
+
+    try {
+      const zip = new JSZip();
+      const photosFolder = zip.folder("01_Photos");
+      const docsFolder = zip.folder("02_Documents");
+
+      photoCategories.forEach(cat => {
+        const files = projectFiles.filter(f => f.cat === cat.id && f.type === 'image');
+        files.forEach((f, idx) => {
+          if (f.thumb && f.thumb.includes(',')) {
+            const base64Content = f.thumb.split(',')[1];
+            const safeFileName = `${cat.drivePrefix}_${idx + 1}_${f.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+            photosFolder.file(safeFileName, base64Content, { base64: true });
+          }
+        });
+      });
+
+      const docFiles = projectFiles.filter(f => f.type === 'doc');
+      if (docFiles.length > 0) {
+        let docIndexTxt = `DOCUMENTS TECHNIQUES VERSÉS — ${currentProjectName} (${projectId})\n=================================================================\n\n`;
+        docFiles.forEach((d, idx) => {
+          const catObj = docCategories.find(c => c.id === d.cat);
+          const lbl = catObj ? catObj.label : "Document";
+          docIndexTxt += `${idx + 1}. [${lbl}] ${d.name}\n   Lien direct Google Drive : ${d.fileUrl || 'Non disponible'}\n\n`;
+        });
+        docsFolder.file("Liste_et_Liens_Documents.txt", docIndexTxt);
+      }
+
+      const standaloneReportHtml = `<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Rapport Commissioning - ${esc(currentProjectName)}</title>
+<style>
+  body { font-family: 'Segoe UI', Arial, sans-serif; color: #0F172A; max-width: 960px; margin: 20px auto; padding: 0 16px; font-size: 12px; }
+  .rpt-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #0A365C; padding-bottom: 12px; margin-bottom: 18px; }
+  .rpt-brand { font-size: 20px; font-weight: 800; color: #0A365C; }
+  .rpt-sub { font-size: 12px; color: #64748B; }
+  .rpt-badge { border: 2px solid #28A745; color: #28A745; background: #F0FDF4; padding: 6px 12px; border-radius: 6px; font-weight: 700; }
+  .rpt-sec { margin-bottom: 20px; }
+  .rpt-sec-title { background: #0A365C; color: #fff; font-weight: 700; padding: 7px 10px; border-radius: 4px; margin-bottom: 8px; text-transform: uppercase; }
+  .rpt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; border: 1px solid #CBD5E1; padding: 10px; border-radius: 6px; background: #FAFCFF; }
+  .rpt-field { padding: 3px 0; border-bottom: 1px dotted #E2E8F0; }
+  .rpt-field strong { color: #0A365C; display: inline-block; min-width: 150px; }
+  .rpt-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+  .rpt-table th { background: #F1F5F9; color: #0A365C; border: 1px solid #CBD5E1; padding: 6px; text-align: left; }
+  .rpt-table td { border: 1px solid #CBD5E1; padding: 5px 6px; }
+  .pill-yes { background: #DCFCE7; color: #166534; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
+  .pill-no { background: #FEE2E2; color: #991B1B; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
+  .pill-na { background: #F1F5F9; color: #475569; font-weight: 600; padding: 2px 6px; border-radius: 4px; }
+  .rpt-photo-item { border: 1px solid #CBD5E1; border-radius: 6px; padding: 10px; margin-bottom: 12px; page-break-inside: avoid; }
+  .rpt-photo-head { display: flex; justify-content: space-between; border-bottom: 1px solid #E2E8F0; padding-bottom: 5px; margin-bottom: 8px; }
+  .rpt-photo-title { font-weight: 700; color: #0A365C; }
+  .rpt-photo-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .rpt-photo-box { text-align: center; border: 1px solid #E2E8F0; padding: 4px; border-radius: 4px; }
+  .rpt-photo-box img { width: 100%; height: 220px; object-fit: contain; background: #F8FAFC; }
+  .rpt-photo-cap { font-size: 10px; color: #64748B; margin-top: 3px; }
+  @media print { .no-print { display: none; } }
+</style>
+</head>
+<body>
+  <div class="no-print" style="background:#EFF6FC; border:1px solid #1E73BE; padding:10px 14px; border-radius:6px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center;">
+    <span><strong>Rapport officiel ePropulsion France</strong> — Cliquez sur Imprimer pour enregistrer en PDF.</span>
+    <button onclick="window.print()" style="background:#1E73BE; color:#fff; border:none; padding:7px 14px; border-radius:5px; cursor:pointer; font-weight:600;">Imprimer / PDF</button>
+  </div>
+  ${buildFullReportHtml(true)}
+</body>
+</html>`;
+
+      zip.file(`Rapport_Commissioning_${projectId}.html`, standaloneReportHtml);
+
+      const blob = await zip.generateAsync({ type: "blob" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const cleanProjName = currentProjectName.replace(/[^a-zA-Z0-9_-]/g, '_');
+      a.href = url;
+      a.download = `ePropulsion_France_Commissioning_${cleanProjName}_${projectId}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      alert("Erreur lors de la création du fichier ZIP : " + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = originalHtml;
+    }
+  };
+
+  // =========================================================================
+  // FONCTIONS ADMIN EXCLUSIVES : VALIDATION, RAPPORT PDF & CERTIFICAT FINAL
+  // =========================================================================
+  window.validateDossier = async () => {
+    if (!isStrictAdmin()) return alert("Accès refusé : réservé à l'administrateur.");
+    if (!document.getElementById('adminDate').value) {
+      document.getElementById('adminDate').value = new Date().toISOString().split('T')[0];
+    }
+    currentProjectStatus = "Validé & Terminé";
+    await saveForm("Validé & Terminé", false);
+    document.getElementById('clientValidatedBanner').classList.remove('hidden');
+  };
+
+  window.printFullReport = () => {
+    if (!isStrictAdmin()) return alert("Accès refusé : réservé à l'administrateur.");
+    document.getElementById('printReportView').innerHTML = buildFullReportHtml(false);
+    document.body.classList.remove('printing-certificate');
+    document.body.classList.add('printing-report');
+    window.print();
+  };
+
+  // CERTIFICAT DE FIN DE COMMISSIONING VERROUILLE SUR 1 SEULE PAGE A4
+  window.printCertificate = () => {
+    if (!isStrictAdmin()) return alert("Accès refusé : le certificat de fin de commissioning est strictement réservé à l'administrateur.");
+    if (!currentProjectStatus.includes("Validé")) {
+      if (!confirm("Ce dossier n'est pas encore marqué 'Validé & Terminé'. Voulez-vous quand même éditer le certificat ?")) return;
+    }
+
+    const g = id => (document.getElementById(id) ? document.getElementById(id).value.trim() : "");
+    const posVal = g('insulPosVal'), posUnit = g('insulPosUnit') === 'MOhm' ? 'MΩ' : 'kΩ';
+    const negVal = g('insulNegVal'), negUnit = g('insulNegUnit') === 'MOhm' ? 'MΩ' : 'kΩ';
+    const eMot = g('earthMotorTest'), eBat = g('earthBatTest');
+    const validDate = g('adminDate') || new Date().toISOString().split('T')[0];
+
+    const maxSpeed = document.getElementById('avg_kts_100') ? document.getElementById('avg_kts_100').innerText : "-";
+    const maxPower = document.getElementById('avg_kw_100') ? document.getElementById('avg_kw_100').innerText : "-";
+    const sigInstUrl = document.getElementById('sigInstaller').toDataURL();
+    const sigCustUrl = document.getElementById('sigCustomer').toDataURL();
+
+    document.getElementById('printCertificateView').innerHTML = `
+      <div class="cert-frame">
+        <div class="cert-top">
+          <div class="cert-logo-txt">ePropulsion France</div>
+          <div style="font-size:10px; color:#64748B; letter-spacing:1px;">MARINE ELECTRIC PROPULSION ENGINEERING & QUALITY • www.epropulsion.fr</div>
+          <div class="cert-main-title">Certificat de Fin de Commissioning</div>
+          <div class="cert-sub-title">Certificate of Installation & Sea Trial Approval • Réf. Dossier : <strong>${esc(projectId)}</strong></div>
+        </div>
+
+        <div class="cert-body">
+          <p class="cert-intro">
+            Nous certifions par la présente que le système de propulsion électrique installé à bord du navire désigné ci-dessous a fait l'objet d'un contrôle complet d'installation mécanique, d'essais d'isolement électrique et d'essais en mer conformes aux exigences techniques <strong>ePropulsion France</strong>.
+          </p>
+
+          <div class="cert-box">
+            <div class="cert-box-title">1. Identification du Navire & de l'Installation</div>
+            <div class="cert-grid">
+              <div class="cert-row"><strong>Nom du Projet / Client :</strong> ${esc(currentProjectName)}</div>
+              <div class="cert-row"><strong>Modèle & Chantier :</strong> ${esc(g('vesselModel'))} (${esc(g('makeBuilder'))})</div>
+              <div class="cert-row"><strong>Type de Coque :</strong> ${esc(g('hullType'))}</div>
+              <div class="cert-row"><strong>LOA / LWL / Beam :</strong> ${esc(g('vesselLoa'))}m / ${esc(g('vesselLwl'))}m / ${esc(g('vesselBeam'))}m</div>
+              <div class="cert-row"><strong>Draught / Displacement :</strong> ${esc(g('vesselDraught'))}m / ${esc(g('vesselDisplacement'))}kg</div>
+              <div class="cert-row"><strong>Transmission & Hélice :</strong> ${esc(g('driveSystem'))} — ${esc(g('fittedProp'))}</div>
+              <div class="cert-row"><strong>Puissance Nominale :</strong> ${esc(g('seaModel'))} kW</div>
+              <div class="cert-row"><strong>Port / Chantier :</strong> ${esc(g('location'))}</div>
+              <div class="cert-row"><strong>Installateur Agréé :</strong> ${esc(g('installerName'))}</div>
+              <div class="cert-row"><strong>Date d'Installation :</strong> ${esc(g('installDate'))}</div>
+            </div>
+          </div>
+
+          <div class="cert-box">
+            <div class="cert-box-title">2. Équipements & Numéros de Série Certifiés</div>
+            ${buildSerialTableHtml()}
+          </div>
+
+          <div class="cert-box">
+            <div class="cert-box-title">3. Synthèse des Mesures de Sécurité & Performances en Mer</div>
+            <div class="cert-grid">
+              <div class="cert-row"><strong>Isolement 96V (+) / Terre :</strong> ${posVal ? esc(posVal + ' ' + posUnit) : 'Conforme'}</div>
+              <div class="cert-row"><strong>Isolement 96V (-) / Terre :</strong> ${negVal ? esc(negVal + ' ' + negUnit) : 'Conforme'}</div>
+              <div class="cert-row"><strong>Terre Busbar / Moteur :</strong> ${eMot ? esc(eMot) + ' Ω (< 1 Ω)' : 'Conforme (< 1 Ω)'}</div>
+              <div class="cert-row"><strong>Terre Busbar / Batterie :</strong> ${eBat ? esc(eBat) + ' Ω (< 1 Ω)' : 'Conforme (< 1 Ω)'}</div>
+              <div class="cert-row"><strong>Terminaison Réseau CAN :</strong> ${esc(g('canTest') || 'YES')}</div>
+              <div class="cert-row"><strong>Perf. Max (100%) :</strong> ${esc(maxSpeed)} Kts / ${esc(maxPower)} kW</div>
+            </div>
+          </div>
+
+          ${g('adminNotes') ? `
+          <div class="cert-box">
+            <div class="cert-box-title">4. Observations & Conditions de Garantie</div>
+            <div style="font-size:11px; line-height:1.4;">${esc(g('adminNotes'))}</div>
+          </div>` : ''}
+        </div>
+
+        <div class="cert-stamp-zone">
+          <div style="text-align:center;">
+            <div style="font-size:10px; font-weight:700; color:#475569;">Visa Installateur</div>
+            <img src="${sigInstUrl}" style="height:46px; border-bottom:1px solid #94A3B8; margin-top:3px;">
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:10px; font-weight:700; color:#475569;">Visa Propriétaire / Client</div>
+            <img src="${sigCustUrl}" style="height:46px; border-bottom:1px solid #94A3B8; margin-top:3px;">
+          </div>
+          <div class="cert-official-seal">
+            COMMISSIONING VALIDÉ<br>
+            <span style="font-size:10.5px; font-weight:600;">ePropulsion France</span><br>
+            <span style="font-size:9.5px; font-weight:600;">Date : ${esc(validDate)} • Réf : ${esc(projectId)}</span>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.body.classList.remove('printing-report');
+    document.body.classList.add('printing-certificate');
+    window.print();
+  };
+
+  // Authentification Admin
+  window.checkAdminLogin = () => {
+    if (document.getElementById('adminPwdInput').value === ADMIN_PASSWORD) {
+      sessionStorage.setItem('isAdminAuth', 'true');
+      initApp();
+    } else alert("Mot de passe incorrect.");
+  };
+  window.logoutAdmin = () => { sessionStorage.removeItem('isAdminAuth'); location.reload(); };
+
+  window.createProject = async (templateData = null, customName = null) => {
+    if (!isStrictAdmin()) return;
+    const name = customName || document.getElementById('newProjectName').value;
+    const inst = templateData ? (templateData.installerName || "") : document.getElementById('newInstallerName').value;
+    const email = templateData ? (templateData.installerEmail || "") : document.getElementById('newInstallerEmail').value;
+    if(!name) return alert("Entrez un nom de projet");
+    const btn = document.getElementById('createProjBtn');
+    btn.disabled = true; btn.innerText = "Création dossier Drive...";
+
+    const id = "PROJ-" + Date.now().toString().slice(-5);
+    let driveUrl = "";
+    try {
+      const res = await fetch(GOOGLE_SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "createProjectFolder", projectId: id, projectName: name })
+      });
+      const result = await res.json();
+      if (result.status === "ok") driveUrl = result.folderUrl;
+    } catch (e) { console.error(e); }
+
+    const basePayload = templateData ? { ...templateData } : {};
+    delete basePayload.photos;
+    delete basePayload.photoNaState;
+    delete basePayload.sigInstaller;
+    delete basePayload.sigCustomer;
+    delete basePayload.adminNotes;
+    delete basePayload.adminDate;
+    delete basePayload.filesCount;
+
+    await setDoc(doc(db, "projects", id), {
+      ...basePayload,
+      projectName: name,
+      installerName: inst,
+      installerEmail: email,
+      status: "En attente Installateur",
+      driveFolderUrl: driveUrl,
+      filesCount: 0,
+      photoNaState: {},
+      serialItems: [
+        { type: "Moteur Principal", model: "", sn: "" },
+        { type: "Batterie Master", model: "", sn: "" }
+      ]
+    });
+
+    document.getElementById('newProjectName').value = "";
+    document.getElementById('newInstallerName').value = "";
+    document.getElementById('newInstallerEmail').value = "";
+    btn.disabled = false; btn.innerText = "+ Créer Projet & Dossier Drive";
+    loadDashboard();
+  };
+
+  window.duplicateProject = async (sourceId) => {
+    const found = allProjectsCache.find(p => p.id === sourceId);
+    if (!found) return;
+    const newName = prompt("Nom du nouveau projet (copie de " + found.data.projectName + ") :", found.data.projectName + " (Copie)");
+    if (!newName) return;
+    await createProject(found.data, newName);
+  };
+
+  window.deleteProject = async (id) => {
+    if(confirm("Supprimer ce projet de la liste ? (Le dossier Google Drive sera conservé par sécurité)")) {
+      await deleteDoc(doc(db, "projects", id));
+      loadDashboard();
+    }
+  };
+
+  window.filterProjects = () => {
+    const query = (document.getElementById('searchProjectInput').value || "").toLowerCase();
+    const statusFilter = document.getElementById('filterStatusSelect').value;
+    const tbody = document.getElementById('projectList');
+    tbody.innerHTML = "";
+    const baseUrl = window.location.href.split('?')[0];
+
+    allProjectsCache.forEach(({ id, data }) => {
+      const matchText = `${data.projectName} ${id} ${data.installerName || ''}`.toLowerCase().includes(query);
+      const matchStatus = statusFilter === "ALL" || (data.status || "").includes(statusFilter);
+      if (!matchText || !matchStatus) return;
+
+      const pct = computeCompletion(data);
+      const linkInst = `${baseUrl}?id=${id}`;
+      const linkAdmin = `${baseUrl}?id=${id}&admin=1`;
+      const driveBtn = data.driveFolderUrl
+        ? `<a href="${data.driveFolderUrl}" target="_blank" class="btn btn-green btn-sm"><svg class="icon" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Drive</a>`
+        : ``;
+
+      const safeProj = (data.projectName || '').replace(/'/g, "\\'");
+      const safeInst = (data.installerName || '').replace(/'/g, "\\'");
+      const safeMail = (data.installerEmail || '').replace(/'/g, "\\'");
+
+      tbody.innerHTML += `<tr>
+        <td style="text-align:left; padding-left:16px;"><strong>${data.projectName}</strong><br><small style="color:var(--ep-muted);">${id}</small></td>
+        <td>${data.installerName || '-'}${data.installerEmail ? `<br><small style="color:var(--ep-muted);">${data.installerEmail}</small>` : ''}</td>
+        <td>
+          <div class="progress-wrap">
+            <div class="progress-bar" style="width:${pct}%;"></div>
+            <div class="progress-text">${pct}%</div>
+          </div>
+        </td>
+        <td>${data.status || 'Nouveau'}</td>
+        <td style="display:flex; gap:5px; justify-content:center; flex-wrap:wrap; border:none;">
+          <button class="btn btn-outline btn-sm" onclick="navigator.clipboard.writeText('${linkInst}'); alert('Lien installateur / client copié !')" title="Copier le lien">
+            <svg class="icon" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Lien
+          </button>
+          <button class="btn btn-outline btn-sm" onclick="sendProjectEmail('${safeProj}', '${safeInst}', '${safeMail}', '${linkInst}')" title="Envoyer par e-mail">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            Email
+          </button>
+          <a href="${linkAdmin}" class="btn btn-sm">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Ouvrir
+          </a>
+          <button class="btn btn-outline btn-sm" onclick="duplicateProject('${id}')" title="Dupliquer ce modèle">
+            <svg class="icon" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+          </button>
+          ${driveBtn}
+          <button class="btn btn-red" onclick="deleteProject('${id}')" title="Supprimer">
+            <svg class="icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          </button>
+        </td>
+      </tr>`;
+    });
+  };
+
+  async function loadDashboard() {
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('adminDashboard').classList.remove('hidden');
+    document.getElementById('breadcrumbText').innerText = "Gestion des Projets";
+
+    await loadCoAdmins();
+
+    const tbody = document.getElementById('projectList');
+    tbody.innerHTML = "<tr><td colspan='5'>Chargement...</td></tr>";
+    const snap = await getDocs(collection(db, "projects"));
+    allProjectsCache = [];
+    let doneCount = 0;
+
+    snap.forEach(d => {
+      const data = d.data();
+      allProjectsCache.push({ id: d.id, data });
+      if ((data.status || "").includes("Validé")) doneCount++;
+    });
+
+    document.getElementById('statTotal').innerText = allProjectsCache.length;
+    document.getElementById('statDone').innerText = doneCount;
+    document.getElementById('statPending').innerText = allProjectsCache.length - doneCount;
+    filterProjects();
+  }
+
+  async function loadProject(id, isAuthAdmin) {
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('adminDashboard').classList.add('hidden');
+    document.getElementById('projectForm').classList.remove('hidden');
+    document.getElementById('topSaveBtn').classList.remove('hidden');
+
+    if (isAuthAdmin) {
+      document.getElementById('adminSection').classList.remove('hidden');
+      document.getElementById('backAdminBtn').classList.remove('hidden');
+    } else {
+      document.getElementById('adminSection').classList.add('hidden');
+      document.getElementById('backAdminBtn').classList.add('hidden');
+    }
+
+    const snap = await getDoc(doc(db, "projects", id));
+    if(snap.exists()) {
+      const data = snap.data();
+      currentProjectName = data.projectName || id;
+      currentProjectStatus = data.status || "En cours";
+      currentDriveFolderUrl = data.driveFolderUrl || "";
+      document.getElementById('displayProjName').innerText = currentProjectName;
+      document.getElementById('displayProjId').innerText = id;
+      document.getElementById('breadcrumbText').innerText = `Commissioning / ${currentProjectName}`;
+
+      if (currentProjectStatus.includes("Validé")) {
+        document.getElementById('clientValidatedBanner').classList.remove('hidden');
+      } else {
+        document.getElementById('clientValidatedBanner').classList.add('hidden');
+      }
+
+      if (currentDriveFolderUrl && isAuthAdmin) {
+        document.getElementById('projectDriveLinkBtn').href = currentDriveFolderUrl;
+        document.getElementById('projectDriveLinkBtn').classList.remove('hidden');
+        document.getElementById('adminDriveBtn').href = currentDriveFolderUrl;
+      }
+
+      Object.keys(data).forEach(k => {
+        const el = document.getElementById(k);
+        if(el && el.tagName !== 'CANVAS' && el.type !== 'file' && el.type !== 'checkbox') el.value = data[k];
+      });
+
+      if (data.driveSystem) {
+        document.querySelectorAll('#driveCards .radio-card').forEach(c => {
+          c.classList.toggle('selected', c.innerText.includes(data.driveSystem));
+        });
+      }
+      if (data.seaModel) {
+        document.querySelectorAll('#motorCards .radio-card').forEach(c => {
+          c.classList.toggle('selected', c.innerText.includes(data.seaModel));
+        });
+      }
+
+      if (Array.isArray(data.serialItems) && data.serialItems.length > 0) {
+        serialItems = data.serialItems;
+      } else if (data.serialNumbers && data.serialNumbers.trim() !== "") {
+        serialItems = data.serialNumbers.split('\n').filter(l => l.trim() !== "").map(line => ({
+          type: "Autre équipement", model: "", sn: line.trim()
+        }));
+      } else {
+        serialItems = [
+          { type: "Moteur Principal", model: "", sn: "" },
+          { type: "Batterie Master", model: "", sn: "" }
+        ];
+      }
+      renderSerialRows();
+
+      photoNaState = data.photoNaState || {};
+      checkInsulationValues();
+      checkEarthValues();
+      recalcSeaTrial();
+
+      projectFiles = [];
+      try {
+        const filesSnap = await getDocs(collection(db, "projects", id, "files"));
+        filesSnap.forEach(fDoc => {
+          projectFiles.push(fDoc.data());
+        });
+        projectFiles.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+      } catch (e) { console.error(e); }
+
+      if (projectFiles.length === 0 && Array.isArray(data.photos) && data.photos.length > 0) {
+        for (let i = 0; i < data.photos.length; i++) {
+          const oldItem = {
+            ...data.photos[i],
+            fileId: data.photos[i].fileId || ("FILE-MIG-" + Date.now() + "-" + i),
+            createdAt: Date.now() + i
+          };
+          projectFiles.push(oldItem);
+          await saveSingleFileToSubcollection(oldItem);
+        }
+      }
+      renderGalleries();
+
+      if(data.sigInstaller && data.sigInstaller.length > 2500) {
+        sigInstSigned = true;
+        const img = new Image();
+        img.onload = () => document.getElementById('sigInstaller').getContext('2d').drawImage(img, 0, 0);
+        img.src = data.sigInstaller;
+      }
+      if(data.sigCustomer && data.sigCustomer.length > 2500) {
+        sigCustSigned = true;
+        const img = new Image();
+        img.onload = () => document.getElementById('sigCustomer').getContext('2d').drawImage(img, 0, 0);
+        img.src = data.sigCustomer;
+      }
+      goToStep(1, false);
+      markSaved();
+    } else alert("Projet introuvable. Vérifiez le lien.");
+  }
+
+  window.saveForm = async (newStatus, silent = false) => {
+    const payload = {
+      photos: [],
+      filesCount: projectFiles.length,
+      photoNaState: photoNaState,
+      serialItems: serialItems,
+      driveFolderUrl: currentDriveFolderUrl
+    };
+    if (newStatus) {
+      payload.status = newStatus;
+      currentProjectStatus = newStatus;
+    }
+    document.querySelectorAll('input, select, textarea').forEach(el => {
+      if(el.id && el.type !== 'file' && el.type !== 'checkbox' && el.id !== 'adminPwdInput') {
+        if (!isStrictAdmin() && (el.id === 'adminNotes' || el.id === 'adminDate')) return;
+        payload[el.id] = el.value;
+      }
+    });
+    payload.sigInstaller = document.getElementById('sigInstaller').toDataURL();
+    payload.sigCustomer = document.getElementById('sigCustomer').toDataURL();
+    try {
+      await setDoc(doc(db, "projects", projectId), payload, { merge: true });
+      markSaved();
+      if (!silent) alert("Enregistré avec succès !");
+    } catch (e) {
+      if (!silent) alert("Erreur lors de la sauvegarde : " + e.message);
+    }
+  };
+
+  window.goAdmin = () => {
+    if (isStrictAdmin()) {
+      if (hasUnsavedChanges && !confirm("Vous avez des modifications non enregistrées. Quitter quand même vers la liste des projets ?")) {
+        return;
+      }
+      hasUnsavedChanges = false;
+      window.location.href = window.location.href.split('?')[0];
+    }
+  };
+
+  function initApp() {
+    const isAuthAdmin = isStrictAdmin();
+    document.getElementById('userRoleLabel').innerText = isAuthAdmin ? "Administrateur" : "Installateur";
+    if (projectId) loadProject(projectId, isAuthAdmin);
+    else if (isAuthAdmin) loadDashboard();
+    else document.getElementById('loginScreen').classList.remove('hidden');
+  }
+
+  initApp();
+</script>
+</body>
+</html>
